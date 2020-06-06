@@ -2,8 +2,8 @@ from PySide2.QtWidgets import (QToolBar, QPushButton,
                                QVBoxLayout, QWidget)
 from PySide2.QtCore import Qt
 
-
 import src.assets_manager as assets_mgr
+from src.Editor import EditorFrame
 
 APP_VERSION = "BETA-0.1"  # Application version
 
@@ -20,7 +20,7 @@ class ExecutionFrame(QWidget):
 
         self.setWindowTitle("DigiQt - Emulator for Digirule - " + str(APP_VERSION))
 
-        self.is_editor_opened = False
+        self.editor_frame = EditorFrame(self)
 
         self._initToolBar()
         self._setLayout()
@@ -59,24 +59,33 @@ class ExecutionFrame(QWidget):
         """
         Connects all the buttons to methods
         """
-        self.open_editor_btn.clicked.connect(self.onOpenEditorBtnClicked)
+        self.open_editor_btn.clicked.connect(lambda: self.showEditorFrame(not self.editor_frame.isVisible()))
 
     # --- Buttons callbacks methods ---
 
-    def onOpenEditorBtnClicked(self):
+    def showEditorFrame(self, do_display):
         """
-        Handles the click on the open editor button
-        """
-        if not self.is_editor_opened:  # opening editor frame
-            print("Opening editor...")
+        Hides or shows the editor frame
 
+        :param do_display: True will display the editor frame, False will hide it
+        :type do_display: bool
+        """
+        if do_display:
             self.open_editor_btn.setIcon(assets_mgr.get_icon("close_editor"))
             self.open_editor_btn.setToolTip("Close Editor")
 
-        else:  # closing editor frame
-            print("Closing editor...")
-
+            self.editor_frame.show()
+        else:
             self.open_editor_btn.setIcon(assets_mgr.get_icon("open_editor"))
             self.open_editor_btn.setToolTip("Open Editor")
 
-        self.is_editor_opened = not self.is_editor_opened
+            self.editor_frame.hide()
+
+    # --- Close handler ---
+
+    def closeEvent(self, event):
+        """
+        Event called upon a red-cross click
+        """
+        print("bye")
+        event.accept()
