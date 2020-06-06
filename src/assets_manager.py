@@ -4,7 +4,7 @@ from PySide2.QtGui import QIcon
 from PySide2.QtCore import QSize
 
 ASSETS_PATH = "assets/"
-ICON_SIZE = QSize(25, 25)
+ICON_SIZE = QSize(50, 50)
 
 
 def get_icon(icon_name, extension=".png"):

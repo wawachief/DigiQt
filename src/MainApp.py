@@ -7,8 +7,6 @@ import src.assets_manager as assets_mgr
 
 APP_VERSION = "BETA-0.1"  # Application version
 
-TOOLBAR_BTN_WIDTH = 50
-
 
 class ExecutionFrame(QWidget):
 
@@ -22,6 +20,8 @@ class ExecutionFrame(QWidget):
 
         self.setWindowTitle("DigiQt - Emulator for Digirule - " + str(APP_VERSION))
 
+        self.is_editor_opened = False
+
         self._initToolBar()
         self._setLayout()
         self._connectAll()
@@ -31,11 +31,13 @@ class ExecutionFrame(QWidget):
         Creates the main toolbar with all its content
         """
         self.toolbar = QToolBar()
+        self.toolbar.setFixedHeight(70)
 
         self.open_editor_btn = QPushButton()
         self.open_editor_btn.setIcon(assets_mgr.get_icon("open_editor"))
+        self.open_editor_btn.setToolTip("Open Editor")
         self.open_editor_btn.setIconSize(assets_mgr.ICON_SIZE)
-        self.open_editor_btn.setFixedWidth(TOOLBAR_BTN_WIDTH)
+        self.open_editor_btn.setStyleSheet('border: none; padding-left: 10px;')
 
         self.toolbar.addWidget(self.open_editor_btn)
         self.toolbar.addSeparator()
@@ -62,4 +64,19 @@ class ExecutionFrame(QWidget):
     # --- Buttons callbacks methods ---
 
     def onOpenEditorBtnClicked(self):
-        print("Opening editor...")
+        """
+        Handles the click on the open editor button
+        """
+        if not self.is_editor_opened:  # opening editor frame
+            print("Opening editor...")
+
+            self.open_editor_btn.setIcon(assets_mgr.get_icon("close_editor"))
+            self.open_editor_btn.setToolTip("Close Editor")
+
+        else:  # closing editor frame
+            print("Closing editor...")
+
+            self.open_editor_btn.setIcon(assets_mgr.get_icon("open_editor"))
+            self.open_editor_btn.setToolTip("Open Editor")
+
+        self.is_editor_opened = not self.is_editor_opened
