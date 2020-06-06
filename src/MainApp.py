@@ -1,17 +1,16 @@
-import sys
-from PySide2.QtWidgets import (QApplication, QToolBar, QPushButton,
+from PySide2.QtWidgets import (QToolBar, QPushButton,
                                QVBoxLayout, QWidget)
 from PySide2.QtCore import Qt
 
 
-from src.assets_manager import get_icon, ICON_SIZE
+import src.assets_manager as assets_mgr
 
 APP_VERSION = "BETA-0.1"  # Application version
 
 TOOLBAR_BTN_WIDTH = 50
 
 
-class MyWidget(QWidget):
+class ExecutionFrame(QWidget):
 
     # --- Init methods ---
 
@@ -34,8 +33,8 @@ class MyWidget(QWidget):
         self.toolbar = QToolBar()
 
         self.open_editor_btn = QPushButton()
-        self.open_editor_btn.setIcon(get_icon("open_editor"))
-        self.open_editor_btn.setIconSize(ICON_SIZE)
+        self.open_editor_btn.setIcon(assets_mgr.get_icon("open_editor"))
+        self.open_editor_btn.setIconSize(assets_mgr.ICON_SIZE)
         self.open_editor_btn.setFixedWidth(TOOLBAR_BTN_WIDTH)
 
         self.toolbar.addWidget(self.open_editor_btn)
@@ -64,13 +63,3 @@ class MyWidget(QWidget):
 
     def onOpenEditorBtnClicked(self):
         print("Opening editor...")
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-
-    widget = MyWidget()
-    widget.resize(800, 400)
-    widget.show()
-
-    sys.exit(app.exec_())

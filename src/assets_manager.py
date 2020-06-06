@@ -3,8 +3,9 @@
 from PySide2.QtGui import QIcon
 from PySide2.QtCore import QSize
 
-ASSETS_PATH = "../assets/"  # We are located in src/, so we need to go to the parent directory before accessing assets/
+ASSETS_PATH = "assets/"
 ICON_SIZE = QSize(25, 25)
+
 
 def get_icon(icon_name, extension=".png"):
     """
