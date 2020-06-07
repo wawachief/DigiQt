@@ -7,7 +7,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     widget = ExecutionFrame()
-    widget.resize(800, 400)
+    widget.resize(800, 300)
     widget.show()
 
     sys.exit(app.exec_())

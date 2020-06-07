@@ -4,6 +4,7 @@ from PySide2.QtCore import Qt
 
 import src.assets_manager as assets_mgr
 from src.Editor import EditorFrame
+from src.DigiruleCanvas import DRCanvas
 
 APP_VERSION = "BETA-0.1"  # Application version
 
@@ -21,6 +22,7 @@ class ExecutionFrame(QWidget):
         self.setWindowTitle("DigiQt - Emulator for Digirule - " + str(APP_VERSION))
 
         self.editor_frame = EditorFrame(self)
+        self.dr_canvas = DRCanvas(self)
 
         self._initToolBar()
         self._setLayout()
@@ -48,10 +50,14 @@ class ExecutionFrame(QWidget):
         """
         box = QVBoxLayout()
         box.setContentsMargins(0, 0, 0, 0)
-        box.setSpacing(10)
 
         box.addWidget(self.toolbar)
         box.setAlignment(self.toolbar, Qt.AlignTop)
+
+        box.addWidget(self.dr_canvas)
+        box.setAlignment(self.dr_canvas, Qt.AlignTop)
+
+        box.addSpacing(20)
 
         self.setLayout(box)
 
@@ -80,6 +86,13 @@ class ExecutionFrame(QWidget):
             self.open_editor_btn.setToolTip("Open Editor")
 
             self.editor_frame.hide()
+
+    def getUsedDR(self):
+        """
+        :return: The DR Model to use
+        :rtype: str
+        """
+        return "2A"
 
     # --- Close handler ---
 
