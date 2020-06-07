@@ -11,7 +11,7 @@ class DigiruleInfo:
         :type digirule_model: str
         """
 
-        self.digi_model = import_module("src.digirules.Digirule" + digirule_model)
+        self.digi_model = import_module("src.digirules.digirule_description_" + digirule_model)
 
     def get_img_name(self):
         """
