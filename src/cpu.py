@@ -1,7 +1,7 @@
 from importlib import import_module
 
-class Cpu():
-    def __init__(self, stack_size = 16, sstack_size = 64, dr_model = "2U"):
+class Cpu:
+    def __init__(self, stack_size=16, sstack_size=64, dr_model="2U"):
         self.ram = [0] * 256
         self.accu = 0          # Accumulator
         self.pc   = 0          # Program Counter
@@ -21,9 +21,9 @@ class Cpu():
         # Building lookup table to access functions by opcodes
         # format : lookupTable [opcode] --> function
         self.lookup_table = [self.inst_illegal] * 256
-        for inst in self.inst_dic :
+        for inst in self.inst_dic:
             opcode = self.inst_dic[inst]["code"]
-            self.lookup_table[opcode] = eval("self.inst_"+inst)
+            self.lookup_table[opcode] = eval("self.inst_" + inst)
 
 
     def tick(self):
