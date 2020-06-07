@@ -23,18 +23,18 @@ class EditorFrame(QWidget):
 
         self.exec_frame = parent_frame
 
-        self._initToolBar()
-        self._setLayout()
-        self._connectAll()
+        self._init_tool_bar()
+        self._set_layout()
+        self._connect_all()
 
-    def _initToolBar(self):
+    def _init_tool_bar(self):
         """
         Creates the main toolbar with all its content
         """
         self.toolbar = QToolBar()
         self.toolbar.setFixedHeight(70)
 
-    def _setLayout(self):
+    def _set_layout(self):
         """
         Creates this Widget's Layout
         """
@@ -47,7 +47,7 @@ class EditorFrame(QWidget):
 
         self.setLayout(box)
 
-    def _connectAll(self):
+    def _connect_all(self):
         """
         Connects all the buttons to methods
         """

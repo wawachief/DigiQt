@@ -1,7 +1,7 @@
 import sys
 from PySide2.QtWidgets import QApplication
 
-from src.MainApp import ExecutionFrame
+from src.view.MainApp import ExecutionFrame
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

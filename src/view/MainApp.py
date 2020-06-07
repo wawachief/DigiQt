@@ -3,8 +3,8 @@ from PySide2.QtWidgets import (QToolBar, QPushButton,
 from PySide2.QtCore import Qt
 
 import src.assets_manager as assets_mgr
-from src.Editor import EditorFrame
-from src.DigiruleCanvas import DRCanvas
+from src.view.Editor import EditorFrame
+from src.view.DigiruleCanvas import DRCanvas
 
 APP_VERSION = "BETA-0.1"  # Application version
 
@@ -24,11 +24,11 @@ class ExecutionFrame(QWidget):
         self.editor_frame = EditorFrame(self)
         self.dr_canvas = DRCanvas(self)
 
-        self._initToolBar()
-        self._setLayout()
-        self._connectAll()
+        self._init_tool_bar()
+        self._set_layout()
+        self._connect_all()
 
-    def _initToolBar(self):
+    def _init_tool_bar(self):
         """
         Creates the main toolbar with all its content
         """
@@ -44,7 +44,7 @@ class ExecutionFrame(QWidget):
         self.toolbar.addWidget(self.open_editor_btn)
         self.toolbar.addSeparator()
 
-    def _setLayout(self):
+    def _set_layout(self):
         """
         Creates this Widget's Layout
         """
@@ -61,15 +61,15 @@ class ExecutionFrame(QWidget):
 
         self.setLayout(box)
 
-    def _connectAll(self):
+    def _connect_all(self):
         """
         Connects all the buttons to methods
         """
-        self.open_editor_btn.clicked.connect(lambda: self.showEditorFrame(not self.editor_frame.isVisible()))
+        self.open_editor_btn.clicked.connect(lambda: self.show_editor_frame(not self.editor_frame.isVisible()))
 
-    # --- Buttons callbacks methods ---
+    # --- Toolbar's buttons callbacks methods ---
 
-    def showEditorFrame(self, do_display):
+    def show_editor_frame(self, do_display):
         """
         Hides or shows the editor frame
 
@@ -86,13 +86,6 @@ class ExecutionFrame(QWidget):
             self.open_editor_btn.setToolTip("Open Editor")
 
             self.editor_frame.hide()
-
-    def getUsedDR(self):
-        """
-        :return: The DR Model to use
-        :rtype: str
-        """
-        return "2A"
 
     # --- Close handler ---
 

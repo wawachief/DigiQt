@@ -8,8 +8,8 @@
 from importlib import import_module
 from random import randint
 
-class Cpu():
-    def __init__(self, stack_size = 16, sstack_size = 64, dr_model = "2U"):
+class Cpu:
+    def __init__(self, stack_size=16, sstack_size=64, dr_model="2U"):
         self.ram = [0] * 256
         self.accu = 0          # Accumulator
         self.pc   = 0          # Program Counter
