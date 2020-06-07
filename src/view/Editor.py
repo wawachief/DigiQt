@@ -62,4 +62,4 @@ class EditorFrame(QWidget):
 
         Updates the execution frame's open editor icon and tooltip
         """
-        self.exec_frame.showEditorFrame(False)
+        self.exec_frame.show_editor_frame(False)
