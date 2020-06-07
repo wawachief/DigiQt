@@ -49,6 +49,15 @@ class DigiruleInfo:
         """
         return self.digi_model.buttons_positions
 
+    def get_special_buttons_rects_dic(self):
+        """
+        Retrives the rectangles dictionary for non-square buttons
+
+        :return: Digirule special buttons' positions
+        :rtype: dict
+        """
+        return self.digi_model.special_buttons_rectangles
+
     def get_led_positions_dic(self):
         """
         Retrieves the position dictionary of the LEDs given the Digirule currently used
