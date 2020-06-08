@@ -340,38 +340,38 @@ class Cpu:
     # 2B experimental instructions
     #
     def inst_copyli(self):
-        pass
+        return True
     def inst_copyai(self):
-        pass
+        return True
     def inst_copyia(self):
-        pass
+        return True
     def inst_copyri(self):
-        pass
+        return True
     def inst_copyir(self):
-        pass
+        return True
     def inst_copyii(self):
-        pass
+        return True
     def inst_shiftar(self):
-        pass
+        return True
     def inst_shiftal(self):
-        pass
+        return True
     def inst_jumpi(self):
-        pass
+        return False
     def inst_calli(self):
-        pass
+        return False
     def inst_sspush(self):
-        pass
+        return True
     def inst_sspop(self):
-        pass
+        return True
     def inst_sspushr(self):
-        pass
+        return True
     def inst_sspopr(self):
-        pass
+        return True
     def inst_sspushi(self):
-        pass
+        return True
     def inst_sspopi(self):
-        pass
+        return True
     def inst_sshead(self):
-        pass
+        return True
     def inst_ssdepth(self):
-        pass
+        return True
