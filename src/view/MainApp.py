@@ -51,7 +51,7 @@ class ExecutionFrame(QWidget):
         self._set_layout()
         self._set_stylesheets()
 
-        self.sig_status_message.connect(self.statusbar.display)
+        self.sig_status_message.connect(self.statusbar.display_for_4_sec)
 
     def _init_tool_bar(self):
         """
