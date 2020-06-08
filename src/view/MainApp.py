@@ -5,7 +5,7 @@
 # Execution frame
 #
 
-from PySide2.QtWidgets import QToolBar, QVBoxLayout, QWidget
+from PySide2.QtWidgets import QToolBar, QVBoxLayout, QHBoxLayout, QWidget, QSlider
 from PySide2.QtCore import Qt, Signal
 
 from src.view.Editor import EditorFrame
@@ -13,6 +13,7 @@ from src.view.exec_frame_widgets.DigiruleCanvas import DRCanvas
 from src.view.exec_frame_widgets.DigiruleModelDropdown import DigiruleModelDropdown
 from src.view.exec_frame_widgets.OpenEditorButton import OpenEditorButton
 from src.view.exec_frame_widgets.StatusBar import StatusBar
+from src.view.exec_frame_widgets.SpeedSlider import SpeedSlider
 from src.view.style import style
 
 APP_VERSION = "BETA-0.1"  # Application version
@@ -34,13 +35,17 @@ class ExecutionFrame(QWidget):
         QWidget.__init__(self)
 
         self.setWindowTitle("DigiQt - Emulator for Digirule - " + str(APP_VERSION))
-        self.setFixedSize(window_width, 400)
+        self.setFixedSize(window_width, 340)
 
         self.current_digirule_model = "2B"  # Insert here the load process from config file for the digirule's model
 
+        sliderbar_width = 200
+        bottom_widget_height = 26
+
         self.editor_frame = EditorFrame(self)
         self.dr_canvas = DRCanvas(self, self.sig_status_message, window_width, self.current_digirule_model)
-        self.statusbar = StatusBar(window_width)
+        self.statusbar = StatusBar(window_width - sliderbar_width, bottom_widget_height)
+        self.slider = SpeedSlider(self.sig_status_message, sliderbar_width, bottom_widget_height)
 
         self._init_tool_bar()
         self._set_layout()
@@ -77,8 +82,14 @@ class ExecutionFrame(QWidget):
 
         box.addSpacing(20)
 
-        box.addWidget(self.statusbar)
-        box.setAlignment(self.statusbar, Qt.AlignBottom)
+        bottom_box = QHBoxLayout()
+        bottom_box.setContentsMargins(0, 0, 0, 0)
+
+        bottom_box.addWidget(self.statusbar)
+        bottom_box.addWidget(self.slider)
+
+        box.addLayout(bottom_box)
+        box.setAlignment(bottom_box, Qt.AlignBottom)
 
         self.setLayout(box)
 

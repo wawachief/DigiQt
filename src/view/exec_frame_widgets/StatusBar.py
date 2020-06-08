@@ -11,16 +11,18 @@ from PySide2.QtCore import Slot
 
 class StatusBar(QLabel):
 
-    def __init__(self, window_width):
+    def __init__(self, width, height):
         """
         Custom widget for the execution frame's status bar
 
-        :param window_width: application window width, to use as width for this label as well
-        :type window_width: int
+        :param width: to use as width for this label
+        :type width: int
+        :param height: to use as height for this label
+        :type height: int
         """
         QLabel.__init__(self)
 
-        self.setFixedSize(window_width, 26)
+        self.setFixedSize(width, height)
         self.setStyleSheet("padding-left: 1em; background-color: #585858; color: cyan;")
 
     @Slot(str)
