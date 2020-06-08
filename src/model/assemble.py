@@ -1,8 +1,9 @@
+# Author: Olivier Lécluse
+# Licence GPL-3
+
+#
 # Assembler for digirule 2A
-# Ronan Jahier
-# Olivier Lécluse
-# Thomas Lécluse
-# Licence GNU General Public License v3.0
+#
 
 class Assemble:
     def __init__(self, text, inst_dic):
@@ -78,6 +79,7 @@ class Assemble:
         # example of entry (True, value) for a variable definition
         #                  (False, PC) for a label - PC is the program counter value for the Jump
         # the key is the variable or the label name
+        labels = []
 
         # Premiere passe
         for line in self.lines:
@@ -122,6 +124,7 @@ class Assemble:
                 # label definition
                 try:
                     keywords[line[0][1:]] = PC
+                    labels.append(line[0][1:])
                 except:
                     return error("error in label definition", line[1])
             else:
@@ -188,4 +191,4 @@ class Assemble:
                     ram[i] = keywords[r]
                 else:
                     return error(r, 0)
-        return (True, ram)
+        return (True, ram, keywords, labels)

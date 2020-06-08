@@ -22,8 +22,6 @@ copylr 0xF0 R0
 copylr 0xFF T0
 copylr 0xFF T1
 copylr 0 stack_ptr 
-:stop
-    jump stop
 halt
 
 // fibo(12)
