@@ -1,4 +1,9 @@
-# This file's purpose is to contain all methods related to assets processing
+# Author: Thomas Lécluse
+# Licence GPL-3
+
+#
+# Assets getter
+#
 
 from PySide2.QtGui import QIcon
 from PySide2.QtCore import QSize

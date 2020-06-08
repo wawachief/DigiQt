@@ -1,4 +1,9 @@
+# Author: Thomas Lécluse
+# Licence GPL-3
+
+#
 # This file's purpose is to describe the Digirule 2A model elements position
+#
 
 IMG_NAME = "DR_2.png"  # Image file name
 BUTTONS_WIDTH = 30  # Push buttons width

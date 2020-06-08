@@ -1,3 +1,10 @@
+# Author: Thomas Lécluse
+# Licence GPL-3
+
+#
+# Edition frame
+#
+
 from PySide2.QtWidgets import (QToolBar, QPushButton,
                                QVBoxLayout, QWidget)
 from PySide2.QtCore import Qt, QSize

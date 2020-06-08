@@ -1,3 +1,10 @@
+# Author: Thomas Lécluse
+# Licence GPL-3
+
+#
+# Dynamic digirule's model getter
+#
+
 from importlib import import_module
 
 

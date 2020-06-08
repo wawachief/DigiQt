@@ -1,3 +1,10 @@
+# Author: Thomas Lécluse
+# Licence GPL-3
+
+#
+# Widget of execution frame
+#
+
 from PySide2.QtWidgets import QPushButton
 
 import src.assets_manager as assets_mgr

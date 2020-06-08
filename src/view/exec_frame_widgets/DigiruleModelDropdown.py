@@ -1,6 +1,13 @@
+# Author: Thomas Lécluse
+# Licence GPL-3
+
+#
+# Widget of execution frame
+#
+
 from PySide2.QtWidgets import QComboBox
 from PySide2.QtCore import QSize
-from style import style
+from src.view.style import style
 
 
 class DigiruleModelDropdown(QComboBox):

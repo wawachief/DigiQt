@@ -1,11 +1,18 @@
-from PySide2.QtWidgets import (QToolBar, QPushButton, QVBoxLayout, QWidget)
+# Author: Thomas Lécluse
+# Licence GPL-3
+
+#
+# Execution frame
+#
+
+from PySide2.QtWidgets import (QToolBar, QVBoxLayout, QWidget)
 from PySide2.QtCore import Qt
 
 from src.view.Editor import EditorFrame
-from src.view.editor_frame_widgets.DigiruleCanvas import DRCanvas
-from src.view.editor_frame_widgets.DigiruleModelDropdown import DigiruleModelDropdown
-from src.view.editor_frame_widgets.OpenEditorButton import OpenEditorButton
-from style import style
+from src.view.exec_frame_widgets.DigiruleCanvas import DRCanvas
+from src.view.exec_frame_widgets.DigiruleModelDropdown import DigiruleModelDropdown
+from src.view.exec_frame_widgets.OpenEditorButton import OpenEditorButton
+from src.view.style import style
 
 APP_VERSION = "BETA-0.1"  # Application version
 
@@ -24,7 +31,7 @@ class ExecutionFrame(QWidget):
         QWidget.__init__(self)
 
         self.setWindowTitle("DigiQt - Emulator for Digirule - " + str(APP_VERSION))
-        self.setFixedSize(window_width, 400)
+        self.setFixedSize(window_width, 300)
 
         self.current_digirule_model = "2B"  # Insert here the load process from config file for the digirule's model
 

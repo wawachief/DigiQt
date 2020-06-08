@@ -1,3 +1,10 @@
+# Author: Thomas Lécluse
+# Licence GPL-3
+
+#
+# Widget of execution frame
+#
+
 from PySide2.QtWidgets import QLabel
 from PySide2.QtGui import QPixmap, QPainter, QColor, QPen, QMatrix
 from PySide2.QtCore import QPoint, QRect

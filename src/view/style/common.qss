@@ -1,0 +1,5 @@
+QComboBox:hover, QPushButton:hover
+{
+    border: 1px solid yellow;
+    color: white;
+}

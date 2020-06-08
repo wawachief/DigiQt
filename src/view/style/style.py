@@ -1,4 +1,11 @@
-def get_stylesheet(file, ext=".qss", path="style/"):
+# Author: Thomas Lécluse
+# Licence GPL-3
+
+#
+# Style resources getter
+#
+
+def get_stylesheet(file, ext=".qss", path="src/view/style/"):
     """
     Gets the qss content into a string
 
