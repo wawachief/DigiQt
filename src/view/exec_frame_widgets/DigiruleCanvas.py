@@ -40,12 +40,14 @@ class DRCanvas(QLabel):
         "bottomLed0": False,
     }
 
-    def __init__(self, parent_frame, window_width, digirule_model):
+    def __init__(self, parent_frame, sig_status, window_width, digirule_model):
         """
         Canvas in witch is drawn the Digirule as well as its buttons
 
         :param parent_frame: Main application frame (the execution frame)
         :type parent_frame: ExecutionFrame
+        :param sig_status: signal that is connected to the statusbar
+        :type sig_status: Signal
         :param digirule_model: Default digirule model
         :type digirule_model: str
         :param window_width: application window width, to use as width for this label as well
@@ -54,6 +56,7 @@ class DRCanvas(QLabel):
         QLabel.__init__(self)
 
         self.exec_frame = parent_frame
+        self.sig_status = sig_status
 
         self.setFixedSize(window_width, 204)  # 1/4 of the original size
         self.setScaledContents(True)
@@ -70,6 +73,8 @@ class DRCanvas(QLabel):
         """
         self.digirule = DigiruleInfo(digirule_model)
         self.redraw()
+
+        self.sig_status.emit("Digirule model switched to " + digirule_model)
 
     def redraw(self):
         """

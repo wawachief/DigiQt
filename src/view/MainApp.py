@@ -5,19 +5,22 @@
 # Execution frame
 #
 
-from PySide2.QtWidgets import (QToolBar, QVBoxLayout, QWidget)
-from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QToolBar, QVBoxLayout, QWidget
+from PySide2.QtCore import Qt, Signal
 
 from src.view.Editor import EditorFrame
 from src.view.exec_frame_widgets.DigiruleCanvas import DRCanvas
 from src.view.exec_frame_widgets.DigiruleModelDropdown import DigiruleModelDropdown
 from src.view.exec_frame_widgets.OpenEditorButton import OpenEditorButton
+from src.view.exec_frame_widgets.StatusBar import StatusBar
 from src.view.style import style
 
 APP_VERSION = "BETA-0.1"  # Application version
 
 
 class ExecutionFrame(QWidget):
+
+    sig_status_message = Signal(str)  # new statusbar message signal
 
     # --- Init methods ---
 
@@ -31,16 +34,19 @@ class ExecutionFrame(QWidget):
         QWidget.__init__(self)
 
         self.setWindowTitle("DigiQt - Emulator for Digirule - " + str(APP_VERSION))
-        self.setFixedSize(window_width, 300)
+        self.setFixedSize(window_width, 400)
 
         self.current_digirule_model = "2B"  # Insert here the load process from config file for the digirule's model
 
         self.editor_frame = EditorFrame(self)
-        self.dr_canvas = DRCanvas(self, window_width, self.current_digirule_model)
+        self.dr_canvas = DRCanvas(self, self.sig_status_message, window_width, self.current_digirule_model)
+        self.statusbar = StatusBar(window_width)
 
         self._init_tool_bar()
         self._set_layout()
         self._set_stylesheets()
+
+        self.sig_status_message.connect(self.statusbar.display)
 
     def _init_tool_bar(self):
         """
@@ -71,11 +77,14 @@ class ExecutionFrame(QWidget):
 
         box.addSpacing(20)
 
+        box.addWidget(self.statusbar)
+        box.setAlignment(self.statusbar, Qt.AlignBottom)
+
         self.setLayout(box)
 
     def _set_stylesheets(self):
         # ToolBar
-        self.toolbar.setStyleSheet('border: none; background: #333333;')
+        self.toolbar.setStyleSheet('border: none; background-color: #333333;')
 
         # Execution Frame
         self.setStyleSheet('background-color: #000000;')
