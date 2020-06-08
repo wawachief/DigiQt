@@ -37,7 +37,7 @@ class ExecutionFrame(QWidget):
         self.setWindowTitle("DigiQt - Emulator for Digirule - " + str(APP_VERSION))
         self.setFixedSize(window_width, 340)
 
-        self.current_digirule_model = "2B"  # Insert here the load process from config file for the digirule's model
+        self.current_digirule_model = "2B"  # TODO Insert here the load process from config file for the digirule's model
 
         sliderbar_width = 200
         bottom_widget_height = 26
@@ -64,7 +64,7 @@ class ExecutionFrame(QWidget):
         self.toolbar.addWidget(self.open_editor_btn)
 
         self.toolbar.addSeparator()
-        self.digimodel_dropdown = DigiruleModelDropdown(self.on_digimodel_dropdown_changed)
+        self.digimodel_dropdown = DigiruleModelDropdown(self.on_digimodel_dropdown_changed, self.current_digirule_model)
         self.toolbar.addWidget(self.digimodel_dropdown)
 
     def _set_layout(self):
@@ -94,11 +94,9 @@ class ExecutionFrame(QWidget):
         self.setLayout(box)
 
     def _set_stylesheets(self):
-        # ToolBar
-        self.toolbar.setStyleSheet('border: none; background-color: #333333;')
+        self.toolbar.setStyleSheet(style.get_stylesheet("qtoolbar"))
 
         # Execution Frame
-        self.setStyleSheet('background-color: #000000;')
         self.setStyleSheet(style.get_stylesheet("common"))
 
     # --- Callbacks methods ---

@@ -1,5 +1,8 @@
-QPushButton:hover
-{
+QPushButton:hover {
     border: 1px solid yellow;
     color: white;
+}
+
+QWidget {
+    background-color: #000000;
 }
