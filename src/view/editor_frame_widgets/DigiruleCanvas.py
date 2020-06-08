@@ -3,6 +3,7 @@ from PySide2.QtGui import QPixmap, QPainter, QColor, QPen, QMatrix
 from PySide2.QtCore import QPoint, QRect
 
 from src.digirules.DigiruleInfo import DigiruleInfo
+
 from random import randint
 
 from threading import Thread
@@ -32,7 +33,7 @@ class DRCanvas(QLabel):
         "bottomLed0": False,
     }
 
-    def __init__(self, parent_frame, digirule_model="2A"):
+    def __init__(self, parent_frame, window_width, digirule_model):
         """
         Canvas in witch is drawn the Digirule as well as its buttons
 
@@ -40,17 +41,17 @@ class DRCanvas(QLabel):
         :type parent_frame: ExecutionFrame
         :param digirule_model: Default digirule model
         :type digirule_model: str
+        :param window_width: application window width, to use as width for this label as well
+        :type window_width: int
         """
         QLabel.__init__(self)
 
         self.exec_frame = parent_frame
 
-        self.setFixedSize(1064, 204)  # 1/4 of the original size
+        self.setFixedSize(window_width, 204)  # 1/4 of the original size
         self.setScaledContents(True)
 
-        self.digirule = DigiruleInfo(digirule_model)
-
-        self.redraw()
+        self.digirule_changed(digirule_model)
 
     def digirule_changed(self, digirule_model):
         """

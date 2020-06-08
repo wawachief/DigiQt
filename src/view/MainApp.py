@@ -1,10 +1,11 @@
-from PySide2.QtWidgets import (QToolBar, QPushButton,
-                               QVBoxLayout, QWidget)
+from PySide2.QtWidgets import (QToolBar, QPushButton, QVBoxLayout, QWidget)
 from PySide2.QtCore import Qt
 
-import src.assets_manager as assets_mgr
 from src.view.Editor import EditorFrame
-from src.view.DigiruleCanvas import DRCanvas
+from src.view.editor_frame_widgets.DigiruleCanvas import DRCanvas
+from src.view.editor_frame_widgets.DigiruleModelDropdown import DigiruleModelDropdown
+from src.view.editor_frame_widgets.OpenEditorButton import OpenEditorButton
+from style import style
 
 APP_VERSION = "BETA-0.1"  # Application version
 
@@ -13,20 +14,26 @@ class ExecutionFrame(QWidget):
 
     # --- Init methods ---
 
-    def __init__(self):
+    def __init__(self, window_width):
         """
         Main application frame. Contains the MenuBar, main toolbar, DR canvas and status bar.
+
+        :param window_width: application window width, to use as width for this label as well
+        :type window_width: int
         """
         QWidget.__init__(self)
 
         self.setWindowTitle("DigiQt - Emulator for Digirule - " + str(APP_VERSION))
+        self.setFixedSize(window_width, 400)
+
+        self.current_digirule_model = "2B"  # Insert here the load process from config file for the digirule's model
 
         self.editor_frame = EditorFrame(self)
-        self.dr_canvas = DRCanvas(self)
+        self.dr_canvas = DRCanvas(self, window_width, self.current_digirule_model)
 
         self._init_tool_bar()
         self._set_layout()
-        self._connect_all()
+        self._set_stylesheets()
 
     def _init_tool_bar(self):
         """
@@ -35,14 +42,12 @@ class ExecutionFrame(QWidget):
         self.toolbar = QToolBar()
         self.toolbar.setFixedHeight(70)
 
-        self.open_editor_btn = QPushButton()
-        self.open_editor_btn.setIcon(assets_mgr.get_icon("open_editor"))
-        self.open_editor_btn.setToolTip("Open Editor")
-        self.open_editor_btn.setIconSize(assets_mgr.ICON_SIZE)
-        self.open_editor_btn.setStyleSheet('border: none; padding-left: 10px;')
-
+        self.open_editor_btn = OpenEditorButton(self.editor_frame)
         self.toolbar.addWidget(self.open_editor_btn)
+
         self.toolbar.addSeparator()
+        self.digimodel_dropdown = DigiruleModelDropdown(self.on_digimodel_dropdown_changed)
+        self.toolbar.addWidget(self.digimodel_dropdown)
 
     def _set_layout(self):
         """
@@ -61,31 +66,30 @@ class ExecutionFrame(QWidget):
 
         self.setLayout(box)
 
-    def _connect_all(self):
-        """
-        Connects all the buttons to methods
-        """
-        self.open_editor_btn.clicked.connect(lambda: self.show_editor_frame(not self.editor_frame.isVisible()))
+    def _set_stylesheets(self):
+        # ToolBar
+        self.toolbar.setStyleSheet('border: none; background: #333333;')
 
-    # --- Toolbar's buttons callbacks methods ---
+        # Execution Frame
+        self.setStyleSheet('background-color: #000000;')
+        self.setStyleSheet(style.get_stylesheet("common"))
+
+    # --- Callbacks methods ---
 
     def show_editor_frame(self, do_display):
         """
-        Hides or shows the editor frame
-
-        :param do_display: True will display the editor frame, False will hide it
-        :type do_display: bool
+        Delegates the process to the editor's open/close button
         """
-        if do_display:
-            self.open_editor_btn.setIcon(assets_mgr.get_icon("close_editor"))
-            self.open_editor_btn.setToolTip("Close Editor")
+        self.open_editor_btn.show_editor_frame(do_display)
 
-            self.editor_frame.show()
-        else:
-            self.open_editor_btn.setIcon(assets_mgr.get_icon("open_editor"))
-            self.open_editor_btn.setToolTip("Open Editor")
+    def on_digimodel_dropdown_changed(self):
+        """
+        Handles the Digirule's model-combo-box-selection-changed process. Calls the canvas redraw.
+        """
+        # Insert here the persistent save operation in the config file for the digirule's model
+        self.current_digirule_model = self.digimodel_dropdown.get_digirule_model()
 
-            self.editor_frame.hide()
+        self.dr_canvas.digirule_changed(self.current_digirule_model)
 
     # --- Close handler ---
 
