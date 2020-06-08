@@ -56,5 +56,7 @@ led_positions = {
     (216, 100): "bottomLed3",
     (264, 100): "bottomLed2",
     (312, 100): "bottomLed1",
-    (360, 100): "bottomLed0"
+    (360, 100): "bottomLed0",
+    (831, 105): "stopLed",
+    (755, 105): "runLed"
 }

@@ -22,7 +22,7 @@ class OpenEditorButton(QPushButton):
         self.setIcon(assets_mgr.get_icon("open_editor"))
         self.setToolTip("Open Editor")
         self.setIconSize(assets_mgr.ICON_SIZE)
-        self.setStyleSheet('border: none; padding-left: 10px;')
+        self.setStyleSheet('border: none; padding-left: 10px; background-color: #333333;')
 
         self.editor_frame = editor_frame
 

@@ -11,13 +11,14 @@ from src.view.style import style
 
 
 class DigiruleModelDropdown(QComboBox):
-    def __init__(self, callback_function):
+    def __init__(self, callback_function, init_model):
         """
         Customed dropdown button for the Digirule model selection
         """
         QComboBox.__init__(self)
 
         self.addItems(("2A", "2B", "2U"))
+        self.setCurrentText(init_model)  # Switch to initial selection
 
         self.setStyleSheet(style.get_stylesheet("qcombobox"))
 

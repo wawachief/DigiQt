@@ -38,6 +38,8 @@ class DRCanvas(QLabel):
         "bottomLed2": False,
         "bottomLed1": False,
         "bottomLed0": False,
+        "stopLed": True,
+        "runLed": False
     }
 
     def __init__(self, parent_frame, sig_status, window_width, digirule_model):
@@ -194,6 +196,21 @@ class DRCanvas(QLabel):
         if do_repaint:
             self.repaint()  # Forces the label to repaint
 
+    def set_running_leds(self, is_running, do_repaint=True):
+        """
+        Sets both the stop and run LEDs given the specified running state
+
+        :param is_running: True if cpu running
+        :type is_running: bool
+        :param do_repaint: repaint after setting
+        :type do_repaint: bool
+        """
+        self.led_states["stopLed"] = not is_running
+        self.led_states["runLed"] = is_running
+
+        if do_repaint:
+            self.repaint()  # Forces the label to repaint
+
     def set_row_state(self, top_row, octet, do_repaint=True):
         """
         Sets the given LED row state
@@ -268,10 +285,12 @@ class DRCanvas(QLabel):
         170 represents 10101010
         """
         for i in range(1, 20):
+            self.set_running_leds(i % 2 != 0, False)  # Don't repaint yet
             self.set_row_state(True, 170 if i % 2 == 0 else 85, False)  # Don't repaint yet
             self.set_row_state(False, 85 if i % 2 == 0 else 170)
             sleep(.08)
 
         # Reset leds
+        self.set_running_leds(False, False)
         self.set_row_state(True, 0, False)
         self.set_row_state(False, 0)

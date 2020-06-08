@@ -16,7 +16,7 @@ QComboBox
 
 QComboBox:hover
 {
-    border: 1px solid yellow;
+    border: 1px solid #FF9800;
     color: white;
 }
 
