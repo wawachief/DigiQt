@@ -144,9 +144,7 @@ class DRCanvas(QLabel):
 
     def mouseReleaseEvent(self, event):
         """
-        Intercepts the click on the canvas and calls the method associated to the clicked button, if there is one
-
-        :param event:
+        Intercepts the click release on the canvas and calls the method associated to the clicked button, if there is one
         """
         # print(event.x(), event.y())
 
@@ -158,7 +156,7 @@ class DRCanvas(QLabel):
 
                 # Particular case for the 'd' buttons, we call the same method with the btn number
                 if 'd_' == btn_name[0:2]:
-                    self.on_d(int(btn_name[-1]))
+                    self.on_d(int(btn_name[-1]), False)
                 else:  # Generic process, calling the method given the full button name
                     eval("self.on_" + btn_name)()
 
@@ -170,6 +168,23 @@ class DRCanvas(QLabel):
                 eval("self.on_" + special_btns_dico[btn])()
 
                 return  # No need to continue once found
+
+    def mousePressEvent(self, event):
+        """
+        Intercepts the click press on the canvas and calls the method associated to the clicked button. This is only
+        applied to dx buttons
+        """
+        w = self.digirule.get_buttons_width() / 2  # Accepted offset to click position
+
+        btns_dico = self.digirule.get_buttons_positions_dic()
+        for btn in btns_dico:
+            if btn[0] - w <= event.x() <= btn[0] + w and btn[1] - w <= event.y() <= btn[1] + w:
+                btn_name = btns_dico[btn]
+
+                if 'd_' == btn_name[0:2]:  # dx buttons
+                    self.on_d(int(btn_name[-1]), True)
+                    return  # No need to continue once found
+
 
     def set_led_state(self, top_row, led, active, do_repaint=True):
         """
@@ -230,12 +245,14 @@ class DRCanvas(QLabel):
 
     # --- Buttons callbacks ---
 
-    def on_d(self, btn):
+    def on_d(self, btn, is_pressed):
         """
         Callback for press on a 'd' button.
 
         :param btn: button number
         :type btn: int
+        :param is_pressed: True if the button was pressed, False if released
+        :type is_pressed: bool
         """
         pass
 

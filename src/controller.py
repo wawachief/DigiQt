@@ -177,7 +177,7 @@ class Controller(QObject):
         """button in normal mode"""
         self.idle_addr = (self.idle_addr - 1) % 256
         self.update_idle_leds()
-    def cb_idle_dx(self, btn):
+    def cb_idle_dx(self, btn, is_pressed):
         """Button Dx pressed in idle mode"""
         if self.load_mode:
             self.load_ram(btn)
@@ -227,7 +227,7 @@ class Controller(QObject):
     def cb_run_prev(self):
         """button in run mode"""
         pass
-    def cb_run_dx(self, btn):
+    def cb_run_dx(self, btn, is_pressed):
         """Button Dx pressed in run mode"""
         self.cpu.REG_BUTTON = 2**btn
         print(btn)
