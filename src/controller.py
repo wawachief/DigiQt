@@ -8,6 +8,5 @@ class Controller:
         config = ConfigParser()
         config.read('src/config.ini')
         dr_model = config.get('digirule', 'DR_MODEL')
-        wwidth = int(config.get('main', 'WINDOW_WIDTH'))
-        self.widget = ExecutionFrame(wwidth)
+        self.widget = ExecutionFrame(config)
         self.widget.show()

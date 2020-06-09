@@ -16,7 +16,7 @@ from src.view.exec_frame_widgets.StatusBar import StatusBar
 from src.view.exec_frame_widgets.SpeedSlider import SpeedSlider
 from src.view.style import style
 
-APP_VERSION = "BETA-0.1"  # Application version
+
 
 
 class ExecutionFrame(QWidget):
@@ -25,7 +25,7 @@ class ExecutionFrame(QWidget):
 
     # --- Init methods ---
 
-    def __init__(self, window_width):
+    def __init__(self, config):
         """
         Main application frame. Contains the MenuBar, main toolbar, DR canvas and status bar.
 
@@ -34,7 +34,9 @@ class ExecutionFrame(QWidget):
         """
         QWidget.__init__(self)
 
-        self.setWindowTitle("DigiQt - Emulator for Digirule - " + str(APP_VERSION))
+        app_version = config.get('main', 'APP_VERSION')
+        self.setWindowTitle("DigiQt - Emulator for Digirule - " + str(app_version))
+        window_width = int(config.get('main', 'WINDOW_WIDTH'))
         self.setFixedSize(window_width, 340)
 
         self.current_digirule_model = "2B"  # TODO Insert here the load process from config file for the digirule's model
