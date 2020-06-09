@@ -37,6 +37,7 @@ class StatusBar(QFrame):
         self.progressbar.setFixedSize(width, 5)
         self.progressbar.setRange(0, 100)
         self.progressbar.setValue(100)
+        self.progressbar.setTextVisible(False)
         self._set_style_sheet()
 
         layout = QVBoxLayout()

@@ -17,29 +17,28 @@ from src.view.exec_frame_widgets.SpeedSlider import SpeedSlider
 from src.view.style import style
 
 
-
-
 class ExecutionFrame(QWidget):
 
     sig_status_message = Signal(str)  # new statusbar message signal
 
     # --- Init methods ---
 
-    def __init__(self, config):
+    def __init__(self, config, sig_update_config):
         """
         Main application frame. Contains the MenuBar, main toolbar, DR canvas and status bar.
 
-        :param window_width: application window width, to use as width for this label as well
-        :type window_width: int
+        :param config: application configuration file
         """
         QWidget.__init__(self)
 
-        app_version = config.get('main', 'APP_VERSION')
+        self.config = config
+
+        app_version = self.config.get('main', 'APP_VERSION')
         self.setWindowTitle("DigiQt - Emulator for Digirule - " + str(app_version))
-        window_width = int(config.get('main', 'WINDOW_WIDTH'))
+        window_width = int(self.config.get('main', 'WINDOW_WIDTH'))
         self.setFixedSize(window_width, 340)
 
-        self.current_digirule_model = "2B"  # TODO Insert here the load process from config file for the digirule's model
+        self.current_digirule_model = self.config.get('digirule', 'DR_MODEL')
 
         sliderbar_width = 200
         bottom_widget_height = 26
@@ -54,6 +53,7 @@ class ExecutionFrame(QWidget):
         self._set_stylesheets()
 
         self.sig_status_message.connect(self.statusbar.display_for_4_sec)
+        self.sig_update_config = sig_update_config
 
     def _init_tool_bar(self):
         """
@@ -113,10 +113,9 @@ class ExecutionFrame(QWidget):
         """
         Handles the Digirule's model-combo-box-selection-changed process. Calls the canvas redraw.
         """
-        # Insert here the persistent save operation in the config file for the digirule's model
-        self.current_digirule_model = self.digimodel_dropdown.get_digirule_model()
+        self.sig_update_config.emit(self.digimodel_dropdown.get_digirule_model())
 
-        self.dr_canvas.digirule_changed(self.current_digirule_model)
+        self.dr_canvas.digirule_changed(self.config.get('digirule', 'DR_MODEL'))
 
     # --- Close handler ---
 
