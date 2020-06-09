@@ -15,7 +15,8 @@ from time import sleep
 class StatusBar(QFrame):
 
     sig_progress_bar = Signal(int)  # progress value update
-    sig_lab_message = Signal(str)  # label text update
+    sig_persistent_message = Signal(str)  # new statusbar persistent message signal
+    sig_temp_message = Signal(str)  # new statusbar temporary message signal
 
     def __init__(self, width, height):
         """
@@ -48,12 +49,14 @@ class StatusBar(QFrame):
 
         self.setLayout(layout)
 
-        self.sig_progress_bar.connect(self.set_progress_val)
-        self.sig_lab_message.connect(self.set_status_message)
+        self.sig_progress_bar.connect(self.__set_progress_val)
+        self.sig_persistent_message.connect(self.__set_status_message)
+        self.sig_temp_message.connect(self.__display_for_4_sec)
+
         self.last_thread = 0
 
     @Slot(str)
-    def display_for_4_sec(self, text):
+    def __display_for_4_sec(self, text):
         """
         Displays the given text for 10 seconds
 
@@ -64,7 +67,7 @@ class StatusBar(QFrame):
         Thread(target=self.__clear_after, args=(4, text, self.last_thread)).start()
 
     @Slot(int)
-    def set_progress_val(self, val):
+    def __set_progress_val(self, val):
         """
         Sets the current val (between 0 and 100) into the progress bar
         :type val: int
@@ -72,7 +75,7 @@ class StatusBar(QFrame):
         self.progressbar.setValue(val)
 
     @Slot(int)
-    def set_status_message(self, message):
+    def __set_status_message(self, message):
         """
         Displays a message that does not disappear
         """
@@ -87,7 +90,7 @@ class StatusBar(QFrame):
         :param text: message to display
         :param thread_index: id of the thread that is running this
         """
-        self.sig_lab_message.emit(text)
+        self.sig_persistent_message.emit(text)
 
         self.sig_progress_bar.emit(100)
 
@@ -101,7 +104,7 @@ class StatusBar(QFrame):
             sleep(time / 100)
 
         self.sig_progress_bar.emit(0)
-        self.sig_lab_message.emit("")
+        self.sig_persistent_message.emit("")
         self.sig_progress_bar.emit(100)
 
         self.last_thread = 0  # Once we've reached the end, we may reset that value
