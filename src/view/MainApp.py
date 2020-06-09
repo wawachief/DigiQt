@@ -118,10 +118,11 @@ class ExecutionFrame(QWidget):
         self.dr_canvas.digirule_changed(self.config.get('digirule', 'DR_MODEL'))
 
     # --- Close handler ---
-
+    def do_quit(self):
+        pass
     def closeEvent(self, event):
         """
         Event called upon a red-cross click
         """
-        print("bye")
+        self.do_quit()
         event.accept()

@@ -11,10 +11,6 @@ from PySide2.QtCore import QPoint, QRect
 
 from src.digirules.DigiruleInfo import DigiruleInfo
 
-from random import randint
-
-from threading import Thread
-from time import sleep
 
 TOP_ROW_LED_COLOR = "#FF0000"
 BOTTOM_ROW_LED_COLOR = "#00FF00"
@@ -265,31 +261,10 @@ class DRCanvas(QLabel):
         pass
 
     def on_btn_ram(self):
-        print("ram")
+        pass
 
     def on_btn_clear(self):
-        # Blinking LEDs
-        Thread(target=self.do_blink).start()
-
-        print("clear")
+        pass
 
     def on_btn_power(self):
-        print("power")
-
-    def do_blink(self):
-        """
-        Performs a blink 10 times on the 2 LEDs rows.
-
-        85 represents 01010101
-        170 represents 10101010
-        """
-        for i in range(1, 20):
-            self.set_running_leds(i % 2 != 0, False)  # Don't repaint yet
-            self.set_row_state(True, 170 if i % 2 == 0 else 85, False)  # Don't repaint yet
-            self.set_row_state(False, 85 if i % 2 == 0 else 170)
-            sleep(.08)
-
-        # Reset leds
-        self.set_running_leds(False, False)
-        self.set_row_state(True, 0, False)
-        self.set_row_state(False, 0)
+        pass

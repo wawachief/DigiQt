@@ -60,21 +60,20 @@ class Cpu(QObject):
     #
     def tick(self):
         """Executes one CPU cycle"""
-        if self.run:
-            # Fetch
-            opcode = self.ram[self.pc]
-            # Decode
-            execute, inst, opcount = self.lookup_table [opcode]
-            self.decoded_inst = inst
-            for i in range(opcount):
-                self.decoded_inst += " " + str(self.ram[self.pc + 1 + i])
-            # Execute
-            inc_pc = execute()
-            # increment Program Counter
-            if inc_pc:
-                # each instruction returns True if PC is to be incremented, False otherwise
-                # jump functions will deal with PC themselves
-                self.set_pc(self.pc + 1 + opcount)
+        # Fetch
+        opcode = self.ram[self.pc]
+        # Decode
+        execute, inst, opcount = self.lookup_table [opcode]
+        self.decoded_inst = inst
+        for i in range(opcount):
+            self.decoded_inst += " " + str(self.ram[self.pc + 1 + i])
+        # Execute
+        inc_pc = execute()
+        # increment Program Counter
+        if inc_pc:
+            # each instruction returns True if PC is to be incremented, False otherwise
+            # jump functions will deal with PC themselves
+            self.set_pc(self.pc + 1 + opcount)
 
     def set_pc(self, new_pc):
         """Changes Program Counter"""

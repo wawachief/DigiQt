@@ -37,6 +37,8 @@ class Controller(QObject):
 
         # Instanciate the view
         self.gui = ExecutionFrame(self.config, self.sig_config_changed)
+        self.gui.dr_canvas.on_btn_power = self.do_quit
+        self.gui.do_quit = self.do_quit
 
         # Instanciate the CPU
         self.cpu = Cpu(self.config, self.sig_cpu_stopped)
@@ -47,18 +49,16 @@ class Controller(QObject):
         # Launch the main CPU thread
         self.running = True
         self.cpu_run_thread = Thread(target = self.run_cpu, args = (self.sig_cpu_tick, ))
-        # self.cpu_run_thread.start()
-        self.cpu.tick()
-        self.sig_cpu_tick.emit(True)
+        self.cpu_run_thread.start()
     
     #
     # Run cpu thread
     #
     def run_cpu(self, tick_signal):
         while self.running:
-            self.cpu.tick()
             # update running LEDS
             if self.cpu.run:
+                self.cpu.tick()
                 tick_signal.emit(True)
                 # 1 cyle every millisecond
                 speed = 0.0001 * self.cpu.speed**2
@@ -91,14 +91,20 @@ class Controller(QObject):
 
     @Slot(bool)
     def on_cpu_tick(self, b):
-        if self.cpu.ram[self.cpu.REG_STATUS] & 2 ==0 and self.show_run_adr :
-            self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.pc], False)
+        if self.show_run_adr:
+            if self.cpu.ram[self.cpu.REG_STATUS] & 2 ==0 :
+                self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.pc], False)
+            else:
+                self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.REG_ADDRLED], False)
         self.gui.dr_canvas.set_row_state(False, self.cpu.ram[self.cpu.REG_DATALED], True)
     #
     # set modes
     #
 
     def set_idle_mode(self):
+        # Stop the CPU
+        self.cpu.run = False
+
         # configure the callbacks to the normal (stop) mode
         self.gui.dr_canvas.on_btn_load = self.cb_idle_load
         self.gui.dr_canvas.on_btn_save = self.cb_idle_save
@@ -113,8 +119,6 @@ class Controller(QObject):
         # update the control leds
         self.gui.dr_canvas.set_running_leds(False)
 
-        # Run the CPU
-        self.cpu.run = False
 
 
     def set_run_mode(self):
@@ -209,10 +213,13 @@ class Controller(QObject):
         pass
     def cb_run_goto(self):
         """button in run mode"""
+        self.gui.dr_canvas.set_row_state(True, 0, False)
         self.show_run_adr = not self.show_run_adr
     def cb_run_run(self):
         """button in run mode"""
         self.set_idle_mode()
+        self.idle_addr = self.cpu.pc
+        self.update_idle_leds()
     def cb_run_next(self):
         """button in run mode"""
         pass
@@ -221,7 +228,11 @@ class Controller(QObject):
         pass
     def cb_run_dx(self, btn):
         """Button Dx pressed in run mode"""
-        pass
+        self.cpu.REG_BUTTON = 2**btn
+        print(btn)
+        sleep(0.3)
+        self.cpu.REG_BUTTON = 0
+        print(btn)
     def cb_run_clear(self):
         """Button clear pressed in run mode"""
         pass
@@ -252,6 +263,15 @@ class Controller(QObject):
             n = 2*n + 1
             self.gui.dr_canvas.set_row_state(False, n)
             sleep(.1)
+
+    def do_quit(self):
+        # Kill the cpu thread and quit the app
+        self.running = False
+        sleep(0.1)
+        self.gui.close()
+        print("Bye")
+
+
     #
     # Other methods
     #
