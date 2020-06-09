@@ -32,7 +32,7 @@ class Cpu(QObject):
         self.ssp  = 0          # Software Pointer
         self.rx   = None       # Byte received or None
         self.tx   = None       # Byte to send of None
-        self.run    = False
+        self.run    = False    # Run mode flag
         self.speed  = 0        # speed attribute changed by the speed instruction
         self.decoded_inst = "" 
         self.exception    = ""
@@ -95,6 +95,8 @@ class Cpu(QObject):
     # RAM operations
     #
     def clear_ram(self):
+        if self.run:
+            self.do_halt("Clear RAM while running")
         self.ram = [0] * 256
 
     def set_ram(self, new_ram):

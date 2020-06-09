@@ -1,9 +1,11 @@
+from configparser import ConfigParser
+from PySide2.QtCore import Signal, Slot, QObject
+from time import sleep
+from threading import Thread
+
 from src.model.cpu import Cpu
 from src.model.assemble import Assemble
-from configparser import ConfigParser
 from src.view.MainApp import ExecutionFrame
-
-from PySide2.QtCore import Signal, Slot, QObject
 
 CONFIG_FILE_PATH = 'src/config.ini'
 
@@ -11,6 +13,7 @@ class Controller(QObject):
     # Signals declarations
     sig_config_changed = Signal(str)
     sig_cpu_stopped = Signal(str)
+    sig_cpu_tick  = Signal(bool)
 
     def __init__(self):
         QObject.__init__(self)
@@ -18,6 +21,7 @@ class Controller(QObject):
         # signals configuration
         self.sig_config_changed.connect(self.on_config_changed)
         self.sig_cpu_stopped.connect(self.on_cpu_stopped)
+        self.sig_cpu_tick.connect(self.on_cpu_tick)
 
         # Read configuration
         self.config = ConfigParser()
@@ -29,6 +33,7 @@ class Controller(QObject):
         self.idle_addr = 0
         self.load_mode = False
         self.save_mode = False
+        self.show_run_adr = True 
 
         # Instanciate the view
         self.gui = ExecutionFrame(self.config, self.sig_config_changed)
@@ -38,7 +43,27 @@ class Controller(QObject):
 
         # Sets idle mode by default
         self.set_idle_mode()
+
+        # Launch the main CPU thread
+        self.running = True
+        self.cpu_run_thread = Thread(target = self.run_cpu, args = (self.sig_cpu_tick, ))
+        # self.cpu_run_thread.start()
+        self.cpu.tick()
+        self.sig_cpu_tick.emit(True)
     
+    #
+    # Run cpu thread
+    #
+    def run_cpu(self, tick_signal):
+        while self.running:
+            self.cpu.tick()
+            # update running LEDS
+            if self.cpu.run:
+                tick_signal.emit(True)
+                # 1 cyle every millisecond
+                speed = 0.0001 * self.cpu.speed**2
+                sleep(speed)
+
     # 
     # Signals handling
     # 
@@ -64,6 +89,11 @@ class Controller(QObject):
         # display on statusbar
         self.gui.statusbar.set_status_message("CPU stopped : " + exception)
 
+    @Slot(bool)
+    def on_cpu_tick(self, b):
+        if self.cpu.ram[self.cpu.REG_STATUS] & 2 ==0 and self.show_run_adr :
+            self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.pc], False)
+        self.gui.dr_canvas.set_row_state(False, self.cpu.ram[self.cpu.REG_DATALED], True)
     #
     # set modes
     #
@@ -77,6 +107,7 @@ class Controller(QObject):
         self.gui.dr_canvas.on_btn_run = self.cb_idle_run
         self.gui.dr_canvas.on_btn_next = self.cb_idle_next
         self.gui.dr_canvas.on_btn_prev = self.cb_idle_prev
+        self.gui.dr_canvas.on_btn_clear = self.cb_idle_clear
         self.gui.dr_canvas.on_d = self.cb_idle_dx
 
         # update the control leds
@@ -95,6 +126,7 @@ class Controller(QObject):
         self.gui.dr_canvas.on_btn_run = self.cb_run_run
         self.gui.dr_canvas.on_btn_next = self.cb_run_next
         self.gui.dr_canvas.on_btn_prev = self.cb_run_prev
+        self.gui.dr_canvas.on_btn_clear = self.cb_run_clear
         self.gui.dr_canvas.on_d = self.cb_run_dx
 
         # update the control leds
@@ -114,10 +146,12 @@ class Controller(QObject):
         """button in normal mode"""
         self.save_mode = False
         self.load_mode = True
+        self.do_progress()
     def cb_idle_save(self):
         """button in normal mode"""
         self.save_mode = True
         self.load_mode = False
+        self.do_progress()
     def cb_idle_store(self):
         """button in normal mode"""
         self.cpu.ram[self.idle_addr] = self.idle_data
@@ -140,14 +174,31 @@ class Controller(QObject):
         self.update_idle_leds()
     def cb_idle_dx(self, btn):
         """Button Dx pressed in idle mode"""
-        self.idle_data ^= 2**btn
-        self.gui.dr_canvas.set_row_state(False, self.idle_data, True)
+        if self.load_mode:
+            self.load_ram(btn)
+            self.load_mode = False
+            self.idle_addr = 0
+            self.update_idle_leds()
+        elif self.save_mode:
+            self.save_ram(btn)
+            self.save_mode = False
+            self.idle_addr = 0
+            self.update_idle_leds()
+        else:
+            self.idle_data ^= 2**btn
+            self.gui.dr_canvas.set_row_state(False, self.idle_data, True)
+    def cb_idle_clear(self):
+        """Button clear pressed in clear mode"""
+        self.cpu.clear_ram()
+        self.idle_addr = 0
+        self.do_blink()
+        self.update_idle_leds()
 
     #
     # run mode methods
     #
 
-    def cb_run_load():
+    def cb_run_load(self):
         """button in run mode"""
         pass
     def cb_run_save(self):
@@ -158,7 +209,7 @@ class Controller(QObject):
         pass
     def cb_run_goto(self):
         """button in run mode"""
-        pass
+        self.show_run_adr = not self.show_run_adr
     def cb_run_run(self):
         """button in run mode"""
         self.set_idle_mode()
@@ -169,32 +220,62 @@ class Controller(QObject):
         """button in run mode"""
         pass
     def cb_run_dx(self, btn):
-        """Button Dx pressed in normal mode"""
+        """Button Dx pressed in run mode"""
+        pass
+    def cb_run_clear(self):
+        """Button clear pressed in run mode"""
         pass
 
     #
-    # Action button methods
+    # action methods
     #
 
-    def load_ram(i):   
+    def do_blink(self):
+        """
+        Performs a blink 10 times on the 2 LEDs rows.
+
+        85 represents 01010101
+        170 represents 10101010
+        """
+        for i in range(1, 20):
+            # self.set_running_leds(i % 2 != 0, False)  # Don't repaint yet
+            self.gui.dr_canvas.set_row_state(True, 170 if i % 2 == 0 else 85, False)  # Don't repaint yet
+            self.gui.dr_canvas.set_row_state(False, 85 if i % 2 == 0 else 170)
+            sleep(.08)
+
+    def do_progress(self):
+        """
+        make a progress bar with the data_leds
+        """
+        n = 0
+        for i in range(8):
+            n = 2*n + 1
+            self.gui.dr_canvas.set_row_state(False, n)
+            sleep(.1)
+    #
+    # Other methods
+    #
+
+    def load_ram(self, i):   
         """loads a program (n°i) to the RAM from the flash memory """
-        with open('flash_memory.txt', 'r', encoding='utf-8') as f:
+        with open('src/flash_memory.txt', 'r', encoding='utf-8') as f:
             flash_memory = f.readlines() 
         start = 256*i # where the program n°i starts in the flash memory
         new_ram = []
         for j in range(start, start+256):
             new_ram.append(int(flash_memory[j][:-1]))
-        cpu.set_ram(new_ram)
+        self.cpu.set_ram(new_ram)
 
-    def save_ram(i): 
+    def save_ram(self, i): 
         """ saves RAM to a program n°i on the flash memory"""
         with open('flash_memory.txt', 'r', encoding='utf-8') as f:
             flash_memory = f.readlines() 
         start = 256*i # where the program n°i starts in the flash memory
-        with open('flash_memory.txt', 'w', encoding='utf-8') as f:
+        with open('src/flash_memory.txt', 'w', encoding='utf-8') as f:
             for j in range(0, start):
                 f.write(flash_memory[j])
             for j in range(start, start + 256):
-                f.write(str(cpu.ram[j-start])+'\n')
+                f.write(str(self.cpu.ram[j-start])+'\n')
             for j in range(start + 256, len(flash_memory)):
                 f.write(flash_memory[j])
+    
