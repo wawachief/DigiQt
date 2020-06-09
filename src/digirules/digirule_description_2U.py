@@ -24,11 +24,11 @@ buttons_positions = {
     (310, 140): "d_btn1",
     (360, 140): "d_btn0",
     (432, 70): "btn_goto",
-    (490, 70): "btn_save",
+    (490, 70): "btn_store",
     (490, 136): "btn_next",
     (432, 136): "btn_prev",
     (793, 136): "btn_run",
-    (904, 136): "btn_eepromsave",
+    (904, 136): "btn_save",
     (904, 70): "btn_load",
 }
 

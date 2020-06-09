@@ -241,29 +241,28 @@ class DRCanvas(QLabel):
         :param btn: button number
         :type btn: int
         """
-        print("Click on btn-" + str(btn))
-        self.set_row_state(randint(0, 1), randint(0, 255))
+        pass
 
     def on_btn_goto(self):
-        print("goto")
+        pass
 
-    def on_btn_save(self):
-        print("save")
+    def on_btn_store(self):
+        pass
 
     def on_btn_prev(self):
-        print("prev")
+       pass
 
     def on_btn_next(self):
-        print("next")
+        pass
 
     def on_btn_run(self):
-        print("run")
+        pass
 
-    def on_btn_eepromsave(self):
-        print("eepromsave")
+    def on_btn_save(self):
+        pass
 
     def on_btn_load(self):
-        print("load")
+        pass
 
     def on_btn_ram(self):
         print("ram")
