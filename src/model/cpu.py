@@ -5,6 +5,10 @@
 # Digirule CPU Core
 #
 
+#
+# todo add symbol table attribute to better decode instructions
+#
+
 from importlib import import_module
 from random import randint
 

@@ -1,14 +1,10 @@
 import sys
 from PySide2.QtWidgets import QApplication
 
-from src.view.MainApp import ExecutionFrame
-
-WINDOW_WIDTH = 1064
+from src.controller import Controller
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-
-    widget = ExecutionFrame(WINDOW_WIDTH)
-    widget.show()
+    ctrl = Controller()
 
     sys.exit(app.exec_())
