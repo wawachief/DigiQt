@@ -96,8 +96,7 @@ class Cpu(QObject):
     def clear_ram(self):
         if self.run:
             self.do_halt("Clear RAM while running")
-        for i in range(256):
-            self.ram[i] = 0
+        self.ram = [0] * 256
 
     def set_ram(self, new_ram):
         self.clear_ram()

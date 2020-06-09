@@ -92,7 +92,7 @@ class Controller(QObject):
     @Slot(bool)
     def on_cpu_tick(self, b):
         if self.show_run_adr:
-            if self.cpu.ram[self.cpu.REG_STATUS] & 2 ==0 :
+            if self.cpu.ram[self.cpu.REG_STATUS] & 4 ==0 :
                 self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.pc], False)
             else:
                 self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.REG_ADDRLED], False)
@@ -179,19 +179,20 @@ class Controller(QObject):
         self.update_idle_leds()
     def cb_idle_dx(self, btn, is_pressed):
         """Button Dx pressed in idle mode"""
-        if self.load_mode:
-            self.load_ram(btn)
-            self.load_mode = False
-            self.idle_addr = 0
-            self.update_idle_leds()
-        elif self.save_mode:
-            self.save_ram(btn)
-            self.save_mode = False
-            self.idle_addr = 0
-            self.update_idle_leds()
-        else:
-            self.idle_data ^= 2**btn
-            self.gui.dr_canvas.set_row_state(False, self.idle_data, True)
+        if is_pressed:
+            if self.load_mode:
+                self.load_ram(btn)
+                self.load_mode = False
+                self.idle_addr = 0
+                self.update_idle_leds()
+            elif self.save_mode:
+                self.save_ram(btn)
+                self.save_mode = False
+                self.idle_addr = 0
+                self.update_idle_leds()
+            else:
+                self.idle_data ^= 2**btn
+                self.gui.dr_canvas.set_row_state(False, self.idle_data, True)
     def cb_idle_clear(self):
         """Button clear pressed in clear mode"""
         self.cpu.clear_ram()
@@ -229,11 +230,11 @@ class Controller(QObject):
         pass
     def cb_run_dx(self, btn, is_pressed):
         """Button Dx pressed in run mode"""
-        self.cpu.REG_BUTTON = 2**btn
-        print(btn)
-        sleep(0.3)
-        self.cpu.REG_BUTTON = 0
-        print(btn)
+        if is_pressed:
+            self.cpu.ram[self.cpu.REG_BUTTON] = 2**btn
+        else:
+            self.cpu.ram[self.cpu.REG_BUTTON] = 0
+        print(btn, is_pressed)
     def cb_run_clear(self):
         """Button clear pressed in run mode"""
         pass
