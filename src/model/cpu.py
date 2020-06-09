@@ -9,25 +9,31 @@
 # todo add symbol table attribute to better decode instructions
 #
 
+from PySide2.QtCore import Signal, Slot, QObject
 from importlib import import_module
 from random import randint
 
-class Cpu:
-    def __init__(self, stack_size=16, sstack_size=64, dr_model="2U"):
+class Cpu(QObject):
+    def __init__(self, config, sig_cpu_stopped = None):
+        QObject.__init__(self)
+        self.sig_cpu_stopped = sig_cpu_stopped
+
+        # Read digirule configuration
+        self.dr_model     = config.get('digirule', 'DR_MODEL')
+        self.stack_size   = int(config.get(self.dr_model, 'STACK_SIZE'))
+        self.sstack_size  = int(config.get(self.dr_model, 'SSTACK_SIZE'))
+        # attributes initialization
         self.ram = [0] * 256
+        self.stack  = [0] * self.stack_size    # CPU Stack
+        self.sstack = [0] * self.sstack_size   # Software stack
         self.accu = 0          # Accumulator
         self.pc   = 0          # Program Counter
         self.sp   = 0          # Stack Pointer
         self.ssp  = 0          # Software Pointer
         self.rx   = None       # Byte received or None
         self.tx   = None       # Byte to send of None
-        self.stack  = [0] * stack_size    # CPU Stack
-        self.sstack = [0] * sstack_size   # Software stack
         self.run    = False
         self.speed  = 0        # speed attribute changed by the speed instruction
-        self.dr_model     = dr_model
-        self.stack_size   = stack_size
-        self.sstack_size  = sstack_size
         self.decoded_inst = "" 
         self.exception    = ""
 
@@ -38,7 +44,7 @@ class Cpu:
         self.REG_DATALED = 255
 
         # Loading instruction set
-        instruction_set = import_module("src.digirules.instructionset_" + dr_model)
+        instruction_set = import_module("src.digirules.instructionset_" + self.dr_model)
         self.inst_dic = instruction_set.inst_dic
 
         # Building lookup table to access functions by opcodes
@@ -81,6 +87,9 @@ class Cpu:
         """Stops the program and updates exception attribute"""
         self.exception = exception_msg
         self.run = False
+        # Emits stop signal
+        if self.sig_cpu_stopped is not None:
+            self.sig_cpu_stopped.emit(self.exception)
 
     #
     # RAM operations

@@ -10,6 +10,9 @@ sys.path.append("..")
 from src.model.assemble import Assemble
 from src.model.cpu import Cpu
 from src.digirules.instructionset_2U import inst_dic
+from configparser import ConfigParser
+
+CONFIG_FILE_PATH = '../src/config.ini'
 
 with open(sys.argv[1], "r") as f:
     text = ""
@@ -19,7 +22,10 @@ with open(sys.argv[1], "r") as f:
     res = asm.parse()
 
 if res[0]:
-    dr_cpu = Cpu(dr_model = "2U")
+    config = ConfigParser()
+    config.read(CONFIG_FILE_PATH)
+    print (config.get('digirule', 'DR_MODEL'))
+    dr_cpu = Cpu(config)
     dr_cpu.set_ram(res[1])
     dr_cpu.run = True
     n = 0
