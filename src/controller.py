@@ -167,6 +167,7 @@ class Controller(QObject):
         self.update_idle_leds()
     def cb_idle_run(self):
         """button in normal mode"""
+        self.cpu.pc = self.idle_addr
         self.set_run_mode()
     def cb_idle_next(self):
         """button in normal mode"""
