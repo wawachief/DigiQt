@@ -6,10 +6,12 @@
 #
 
 from PySide2.QtWidgets import QLabel, QFrame, QProgressBar, QVBoxLayout
-from PySide2.QtCore import Slot, Signal
+from PySide2.QtCore import Slot, Signal, QThread
 
 from threading import Thread
 from time import sleep
+
+PROGRESS_BAR_MAX = 200
 
 
 class StatusBar(QFrame):
@@ -36,7 +38,7 @@ class StatusBar(QFrame):
 
         self.label.setFixedSize(width, height - 5)
         self.progressbar.setFixedSize(width, 5)
-        self.progressbar.setRange(0, 100)
+        self.progressbar.setRange(0, PROGRESS_BAR_MAX)
         self.progressbar.setValue(100)
         self.progressbar.setTextVisible(False)
         self._set_style_sheet()
@@ -49,22 +51,28 @@ class StatusBar(QFrame):
 
         self.setLayout(layout)
 
-        self.sig_progress_bar.connect(self.__set_progress_val)
-        self.sig_persistent_message.connect(self.__set_status_message)
-        self.sig_temp_message.connect(self.__display_for_4_sec)
-
         self.last_thread = 0
 
+        self.sig_progress_bar.connect(self.__set_progress_val)
+        self.sig_persistent_message.connect(self.__set_status_message)
+        self.sig_temp_message.connect(self.__display_temporary_message)
+
     @Slot(str)
-    def __display_for_4_sec(self, text):
+    def __display_temporary_message(self, text):
         """
-        Displays the given text for 10 seconds
+        Displays the given text for a few seconds
 
         :param text: text to display
         :type text: str
         """
         self.last_thread += 1
-        Thread(target=self.__clear_after, args=(4, text, self.last_thread)).start()
+        ProgressBarThread(self, self.sig_progress_bar, self.label, text, self.last_thread).start()
+
+    def get_last_thread(self):
+        """
+        Method that retrieves the last thread, we should be the only one to run.
+        """
+        return self.last_thread
 
     @Slot(int)
     def __set_progress_val(self, val):
@@ -79,35 +87,8 @@ class StatusBar(QFrame):
         """
         Displays a message that does not disappear
         """
+        self.last_thread = 0
         self.label.setText(message)
-
-    def __clear_after(self, time, text, thread_index):
-        """
-        Performs an automatic clear of this status bar after the given time
-
-        :param time: seconds
-        :type time: int
-        :param text: message to display
-        :param thread_index: id of the thread that is running this
-        """
-        self.sig_persistent_message.emit(text)
-
-        self.sig_progress_bar.emit(100)
-
-        for i in range(100):
-            # Stop condition
-            if thread_index != self.last_thread:
-                return
-
-            self.sig_progress_bar.emit(100 - i)
-
-            sleep(time / 100)
-
-        self.sig_progress_bar.emit(0)
-        self.sig_persistent_message.emit("")
-        self.sig_progress_bar.emit(100)
-
-        self.last_thread = 0  # Once we've reached the end, we may reset that value
 
     def _set_style_sheet(self):
         """
@@ -115,3 +96,40 @@ class StatusBar(QFrame):
         """
         self.label.setStyleSheet("padding-left: 1em; background-color: #585858; color: cyan;")
         self.progressbar.setStyleSheet("QProgressBar::chunk {background-color: #585858}")
+
+
+class ProgressBarThread(QThread):
+
+    def __init__(self, parent, sig_bar_update, label, text, thread_index):
+        """
+        Handles the process of the progress bar
+
+        :param sig_bar_update: signal to emit to update the progress bar value
+        :param label: label into which write the text
+        :param thread_index: this thread's index
+        :param parent: parent
+        """
+        QThread.__init__(self, parent)
+        self.sig_bar_update = sig_bar_update
+        self.label = label
+        self.thread_index = thread_index
+
+        self.parent = parent
+
+        self.label.setText(text)
+
+    def run(self):
+        self.sig_bar_update.emit(PROGRESS_BAR_MAX)
+
+        for i in range(PROGRESS_BAR_MAX):
+            # Stop condition
+            if self.thread_index != self.parent.get_last_thread():
+                self.sig_bar_update.emit(PROGRESS_BAR_MAX)
+                return
+
+            self.sig_bar_update.emit(PROGRESS_BAR_MAX - i)
+
+            sleep(0.01)
+
+        self.sig_bar_update.emit(PROGRESS_BAR_MAX)
+        self.label.setText("")
