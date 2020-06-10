@@ -5,13 +5,15 @@
 # Execution frame
 #
 
-from PySide2.QtWidgets import QToolBar, QVBoxLayout, QHBoxLayout, QWidget, QSlider
-from PySide2.QtCore import Qt, Signal
+from PySide2.QtWidgets import QToolBar, QVBoxLayout, QHBoxLayout, QWidget, QPushButton
+from PySide2.QtCore import Qt
 
-from src.view.Editor import EditorFrame
+from src.view.EditorFrame import EditorFrame
+from src.view.RamFrame import RAMFrame
 from src.view.exec_frame_widgets.DigiruleCanvas import DRCanvas
 from src.view.exec_frame_widgets.DigiruleModelDropdown import DigiruleModelDropdown
 from src.view.exec_frame_widgets.OpenEditorButton import OpenEditorButton
+from src.view.exec_frame_widgets.OpenRamButton import OpenRamButton
 from src.view.exec_frame_widgets.StatusBar import StatusBar
 from src.view.exec_frame_widgets.SpeedSlider import SpeedSlider
 from src.view.style import style
@@ -42,7 +44,13 @@ class ExecutionFrame(QWidget):
         bottom_widget_height = 26
 
         self.editor_frame = EditorFrame()
-        self.editor_frame.on_close = lambda: self.show_editor_frame(False)
+        self.open_editor_btn = OpenEditorButton(self.editor_frame)
+        self.editor_frame.on_close = lambda: self.open_editor_btn.show_editor_frame(False)
+
+        self.ram_frame = RAMFrame()
+        self.open_ram_btn = OpenRamButton(self.ram_frame)
+        self.ram_frame.on_close = lambda: self.open_ram_btn.show_ram_frame(False)
+
         self.statusbar = StatusBar(window_width - sliderbar_width, bottom_widget_height)
         self.dr_canvas = DRCanvas(self.statusbar.sig_temp_message, window_width, self.current_digirule_model)
         self.slider = SpeedSlider(self.statusbar.sig_temp_message, sliderbar_width, bottom_widget_height)
@@ -60,8 +68,9 @@ class ExecutionFrame(QWidget):
         self.toolbar = QToolBar()
         self.toolbar.setFixedHeight(70)
 
-        self.open_editor_btn = OpenEditorButton(self.editor_frame)
         self.toolbar.addWidget(self.open_editor_btn)
+
+        self.toolbar.addWidget(self.open_ram_btn)
 
         self.toolbar.addSeparator()
         self.digimodel_dropdown = DigiruleModelDropdown(self.on_digimodel_dropdown_changed, self.current_digirule_model)
@@ -100,12 +109,6 @@ class ExecutionFrame(QWidget):
         self.setStyleSheet(style.get_stylesheet("common"))
 
     # --- Callbacks methods ---
-
-    def show_editor_frame(self, do_display):
-        """
-        Delegates the process to the editor's open/close button
-        """
-        self.open_editor_btn.show_editor_frame(do_display)
 
     def on_digimodel_dropdown_changed(self):
         """

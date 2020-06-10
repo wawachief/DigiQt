@@ -5,7 +5,7 @@ from threading import Thread
 
 from src.model.cpu import Cpu
 from src.model.assemble import Assemble
-from src.view.MainApp import ExecutionFrame
+from src.view.MainAppFrame import ExecutionFrame
 
 CONFIG_FILE_PATH = 'src/config.ini'
 
