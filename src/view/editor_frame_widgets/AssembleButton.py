@@ -27,5 +27,4 @@ class AssembleButton(QPushButton):
         """
         Method to reroute in the Editor in order to process the assemble operation event
         """
-        print("assemble")
         pass

@@ -48,11 +48,15 @@ class Controller(QObject):
         self.load_mode = False
         self.save_mode = False
         self.show_run_adr = True 
+        self.symbol_table, self.labels_table = None, None
 
         # Instanciate the view
         self.gui = ExecutionFrame(self.config, self.sig_config_changed)
         self.gui.dr_canvas.on_btn_power = self.do_quit
         self.gui.do_quit = self.do_quit
+
+        # Callbacks
+        self.gui.editor_frame.assemble_btn.on_assemble = self.assemble_click
 
         # Instanciate the CPU
         self.cpu = Cpu(self.config, self.sig_cpu_stopped)
@@ -324,3 +328,16 @@ class Controller(QObject):
             for j in range(start + 256, len(flash_memory)):
                 f.write(flash_memory[j])
     
+    def assemble_click(self):
+        text = self.gui.editor_frame.retrieve_text()
+        asm = Assemble(text,self.cpu.inst_dic)
+        res = asm.parse()
+        if res[0]:
+            # Compilation success
+            self.gui.statusbar.sig_temp_message.emit("Compilation Success. Occupation " + str(len(res[1])) + " / 252")
+            self.symbol_table, self.labels_table = res[2], res[3]
+            self.cpu.set_ram(res[1])
+        else:
+            # Compilation error
+            self.gui.statusbar.sig_persistent_message.emit(res[1])
+            self.symbol_table, self.labels_table = None, None

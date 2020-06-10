@@ -29,11 +29,10 @@ class OpenFileButton(QPushButton):
         """
         Shows a file chooser dialog
         """
-        print("click")
         dlg = QFileDialog()
         dlg.setWindowTitle("Choose a file to open")
         dlg.setFileMode(QFileDialog.AnyFile)
-        dlg.setNameFilter("Text files (*.txt);;ASM files (*.asm)")
+        dlg.setNameFilter("ASM files (*.asm);;Text files (*.txt)")
 
         if dlg.exec_():
             self.file_path = dlg.selectedFiles()[0]
