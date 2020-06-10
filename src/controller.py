@@ -337,6 +337,7 @@ class Controller(QObject):
             self.gui.statusbar.sig_temp_message.emit("Compilation Success. Occupation " + str(len(res[1])) + " / 252")
             self.symbol_table, self.labels_table = res[2], res[3]
             self.cpu.set_ram(res[1])
+            self.update_idle_leds()
         else:
             # Compilation error
             self.gui.statusbar.sig_persistent_message.emit(res[1])
