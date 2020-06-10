@@ -10,7 +10,7 @@ import src.assets_manager as assets_mgr
 
 
 class OpenFileButton(QPushButton):
-    def __init__(self):
+    def __init__(self, config):
         """
         Button handling the open file operation
         """
@@ -19,7 +19,7 @@ class OpenFileButton(QPushButton):
         self.setIcon(assets_mgr.get_icon("open_file"))
         self.setIconSize(assets_mgr.ICON_SIZE)
         self.setToolTip("Open File")
-        self.setStyleSheet('border: none; padding-left: 10px; background-color: #333333;')
+        self.setStyleSheet('border: none; padding-left: 10px; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
 
         self.clicked.connect(self.on_open)
 

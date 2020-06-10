@@ -11,7 +11,7 @@ import src.assets_manager as assets_mgr
 
 
 class OpenEditorButton(QPushButton):
-    def __init__(self, editor_frame):
+    def __init__(self, editor_frame, config):
         """
         Button handling the open/close operation of the editor frame
 
@@ -22,7 +22,7 @@ class OpenEditorButton(QPushButton):
         self.setIcon(assets_mgr.get_icon("open_editor"))
         self.setIconSize(assets_mgr.ICON_SIZE)
         self.setToolTip("Open Editor")
-        self.setStyleSheet('border: none; padding-left: 10px; background-color: #333333;')
+        self.setStyleSheet('border: none; padding-left: 10px; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
 
         self.editor_frame = editor_frame
 

@@ -19,7 +19,7 @@ class StatusBar(QFrame):
     sig_persistent_message = Signal(str)  # new statusbar persistent message signal
     sig_temp_message = Signal(str)  # new statusbar temporary message signal
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, config):
         """
         Custom widget for the execution frame's status bar
 
@@ -27,10 +27,13 @@ class StatusBar(QFrame):
         :type width: int
         :param height: to use as height for this label
         :type height: int
+        :param config: configuration file
         """
         QFrame.__init__(self)
 
         self.setFixedSize(width, height)
+
+        self.config = config
 
         self.label = QLabel()
         self.progressbar = QProgressBar()
@@ -93,8 +96,9 @@ class StatusBar(QFrame):
         """
         Sets the default style sheet
         """
-        self.label.setStyleSheet("padding-left: 1em; background-color: #585858; color: cyan;")
-        self.progressbar.setStyleSheet("QProgressBar::chunk {background-color: #585858}")
+        self.label.setStyleSheet("padding-left: 1em; background-color: " + self.config.get('colors', 'statusbar_bg') +
+                                 "; color: " + self.config.get('colors', 'statusbar_text') + ";")
+        self.progressbar.setStyleSheet("QProgressBar::chunk {background-color: "  + self.config.get('colors', 'progressbar_bg') + ";}")
 
 
 class ProgressBarThread(QThread):

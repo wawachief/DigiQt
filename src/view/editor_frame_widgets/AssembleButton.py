@@ -10,7 +10,7 @@ import src.assets_manager as assets_mgr
 
 
 class AssembleButton(QPushButton):
-    def __init__(self):
+    def __init__(self, config):
         """
         Button handling the assemble operation
         """
@@ -19,7 +19,7 @@ class AssembleButton(QPushButton):
         self.setIcon(assets_mgr.get_icon("assemble"))
         self.setIconSize(assets_mgr.ICON_SIZE)
         self.setToolTip("Assemble")
-        self.setStyleSheet('border: none; padding-left: 10px; background-color: #333333;')
+        self.setStyleSheet('border: none; padding-left: 10px; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
 
         self.clicked.connect(self.on_assemble)
 

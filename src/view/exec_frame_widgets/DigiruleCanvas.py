@@ -12,10 +12,6 @@ from PySide2.QtCore import QPoint, QRect
 from src.digirules.DigiruleInfo import DigiruleInfo
 
 
-TOP_ROW_LED_COLOR = "#FF0000"
-BOTTOM_ROW_LED_COLOR = "#00FF00"
-
-
 class DRCanvas(QLabel):
     led_states = {
         "topLed7": False,
@@ -38,7 +34,7 @@ class DRCanvas(QLabel):
         "runLed": False
     }
 
-    def __init__(self, sig_status, window_width, digirule_model):
+    def __init__(self, sig_status, window_width, digirule_model, config):
         """
         Canvas in witch is drawn the Digirule as well as its buttons
 
@@ -53,6 +49,7 @@ class DRCanvas(QLabel):
         """
         QLabel.__init__(self)
 
+        self.config = config
         self.sig_status = sig_status
 
         self.setFixedSize(window_width, 204)  # 1/4 of the original size
@@ -127,6 +124,9 @@ class DRCanvas(QLabel):
         """
         super().paintEvent(event)
 
+        top_color = self.config.get('colors', 'led_top_row')
+        bottom_color = self.config.get('colors', 'led_bottom_row')
+
         # LEDs
         painter = QPainter(self)
         pen = QPen()
@@ -135,7 +135,7 @@ class DRCanvas(QLabel):
         led_dico = self.digirule.get_led_positions_dic()
         for led in led_dico:
             if self.led_states[led_dico[led]]:  # LED active color
-                pen.setColor(QColor(TOP_ROW_LED_COLOR if "top" in led_dico[led] else BOTTOM_ROW_LED_COLOR))
+                pen.setColor(QColor(top_color if "top" in led_dico[led] else bottom_color))
             else:  # LED inactive color
                 pen.setColor(QColor("black"))
             painter.setPen(pen)

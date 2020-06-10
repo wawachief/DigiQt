@@ -18,22 +18,26 @@ class EditorFrame(QWidget):
 
     # --- Init methods ---
 
-    def __init__(self):
+    def __init__(self, config):
         """
         Editor frame. Contains a toolbar and an editor widget
+
+        :param config: application configuration file
         """
         QWidget.__init__(self)
 
         self.setWindowTitle("DigiQt - Assemble Editor")
         self.setMinimumSize(QSize(630, 500))
 
-        self.editor = CodeEditor()
+        self.config = config
+
+        self.editor = CodeEditor(config)
         self.editor.setMinimumSize(QSize(600, 430))
 
-        self.open_file_btn = OpenFileButton()
+        self.open_file_btn = OpenFileButton(config)
         self.open_file_btn.set_content = self.editor.setPlainText  # Reroute text set method directly to the text editor widget
 
-        self.assemble_btn = AssembleButton()
+        self.assemble_btn = AssembleButton(config)
 
         self._init_tool_bar()
         self._set_layout()
@@ -73,7 +77,8 @@ class EditorFrame(QWidget):
 
     def _set_stylesheet(self):
         self.toolbar.setStyleSheet(style.get_stylesheet("qtoolbar"))
-        self.editor.setStyleSheet("background-color: #505050; color: white")
+        self.editor.setStyleSheet("background-color: " + self.config.get('colors', 'editor_bg') +
+                                  "; color: " + self.config.get('colors', 'editor_text_default') + ";")
 
         # Execution Frame
         self.setStyleSheet(style.get_stylesheet("common"))

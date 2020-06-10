@@ -43,17 +43,17 @@ class ExecutionFrame(QWidget):
         sliderbar_width = 200
         bottom_widget_height = 26
 
-        self.editor_frame = EditorFrame()
-        self.open_editor_btn = OpenEditorButton(self.editor_frame)
+        self.editor_frame = EditorFrame(config)
+        self.open_editor_btn = OpenEditorButton(self.editor_frame, config)
         self.editor_frame.on_close = lambda: self.open_editor_btn.show_editor_frame(False)
 
         self.ram_frame = RAMFrame()
-        self.open_ram_btn = OpenRamButton(self.ram_frame)
+        self.open_ram_btn = OpenRamButton(self.ram_frame, config)
         self.ram_frame.on_close = lambda: self.open_ram_btn.show_ram_frame(False)
 
-        self.statusbar = StatusBar(window_width - sliderbar_width, bottom_widget_height)
-        self.dr_canvas = DRCanvas(self.statusbar.sig_temp_message, window_width, self.current_digirule_model)
-        self.slider = SpeedSlider(self.statusbar.sig_temp_message, sliderbar_width, bottom_widget_height)
+        self.statusbar = StatusBar(window_width - sliderbar_width, bottom_widget_height, config)
+        self.dr_canvas = DRCanvas(self.statusbar.sig_temp_message, window_width, self.current_digirule_model, config)
+        self.slider = SpeedSlider(self.statusbar.sig_temp_message, sliderbar_width, bottom_widget_height, config)
 
         self._init_tool_bar()
         self._set_layout()
@@ -127,4 +127,8 @@ class ExecutionFrame(QWidget):
         Event called upon a red-cross click
         """
         self.do_quit()
+
+        # Call the secondary frames close methods as well
+        self.editor_frame.on_close()
+        self.ram_frame.on_close()
         event.accept()

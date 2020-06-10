@@ -11,7 +11,7 @@ from PySide2.QtCore import Qt
 
 class SpeedSlider(QSlider):
 
-    def __init__(self, sig_status, width, height):
+    def __init__(self, sig_status, width, height, config):
         """
         Custom slider for the execution's speed selection
 
@@ -19,10 +19,13 @@ class SpeedSlider(QSlider):
         :type sig_status: Signal
         :param width:
         :param height:
+        :param config: configuration file
         """
         QSlider.__init__(self, Qt.Horizontal)
 
         self.sig_status = sig_status
+
+        self.config = config
 
         self.setMinimum(0)
         self.setMaximum(255)
@@ -30,7 +33,7 @@ class SpeedSlider(QSlider):
         self.setFixedSize(width, height)
         self.setToolTip("Execution speed")
 
-        self.setStyleSheet("border-left: 2px solid #333333; background-color: #585858;")
+        self.setStyleSheet("border-left: 2px solid #333333; background-color: " + self.config.get('colors', 'slider_bg') + ";")
 
         self.valueChanged.connect(self.value_changed)
 
