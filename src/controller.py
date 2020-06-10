@@ -5,6 +5,7 @@ from threading import Thread
 
 from src.model.cpu import Cpu
 from src.model.assemble import Assemble
+from src.debugger import Debug
 from src.view.MainAppFrame import ExecutionFrame
 
 CONFIG_FILE_PATH = 'src/config.ini'
@@ -29,6 +30,7 @@ class Controller(QObject):
     # Signals declarations
     sig_config_changed = Signal(str)
     sig_cpu_stopped = Signal(str)
+    sig_cpu_speed = Signal(str)
 
     def __init__(self):
         QObject.__init__(self)
@@ -36,6 +38,7 @@ class Controller(QObject):
         # signals configuration
         self.sig_config_changed.connect(self.on_config_changed)
         self.sig_cpu_stopped.connect(self.on_cpu_stopped)
+        self.sig_cpu_speed.connect(self.on_cpu_speed_chg)
 
         # Read configuration
         self.config = ConfigParser()
@@ -55,11 +58,15 @@ class Controller(QObject):
         self.gui.dr_canvas.on_btn_power = self.do_quit
         self.gui.do_quit = self.do_quit
 
+        # Instanciate the CPU
+        self.cpu = Cpu(self.config, self.sig_cpu_stopped, self.sig_cpu_speed)
+
+        # Instanciate the debugger
+        self.dbg = Debug(self.cpu, self.gui.ram_frame)
+
         # Callbacks
         self.gui.editor_frame.assemble_btn.on_assemble = self.assemble_click
-
-        # Instanciate the CPU
-        self.cpu = Cpu(self.config, self.sig_cpu_stopped)
+        self.gui.dr_canvas.on_btn_ram = self.do_view_ram
 
         # Sets idle mode by default
         self.set_idle_mode()
@@ -108,7 +115,10 @@ class Controller(QObject):
         # display on statusbar
         self.gui.statusbar.sig_persistent_message.emit("CPU stopped : " + exception)
 
-    
+    @Slot(str)
+    def on_cpu_speed_chg(self, new_speed):
+        # Speed changed, update the speed scale
+        self.gui.statusbar.sig_temp_message.emit("speed changed : " + new_speed)
     #
     # set modes
     #
@@ -296,6 +306,8 @@ class Controller(QObject):
         self.gui.close()
         print("Bye")
 
+    def do_view_ram(self):
+        self.dbg.view_ram(1) # hexmode
 
     #
     # Other methods
@@ -342,3 +354,4 @@ class Controller(QObject):
             # Compilation error
             self.gui.statusbar.sig_persistent_message.emit(res[1])
             self.symbol_table, self.labels_table = None, None
+    
