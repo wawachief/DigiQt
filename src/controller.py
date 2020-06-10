@@ -1,5 +1,5 @@
 from configparser import ConfigParser
-from PySide2.QtCore import Signal, Slot, QObject
+from PySide2.QtCore import Signal, Slot, QObject, QThread, QTimer, SIGNAL
 from time import sleep
 from threading import Thread
 
@@ -9,11 +9,26 @@ from src.view.MainApp import ExecutionFrame
 
 CONFIG_FILE_PATH = 'src/config.ini'
 
+class CpuThread(QThread):
+    """Calls ticks the CPU all the time when CPU is in run mode"""
+    def __init__(self, cpu, parent = None):
+        QThread.__init__(self, parent)
+        self.cpu = cpu
+        self.running = True
+
+    def run(self):
+        while self.running:
+            if self.cpu.run:
+                self.cpu.tick()
+                # 1 cyle every millisecond
+                # adjust speed with cpu.speed value
+                speed = 0.0001 * self.cpu.speed**2
+                sleep(speed)
+
 class Controller(QObject):
     # Signals declarations
     sig_config_changed = Signal(str)
     sig_cpu_stopped = Signal(str)
-    sig_cpu_tick  = Signal(bool)
 
     def __init__(self):
         QObject.__init__(self)
@@ -21,7 +36,6 @@ class Controller(QObject):
         # signals configuration
         self.sig_config_changed.connect(self.on_config_changed)
         self.sig_cpu_stopped.connect(self.on_cpu_stopped)
-        self.sig_cpu_tick.connect(self.on_cpu_tick)
 
         # Read configuration
         self.config = ConfigParser()
@@ -45,24 +59,25 @@ class Controller(QObject):
 
         # Sets idle mode by default
         self.set_idle_mode()
-
-        # Launch the main CPU thread
-        self.running = True
-        self.cpu_run_thread = Thread(target = self.run_cpu, args = (self.sig_cpu_tick, ))
-        self.cpu_run_thread.start()
     
-    #
-    # Run cpu thread
-    #
-    def run_cpu(self, tick_signal):
-        while self.running:
-            # update running LEDS
-            if self.cpu.run:
-                self.cpu.tick()
-                tick_signal.emit(True)
-                # 1 cyle every millisecond
-                speed = 0.0001 * self.cpu.speed**2
-                sleep(speed)
+        #
+        # Run cpu thread and UI update
+        #
+    
+        self.cpu_thread = CpuThread(self.cpu, parent = None)
+        self.cpu_thread.start()
+        self.ui_timer = QTimer(parent = self)
+        self.connect(self.ui_timer, SIGNAL('timeout()'), self.update_ui)
+        self.ui_timer.start(50)
+
+    def update_ui(self):
+        if self.cpu.run == True:
+            if self.show_run_adr:
+                if self.cpu.ram[self.cpu.REG_STATUS] & 4 ==0 :
+                    self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.pc], False)
+                else:
+                    self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.REG_ADDRLED], False)
+            self.gui.dr_canvas.set_row_state(False, self.cpu.ram[self.cpu.REG_DATALED], True)
 
     # 
     # Signals handling
@@ -89,14 +104,7 @@ class Controller(QObject):
         # display on statusbar
         self.gui.statusbar.set_status_message("CPU stopped : " + exception)
 
-    @Slot(bool)
-    def on_cpu_tick(self, b):
-        if self.show_run_adr:
-            if self.cpu.ram[self.cpu.REG_STATUS] & 4 ==0 :
-                self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.pc], False)
-            else:
-                self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.REG_ADDRLED], False)
-        self.gui.dr_canvas.set_row_state(False, self.cpu.ram[self.cpu.REG_DATALED], True)
+    
     #
     # set modes
     #
@@ -234,7 +242,6 @@ class Controller(QObject):
             self.cpu.ram[self.cpu.REG_BUTTON] = 2**btn
         else:
             self.cpu.ram[self.cpu.REG_BUTTON] = 0
-        print(btn, is_pressed)
     def cb_run_clear(self):
         """Button clear pressed in run mode"""
         pass
@@ -268,7 +275,7 @@ class Controller(QObject):
 
     def do_quit(self):
         # Kill the cpu thread and quit the app
-        self.running = False
+        self.cpu_thread.running = False
         sleep(0.1)
         self.gui.close()
         print("Bye")
