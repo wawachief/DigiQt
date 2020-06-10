@@ -8,7 +8,6 @@
 from PySide2.QtWidgets import QLabel, QFrame, QProgressBar, QVBoxLayout
 from PySide2.QtCore import Slot, Signal, QThread
 
-from threading import Thread
 from time import sleep
 
 PROGRESS_BAR_MAX = 200

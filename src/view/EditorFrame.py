@@ -10,6 +10,7 @@ from PySide2.QtCore import Qt, QSize
 
 from src.view.editor_frame_widgets.OpenFileButton import OpenFileButton
 from src.view.editor_frame_widgets.AssembleButton import AssembleButton
+from src.view.editor_frame_widgets.CodeEditor import CodeEditor
 from src.view.style import style
 
 
@@ -26,7 +27,7 @@ class EditorFrame(QWidget):
         self.setWindowTitle("DigiQt - Assemble Editor")
         self.setMinimumSize(QSize(630, 500))
 
-        self.editor = QPlainTextEdit()  # TODO temporary
+        self.editor = CodeEditor()
         self.editor.setMinimumSize(QSize(600, 430))
 
         self.open_file_btn = OpenFileButton()
