@@ -22,10 +22,10 @@ class RAMFrame(QWidget):
         QWidget.__init__(self)
 
         self.setWindowTitle("DigiQt - RAM")
-        self.setMinimumSize(QSize(630, 500))
+        self.setMinimumSize(QSize(350, 650))
 
         self.editor = QPlainTextEdit()  # TODO temporary
-        self.editor.setMinimumSize(QSize(600, 430))
+        self.editor.setMinimumSize(QSize(350, 650))
 
         self._set_layout()
         self._set_stylesheet()

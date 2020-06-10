@@ -17,7 +17,7 @@ class Debug(QObject):
         self.text_ram = ""
 
         # computes the current PC position
-        lpc = self.cpu.pc // 8 + 1
+        lpc = self.cpu.pc // 8
         if hexmode == 1 :
             cpc = self.cpu.pc % 8 * 3 + 5
             clen=2
@@ -26,20 +26,21 @@ class Debug(QObject):
             clen=3
         
         for l in range(32):
-            line = self.d2h(l*8, hexmode)+":  "
+            line = self.d2h(l*8, hexmode) + ":  "
             for c in range(8):
-                line += self.d2h(self.cpu.ram[l*8+c], hexmode)+" "
-            if l != 31:
-                line +="\n"
-            if l + 1 == lpc:
-                # mark the current PC position
-                line[cpc] = ">"
-                if len(line) > cpc+clen:
-                    line[cpc+clen] = "<"
+                line += self.d2h(self.cpu.ram[l*8+c], hexmode) + " "
+            # mark the current PC position
+            if l == lpc :
+                line = line[0:cpc-1] + "²" + line[cpc:cpc+clen] + "²" + line[cpc+clen+1:]
+            if l < 31:
+                line += "\n"
             self.text_ram += line
         
-        self.text_ram += "=" * len(line)
+        self.text_ram += "\n"
+        self.text_ram += "=" * len(line) + "\n"
+
         # Displays the registers values
+        
         self.text_ram += f"AC = {self.d2b(self.cpu.accu)} (dec : {str(self.cpu.accu)})\n"
         hexmode_str = "hex" if hexmode == 1 else "dec"
         self.text_ram += f"PC  =  {self.d2b(self.cpu.pc)} ({hexmode_str} : {self.d2h(self.cpu.pc, hexmode)})\n"
@@ -49,7 +50,7 @@ class Debug(QObject):
         self.text_ram += f"\nST  = {self.d2b(self.cpu.ram[self.cpu.REG_STATUS])}"
 
         # Update the RAM text field
-        self.ram_frame.set_ram_content(self.text-ram)
+        self.ram_frame.set_ram_content(self.text_ram)
 
     #
     # Conversion methods

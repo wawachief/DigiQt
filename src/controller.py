@@ -66,11 +66,11 @@ class Controller(QObject):
 
         # Callbacks
         self.gui.editor_frame.assemble_btn.on_assemble = self.assemble_click
-        self.gui.dr_canvas.on_btn_ram = self.do_view_ram
 
-        # Sets idle mode by default
+        # Sets the initial state
         self.set_idle_mode()
-    
+        self.do_view_ram()
+
         #
         # Run cpu thread and UI update
         #
@@ -108,10 +108,14 @@ class Controller(QObject):
         
         # Instanciate a new CPU
         self.cpu = Cpu(self.config, self.sig_cpu_stopped)
+        self.do_view_ram()
     
     @Slot(str)
     def on_cpu_stopped(self, exception):
         self.set_idle_mode()
+        self.idle_addr = self.cpu.pc
+        self.update_idle_leds()
+        self.do_view_ram()
         # display on statusbar
         self.gui.statusbar.sig_persistent_message.emit("CPU stopped : " + exception)
 
@@ -137,6 +141,7 @@ class Controller(QObject):
         self.gui.dr_canvas.on_btn_prev = self.cb_idle_prev
         self.gui.dr_canvas.on_btn_clear = self.cb_idle_clear
         self.gui.dr_canvas.on_d = self.cb_idle_dx
+        self.gui.dr_canvas.on_btn_ram = self.cb_idle_step
 
         # update the control leds
         self.gui.dr_canvas.set_running_leds(False)
@@ -154,6 +159,7 @@ class Controller(QObject):
         self.gui.dr_canvas.on_btn_prev = self.cb_run_prev
         self.gui.dr_canvas.on_btn_clear = self.cb_run_clear
         self.gui.dr_canvas.on_d = self.cb_run_dx
+        self.gui.dr_canvas.on_btn_ram = self.do_view_ram
 
         # update the control leds
         self.gui.dr_canvas.set_running_leds(True)
@@ -182,10 +188,13 @@ class Controller(QObject):
         """button in normal mode"""
         self.cpu.ram[self.idle_addr] = self.idle_data
         self.idle_addr = (self.idle_addr + 1) % 256
+        self.do_view_ram()
         self.update_idle_leds()
     def cb_idle_goto(self):
         """button in normal mode"""
         self.idle_addr = self.idle_data
+        self.cpu.set_pc(self.idle_addr)
+        self.do_view_ram()
         self.update_idle_leds()
     def cb_idle_run(self):
         """button in normal mode"""
@@ -224,14 +233,20 @@ class Controller(QObject):
         """Button clear pressed in clear mode"""
         self.gui.statusbar.sig_temp_message.emit("Memory clear")
         self.cpu.clear_ram()
+        self.do_view_ram()
         self.idle_addr = 0
+        self.cpu.pc = 0
         self.do_blink()
+        self.update_idle_leds()
+    def cb_idle_step(self):
+        self.cpu.tick()
+        self.idle_addr = self.cpu.pc
+        self.do_view_ram()
         self.update_idle_leds()
 
     #
     # run mode methods
     #
-
     def cb_run_load(self):
         """button in run mode"""
         pass
@@ -254,6 +269,7 @@ class Controller(QObject):
         self.set_idle_mode()
         self.idle_addr = self.cpu.pc
         self.gui.statusbar.sig_temp_message.emit("Leaving run mode")
+        self.do_view_ram()
         self.update_idle_leds()
     def cb_run_next(self):
         """button in run mode"""
@@ -270,6 +286,7 @@ class Controller(QObject):
     def cb_run_clear(self):
         """Button clear pressed in run mode"""
         self.gui.statusbar.sig_temp_message.emit("Don't clear memory while running !!")
+        self.do_view_ram()
         pass
 
     #
@@ -307,7 +324,7 @@ class Controller(QObject):
         print("Bye")
 
     def do_view_ram(self):
-        self.dbg.view_ram(1) # hexmode
+        self.dbg.view_ram(0) # decmode
 
     #
     # Other methods
@@ -324,6 +341,8 @@ class Controller(QObject):
         for j in range(start, start+256):
             new_ram.append(int(flash_memory[j][:-1]))
         self.cpu.set_ram(new_ram)
+        self.cpu.set_pc(0)
+        self.do_view_ram()
 
     def save_ram(self, i): 
         """ saves RAM to a program n°i on the flash memory"""
@@ -354,4 +373,6 @@ class Controller(QObject):
             # Compilation error
             self.gui.statusbar.sig_persistent_message.emit(res[1])
             self.symbol_table, self.labels_table = None, None
+        self.cpu.set_pc(0)
+        self.do_view_ram()
     
