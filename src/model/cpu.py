@@ -160,18 +160,28 @@ class Cpu(QObject):
         return True
     def inst_speed(self):
         self.speed = self.ram[self.pc + 1]
+        # send signal to the controler
         return True
     def inst_copylr(self):
         arg1 = self.ram[self.pc + 1] 
         arg2 = self.ram[self.pc + 2] 
         self.ram[arg2] = arg1
+        # Change of behaviour since 2A
+        if self.dr_model != "2A":
+            self.status_Z(arg1)
         return True
     def inst_copyla(self):
         self.accu = self.ram[self.pc + 1]
+        # Change of behaviour since 2A
+        if self.dr_model != "2A":
+            self.status_Z(self.accu)
         return True
     def inst_copyar(self):
         arg1 = self.ram[self.pc + 1] 
         self.ram[arg1] = self.accu
+        # Change of behaviour since 2A
+        if self.dr_model != "2A":
+            self.status_Z(self.accu)
         return True
     def inst_copyra(self):
         arg1 = self.ram[self.pc + 1] 
@@ -183,6 +193,41 @@ class Cpu(QObject):
         arg2 = self.ram[self.pc + 2] 
         self.ram[arg2] = self.ram[arg1]
         self.status_Z(self.ram[arg1])
+        return True
+    # indirect copy
+    def inst_copyli(self):
+        arg1 = self.ram[self.pc + 1] 
+        arg2 = self.ram[self.pc + 2] 
+        self.ram[self.ram[arg2]] = arg1
+        self.status_Z(arg1)
+        return True
+    def inst_copyai(self):
+        arg1 = self.ram[self.pc + 1] 
+        self.ram[self.ram[arg1]] = self.accu
+        self.status_Z(self.accu)
+        return True
+    def inst_copyia(self):
+        arg1 = self.ram[self.pc + 1] 
+        self.accu = self.ram[self.ram[arg1]]
+        self.status_Z(self.accu)
+        return True
+    def inst_copyri(self):
+        arg1 = self.ram[self.pc + 1] 
+        arg2 = self.ram[self.pc + 2] 
+        self.ram[self.ram[arg2]] = self.ram[arg1]
+        self.status_Z(self.ram[arg1])
+        return True
+    def inst_copyir(self):
+        arg1 = self.ram[self.pc + 1] 
+        arg2 = self.ram[self.pc + 2] 
+        self.ram[arg2] = self.ram[self.ram[arg1]]
+        self.status_Z(self.ram[arg2])
+        return True
+    def inst_copyii(self):
+        arg1 = self.ram[self.pc + 1] 
+        arg2 = self.ram[self.pc + 2] 
+        self.ram[self.ram[arg2]] = self.ram[self.ram[arg1]]
+        self.status_Z(self.ram[self.ram[arg2]])
         return True
     def inst_addla(self):
         arg1 = self.ram[self.pc + 1]
@@ -341,6 +386,17 @@ class Cpu(QObject):
     #
     # 2U instructions
     #
+
+    # Indirect jumps
+    def inst_jumpi(self):
+        arg1 = self.ram[self.pc + 1]
+        self.set_pc(self.ram[arg1])
+        return False
+    def inst_calli(self):
+        arg1 = self.ram[self.pc + 1]
+        self.stack_in(self.pc + 2)
+        self.set_pc(self.ram[arg1])
+        return False
     def inst_swapra(self):
         arg1 = self.ram[self.pc + 1]
         self.accu, self.ram[arg1] = self.ram[arg1], self.accu
@@ -353,7 +409,8 @@ class Cpu(QObject):
     def inst_mul(self):                  # on entry arg1 = @multiplicand and arg2 = m@ultiplier; 
         arg1 = self.ram[self.pc + 1]     # on exit arg1 = @product
         arg2 = self.ram[self.pc + 2]
-        self.ram[arg1] = self.ram[arg1] * self.ram[arg2]
+        self.ram[arg1] *= self.ram[arg2]
+        self.status_Z(self.ram[arg1])
         return True
     def inst_div(self):                  # on entry arg1 = @dividend and arg2 = @divisor; 
         arg1 = self.ram[self.pc + 1]     # on exit arg1 = @quotient and accumulator = remainder
@@ -364,6 +421,7 @@ class Cpu(QObject):
         else:
             self.ram[arg1] = dividend // divisor
             self.accu = dividend % divisor
+            self.status_Z(self.ram[arg1])
         return True
     #
     # USB instructions
@@ -379,41 +437,8 @@ class Cpu(QObject):
         else:
             self.status_Z(1)             # if a character is available, clears the zeroflag
         return True
-    #
-    # 2B experimental instructions
-    #
-    def inst_copyli(self):
-        arg1 = self.ram[self.pc + 1] 
-        arg2 = self.ram[self.pc + 2] 
-        self.ram[self.ram[arg2]] = arg1
-        return True
-    def inst_copyai(self):
-        arg1 = self.ram[self.pc + 1] 
-        self.ram[self.ram[arg1]] = self.accu
-        return True
-    def inst_copyia(self):
-        arg1 = self.ram[self.pc + 1] 
-        self.accu = self.ram[self.ram[arg1]]
-        self.status_Z(self.accu)
-        return True
-    def inst_copyri(self):
-        arg1 = self.ram[self.pc + 1] 
-        arg2 = self.ram[self.pc + 2] 
-        self.ram[self.ram[arg2]] = self.ram[arg1]
-        self.status_Z(self.ram[arg1])
-        return True
-    def inst_copyir(self):
-        arg1 = self.ram[self.pc + 1] 
-        arg2 = self.ram[self.pc + 2] 
-        self.ram[arg2] = self.ram[self.ram[arg1]]
-        self.status_Z(self.ram[arg2])
-        return True
-    def inst_copyii(self):
-        arg1 = self.ram[self.pc + 1] 
-        arg2 = self.ram[self.pc + 2] 
-        self.ram[self.ram[arg2]] = self.ram[self.ram[arg1]]
-        self.status_Z(self.ram[self.ram[arg2]])
-        return True
+    
+    # Unused instructions
     def inst_shiftar(self):
         carry = 1 if self.ram[self.REG_STATUS] & 2 else 0 # gets the previous Carry bit on the status register
         if self.accu % 2 == 1:                            # if odd value => raises a new Carry
@@ -430,15 +455,8 @@ class Cpu(QObject):
         if self.status_C(self.accu):
             self.accu -= 256
         return True
-    def inst_jumpi(self):
-        arg1 = self.ram[self.pc + 1]
-        self.set_pc(self.ram[arg1])
-        return False
-    def inst_calli(self):
-        arg1 = self.ram[self.pc + 1]
-        self.stack_in(self.pc + 2)
-        self.set_pc(self.ram[arg1])
-        return False
+
+    # Software stack
     def inst_sspush(self):
         if self.ssp >= self.sstack_size:
         	self.do_halt("Software Stack Overflow")
