@@ -14,9 +14,10 @@ from importlib import import_module
 from random import randint
 
 class Cpu(QObject):
-    def __init__(self, config, sig_cpu_stopped = None):
+    def __init__(self, config, sig_cpu_stopped = None, sig_cpu_speed = None):
         QObject.__init__(self)
         self.sig_cpu_stopped = sig_cpu_stopped
+        self.sig_cpu_speed = sig_cpu_speed
 
         # Read digirule configuration
         self.dr_model     = config.get('digirule', 'DR_MODEL')
@@ -161,6 +162,7 @@ class Cpu(QObject):
     def inst_speed(self):
         self.speed = self.ram[self.pc + 1]
         # send signal to the controler
+        self.sig_cpu_speed.emit(str(self.speed))
         return True
     def inst_copylr(self):
         arg1 = self.ram[self.pc + 1] 
