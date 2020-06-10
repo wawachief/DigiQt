@@ -102,7 +102,7 @@ class Controller(QObject):
     def on_cpu_stopped(self, exception):
         self.set_idle_mode()
         # display on statusbar
-        self.gui.statusbar.set_status_message("CPU stopped : " + exception)
+        self.gui.statusbar.sig_temp_message.emit("CPU stopped : " + exception)
 
     
     #
@@ -207,6 +207,7 @@ class Controller(QObject):
         self.idle_addr = 0
         self.do_blink()
         self.update_idle_leds()
+        self.gui.statusbar.sig_temp_message.emit("Memory cleared")
 
     #
     # run mode methods

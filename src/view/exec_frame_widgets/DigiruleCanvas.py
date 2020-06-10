@@ -38,7 +38,7 @@ class DRCanvas(QLabel):
         "runLed": False
     }
 
-    def __init__(self, parent_frame, sig_status, window_width, digirule_model):
+    def __init__(self, sig_status, window_width, digirule_model):
         """
         Canvas in witch is drawn the Digirule as well as its buttons
 
@@ -53,7 +53,6 @@ class DRCanvas(QLabel):
         """
         QLabel.__init__(self)
 
-        self.exec_frame = parent_frame
         self.sig_status = sig_status
 
         self.setFixedSize(window_width, 204)  # 1/4 of the original size

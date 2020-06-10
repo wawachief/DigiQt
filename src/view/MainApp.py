@@ -19,8 +19,6 @@ from src.view.style import style
 
 class ExecutionFrame(QWidget):
 
-    sig_status_message = Signal(str)  # new statusbar message signal
-
     # --- Init methods ---
 
     def __init__(self, config, sig_update_config):
@@ -43,16 +41,16 @@ class ExecutionFrame(QWidget):
         sliderbar_width = 200
         bottom_widget_height = 26
 
-        self.editor_frame = EditorFrame(self)
-        self.dr_canvas = DRCanvas(self, self.sig_status_message, window_width, self.current_digirule_model)
+        self.editor_frame = EditorFrame()
+        self.editor_frame.on_close = lambda: self.show_editor_frame(False)
         self.statusbar = StatusBar(window_width - sliderbar_width, bottom_widget_height)
-        self.slider = SpeedSlider(self.sig_status_message, sliderbar_width, bottom_widget_height)
+        self.dr_canvas = DRCanvas(self.statusbar.sig_temp_message, window_width, self.current_digirule_model)
+        self.slider = SpeedSlider(self.statusbar.sig_temp_message, sliderbar_width, bottom_widget_height)
 
         self._init_tool_bar()
         self._set_layout()
         self._set_stylesheets()
 
-        self.sig_status_message.connect(self.statusbar.display_for_4_sec)
         self.sig_update_config = sig_update_config
 
     def _init_tool_bar(self):
@@ -120,6 +118,7 @@ class ExecutionFrame(QWidget):
     # --- Close handler ---
     def do_quit(self):
         pass
+
     def closeEvent(self, event):
         """
         Event called upon a red-cross click

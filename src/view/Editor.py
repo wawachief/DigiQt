@@ -17,19 +17,14 @@ class EditorFrame(QWidget):
 
     # --- Init methods ---
 
-    def __init__(self, parent_frame):
+    def __init__(self):
         """
         Editor frame. Contains a toolbar and an editor widget
-
-        :param parent_frame: Main application frame (the execution frame)
-        :type parent_frame: ExecutionFrame
         """
         QWidget.__init__(self)
 
         self.setWindowTitle("DigiQt - Assemble Editor")
         self.setMinimumSize(QSize(630, 500))
-
-        self.exec_frame = parent_frame
 
         self.editor = QPlainTextEdit()  # TODO temporary
         self.editor.setMinimumSize(QSize(600, 430))
@@ -96,7 +91,12 @@ class EditorFrame(QWidget):
     def closeEvent(self, event):
         """
         Event called upon a red-cross click.
-
-        Updates the execution frame's open editor icon and tooltip
         """
-        self.exec_frame.show_editor_frame(False)
+        self.on_close()
+
+    def on_close(self):
+        """
+        Reroot this method in the Main Frame in order to Updates the execution frame's open editor icon and tooltip
+        :return:
+        """
+        pass
