@@ -49,7 +49,7 @@ class Cpu(QObject):
 
         # Building lookup table to access functions by opcodes
         # format : lookupTable [opcode] --> function
-        self.lookup_table = [self.inst_illegal] * 256
+        self.lookup_table = [[self.inst_illegal, "illegal", 0] for _ in range(256)]
         for inst in self.inst_dic :
             opcode  = self.inst_dic[inst]["code"]
             opcount = self.inst_dic[inst]["operandCount"]
@@ -65,15 +65,18 @@ class Cpu(QObject):
         # Decode
         execute, inst, opcount = self.lookup_table [opcode]
         self.decoded_inst = inst
-        for i in range(opcount):
-            self.decoded_inst += " " + str(self.ram[self.pc + 1 + i])
-        # Execute
-        inc_pc = execute()
-        # increment Program Counter
-        if inc_pc:
-            # each instruction returns True if PC is to be incremented, False otherwise
-            # jump functions will deal with PC themselves
-            self.set_pc(self.pc + 1 + opcount)
+        if self.pc + opcount > 255:
+            self.do_halt("Illegal RAM access")
+        else:
+            for i in range(opcount):
+                self.decoded_inst += " " + str(self.ram[self.pc + 1 + i])
+            # Execute
+            inc_pc = execute()
+            # increment Program Counter
+            if inc_pc:
+                # each instruction returns True if PC is to be incremented, False otherwise
+                # jump functions will deal with PC themselves
+                self.set_pc(self.pc + 1 + opcount)
 
     def set_pc(self, new_pc):
         """Changes Program Counter"""

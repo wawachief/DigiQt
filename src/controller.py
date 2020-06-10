@@ -102,7 +102,7 @@ class Controller(QObject):
     def on_cpu_stopped(self, exception):
         self.set_idle_mode()
         # display on statusbar
-        self.gui.statusbar.sig_temp_message.emit("CPU stopped : " + exception)
+        self.gui.statusbar.sig_persistent_message.emit("CPU stopped : " + exception)
 
     
     #
@@ -176,6 +176,7 @@ class Controller(QObject):
     def cb_idle_run(self):
         """button in normal mode"""
         self.cpu.pc = self.idle_addr
+        self.gui.statusbar.sig_temp_message.emit("Entering run mode")
         self.set_run_mode()
     def cb_idle_next(self):
         """button in normal mode"""
@@ -183,8 +184,12 @@ class Controller(QObject):
         self.update_idle_leds()
     def cb_idle_prev(self):
         """button in normal mode"""
-        self.idle_addr = (self.idle_addr - 1) % 256
-        self.update_idle_leds()
+        if self.load_mode:
+            self.cb_idle_clear()
+            self.load_mode = False
+        else:
+            self.idle_addr = (self.idle_addr - 1) % 256
+            self.update_idle_leds()
     def cb_idle_dx(self, btn, is_pressed):
         """Button Dx pressed in idle mode"""
         if is_pressed:
@@ -203,11 +208,11 @@ class Controller(QObject):
                 self.gui.dr_canvas.set_row_state(False, self.idle_data, True)
     def cb_idle_clear(self):
         """Button clear pressed in clear mode"""
+        self.gui.statusbar.sig_temp_message.emit("Memory clear")
         self.cpu.clear_ram()
         self.idle_addr = 0
         self.do_blink()
         self.update_idle_leds()
-        self.gui.statusbar.sig_temp_message.emit("Memory cleared")
 
     #
     # run mode methods
@@ -226,10 +231,15 @@ class Controller(QObject):
         """button in run mode"""
         self.gui.dr_canvas.set_row_state(True, 0, False)
         self.show_run_adr = not self.show_run_adr
+        if self.show_run_adr :
+            self.gui.statusbar.sig_temp_message.emit("Show Address LEDs")
+        else:
+            self.gui.statusbar.sig_temp_message.emit("Hide Address LEDs")
     def cb_run_run(self):
         """button in run mode"""
         self.set_idle_mode()
         self.idle_addr = self.cpu.pc
+        self.gui.statusbar.sig_temp_message.emit("Leaving run mode")
         self.update_idle_leds()
     def cb_run_next(self):
         """button in run mode"""
@@ -245,6 +255,7 @@ class Controller(QObject):
             self.cpu.ram[self.cpu.REG_BUTTON] = 0
     def cb_run_clear(self):
         """Button clear pressed in run mode"""
+        self.gui.statusbar.sig_temp_message.emit("Don't clear memory while running !!")
         pass
 
     #
@@ -288,6 +299,8 @@ class Controller(QObject):
 
     def load_ram(self, i):   
         """loads a program (n°i) to the RAM from the flash memory """
+
+        self.gui.statusbar.sig_temp_message.emit("Loading program "+str(i))
         with open('src/flash_memory.txt', 'r', encoding='utf-8') as f:
             flash_memory = f.readlines() 
         start = 256*i # where the program n°i starts in the flash memory
@@ -298,6 +311,8 @@ class Controller(QObject):
 
     def save_ram(self, i): 
         """ saves RAM to a program n°i on the flash memory"""
+
+        self.gui.statusbar.sig_temp_message.emit("Saving program "+str(i))
         with open('flash_memory.txt', 'r', encoding='utf-8') as f:
             flash_memory = f.readlines() 
         start = 256*i # where the program n°i starts in the flash memory
