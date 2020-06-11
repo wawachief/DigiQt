@@ -1,7 +1,28 @@
 import serial
 import serial.tools.list_ports as list_ports
-from PySide2.QtCore import QObject
+from PySide2.QtCore import QObject, QThread
 from time import sleep
+
+class InitSerialThread(QThread):
+    """Initialize the serial port in background"""
+    def __init__(self, parent):
+        QThread.__init__(self, parent)
+        self.parent = parent
+
+        # Serial port configuration
+        self.port      = parent.config.get("serial","port")
+        self.baudrate  = int(parent.config.get("serial","baudrate"))
+        self.timeout   = float(parent.config.get("serial","TIMEOUT"))
+
+    def run(self):
+        list_available_ports =  [p.device for p in list_ports.comports()]
+        if self.port in list_available_ports:
+            self.parent.ser_port = serial.Serial(timeout=self.timeout)
+            self.parent.ser_port.baudrate = self.baudrate
+            self.parent.ser_port.port = self.port
+            self.parent.init_OK()
+        else:
+            self.parent.ser_port = None
 
 class SerialControl(QObject):
     def __init__(self, cpu, monitor_frame, statusbar, config):
@@ -11,25 +32,21 @@ class SerialControl(QObject):
         self.monitor   = monitor_frame
         self.statusbar = statusbar
         self.config    = config
-
-        # Serial port configuration
-        port      = config.get("serial","port")
-        baudrate  = config.get("serial","baudrate")
-        timeout   = config.get("serial","TIMEOUT")
-        list_available_ports =  [p.device for p in list_ports.comports()]
-        print(list_available_ports)
-        if port in list_available_ports:
-            self.ser_port = serial.Serial(timeout=timeout)
-            self.ser_port.baudrate = baudrate
-            self.ser_port.port = port
-        else:
-            self.ser_port = None
+        self.ser_port  = None
+        self.init_serial()
         
+    def init_serial(self):
+        is_thread = InitSerialThread(self)
+        is_thread.start()
+
+    def init_OK(self):
+        self.statusbar.sig_temp_message.emit("Serial port Initialized")
+
     def to_digirule(self):
         if self.ser_port is None:
             self.statusbar.sig_temp_message.emit("Error : No serial port configured")
         else:
-            dump = ram2hex(self.cpu.ram)
+            dump = self.ram2hex(self.cpu.ram)
             self.statusbar.sig_temp_message.emit("Dumpimg memory on port " + self.ser_port.port)
             try:
                 self.ser_port.open()

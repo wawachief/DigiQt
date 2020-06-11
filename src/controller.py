@@ -1,7 +1,6 @@
 from configparser import ConfigParser
 from PySide2.QtCore import Signal, Slot, QObject, QThread, QTimer, SIGNAL
 from time import sleep
-from threading import Thread
 
 from src.model.cpu import Cpu
 from src.model.assemble import Assemble
