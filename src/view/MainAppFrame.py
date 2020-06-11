@@ -55,6 +55,7 @@ class ExecutionFrame(QWidget):
         self.dr_canvas = DRCanvas(self.statusbar.sig_temp_message, window_width, self.current_digirule_model, config)
         self.slider = SpeedSlider(sliderbar_width, bottom_widget_height, config)
 
+        # TODO : Instanciate a serial monitor view
         self.monitor_frame = None
 
         self._init_tool_bar()

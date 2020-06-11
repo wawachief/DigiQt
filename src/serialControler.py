@@ -1,47 +1,47 @@
 import serial
 import serial.tools.list_ports as list_ports
 from PySide2.QtCore import QObject
-
-TIMEOUT = 0.1 # TODO : move into config
+from time import sleep
 
 class SerialControl(QObject):
     def __init__(self, cpu, monitor_frame, statusbar, config):
         QObject.__init__(self)
 
-        self.cpu = cpu
-        self.monitor = monitor_frame
+        self.cpu       = cpu
+        self.monitor   = monitor_frame
         self.statusbar = statusbar
-        self.config = config
+        self.config    = config
 
-    def comport(self, baud, port=""):
-        ''' return a serial port '''
-        ser_port = serial.Serial(timeout=TIMEOUT)
-        ser_port.baudrate = baud
-        if port != "":
-            ser_port.port = port
+        # Serial port configuration
+        port      = config.get("serial","port")
+        baudrate  = config.get("serial","baudrate")
+        timeout   = config.get("serial","TIMEOUT")
+        list_available_ports =  [p.device for p in list_ports.comports()]
+        print(list_available_ports)
+        if port in list_available_ports:
+            self.ser_port = serial.Serial(timeout=timeout)
+            self.ser_port.baudrate = baudrate
+            self.ser_port.port = port
         else:
-            ports = list_ports.comports()
-            serial_devices = ""
-            for i,p in enumerate(ports):
-                serial_devices += str(i) + " : " + p.device + "\n"
-            # print(len(ports), 'ports found')
-            if len(ports)>1:
-                # Multiple adapters detected, ask the user
-                serial_devices += "\nEnter the number of the device connected to Digirule"
-                answer = simpledialog.askstring("Choose your Serial adapter", serial_devices,
-                                        parent=mainWindow)
-                try:
-                    ser_port.port = ports[int(answer)].device
-                except:
-                    ser_port.port = ports[0].device
-            elif len(ports) == 1:
-                # We choose the only adapter present
-                    ser_port.port = ports[0].device
+            self.ser_port = None
+        
+    def to_digirule(self):
+        if self.ser_port is None:
+            self.statusbar.sig_temp_message.emit("Error : No serial port configured")
+        else:
+            dump = ram2hex(self.cpu.ram)
+            self.statusbar.sig_temp_message.emit("Dumpimg memory on port " + self.ser_port.port)
+            try:
+                self.ser_port.open()
+            except serial.serialutil.SerialException as ex:
+                self.statusbar.sig_temp_message.emit(ex)
             else:
-                # No serial port detected
-                messagebox.showerror("Error", "No serial adapter detected")
-                return None
-        return ser_port
+                for line in dump.splitlines():
+                    self.ser_port.write(line.encode("utf-8"))
+                    sleep(0.1)
+                sleep(2)
+                self.ser_port.close()
+                self.statusbar.sig_temp_message.emit("Memory sent")
 
     def ram2hex(self, ram):
         """converts the content of the ram into hex format"""

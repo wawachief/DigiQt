@@ -48,8 +48,8 @@ class Controller(QObject):
         # Read configuration
         self.config = ConfigParser()
         self.config.read(CONFIG_FILE_PATH)
-        dr_model = self.config.get('digirule', 'DR_MODEL')
-        
+        self.dr_model = self.config.get('digirule', 'DR_MODEL')
+
         # Controller attributes
         self.idle_data = 0
         self.idle_addr = 0
@@ -66,14 +66,8 @@ class Controller(QObject):
         self.gui.dr_canvas.on_btn_power = self.do_quit
         self.gui.do_quit = self.do_quit
 
-        # Instanciate the CPU
-        self.cpu = Cpu(self.config, self.sig_cpu_stopped, self.sig_cpu_speed)
-
-        # Instanciate the debugger
-        self.dbg = Debug(self.cpu, self.gui.ram_frame)
-
-        # Instantiate the serial controler
-        self.serialctl = SerialControl(self.cpu, self.gui.monitor_frame, self.gui.statusbar, self.config)
+        self.cpu = None
+        self.init_state()
 
         # Callbacks
         self.gui.editor_frame.assemble_btn.on_assemble = self.assemble_click
@@ -81,50 +75,69 @@ class Controller(QObject):
 
         # Sets the initial state
         self.set_idle_mode()
-        self.do_view_ram()
-        self.gui.editor_frame.editor.highlight.init_rules(self.cpu.inst_dic)
 
-        #
-        # Run cpu thread and UI update
-        #
-    
-        self.cpu_thread = CpuThread(self.cpu, parent = None)
-        self.cpu_thread.start()
+        # run UI update timer
         self.ui_timer = QTimer(parent = self)
         self.connect(self.ui_timer, SIGNAL('timeout()'), self.update_ui)
         self.ui_timer.start(50) # ui refresh every 50 ms
+
+    def init_state(self):
+        """Instantiate the main compnents
+        must be called when digirule changes"""
+        
+        # Instanciate the CPU
+        self.cpu = Cpu(self.config, self.sig_cpu_stopped, self.sig_cpu_speed)
+        #
+        # Run cpu thread and UI update
+        #
+        self.cpu_thread = CpuThread(self.cpu, parent = None)
+        self.cpu_thread.start()
+
+        # Instanciate the debugger
+        self.dbg = Debug(self.cpu, self.gui.ram_frame)
+
+        # change attribute in editor for coloration
+        self.gui.editor_frame.editor.highlight.init_rules(self.cpu.inst_dic)
+        self.do_view_ram()
+
+        # Instantiate the serial controler
+        if self.dr_model == "2U":
+            self.serialctl = SerialControl(self.cpu, self.gui.monitor_frame, self.gui.statusbar, self.config)
+        else:
+            self.serialctl = None
 
     def update_ui(self):
         """This method is responsible for updating the UI in run mode and
         for the animations in idle mode.
         Is is called every 50 ms by a timer"""
-        if self.cpu.run == True:
-            # we are in run mode, we handle the LEDs
-            if self.show_run_adr:
-                if self.cpu.ram[self.cpu.REG_STATUS] & 4 ==0 :
-                    self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.pc], False)
-                else:
-                    self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.REG_ADDRLED], False)
-            self.gui.dr_canvas.set_row_state(False, self.cpu.ram[self.cpu.REG_DATALED], True)
-            self.do_view_ram()
-        else:
-            # we are in idle mode, we handle the animations
-            if self.anim_boot != 0:
-                # Animation clear memory
-                if self.anim_boot % 2 ==0:
-                    self.do_blink()
-                self.anim_boot -= 1
-                if self.anim_boot == 1:
-                    # end animation
-                    self.update_idle_leds()
-            if self.anim_adrLED != 0:
-                # Animation de la barre de LED
-                if self.anim_adrLED % 2 ==0:
-                    self.do_progress()
-                self.anim_adrLED -= 1
-                if self.anim_adrLED == 1:
-                    # end animation
-                    self.update_idle_leds()
+        if self.cpu is not None:
+            if self.cpu.run == True:
+                # we are in run mode, we handle the LEDs
+                if self.show_run_adr:
+                    if self.cpu.ram[self.cpu.REG_STATUS] & 4 ==0 :
+                        self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.pc], False)
+                    else:
+                        self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.REG_ADDRLED], False)
+                self.gui.dr_canvas.set_row_state(False, self.cpu.ram[self.cpu.REG_DATALED], True)
+                self.do_view_ram()
+            else:
+                # we are in idle mode, we handle the animations
+                if self.anim_boot != 0:
+                    # Animation clear memory
+                    if self.anim_boot % 2 ==0:
+                        self.do_blink()
+                    self.anim_boot -= 1
+                    if self.anim_boot == 1:
+                        # end animation
+                        self.update_idle_leds()
+                if self.anim_adrLED != 0:
+                    # Animation de la barre de LED
+                    if self.anim_adrLED % 2 ==0:
+                        self.do_progress()
+                    self.anim_adrLED -= 1
+                    if self.anim_adrLED == 1:
+                        # end animation
+                        self.update_idle_leds()
 
     # 
     # Signals handling
@@ -137,16 +150,18 @@ class Controller(QObject):
 
         :param new_value: new digirule model value
         """
+        if self.cpu is not None:
+            # Stops the old CPU
+            self.cpu_thread.running = False
+            sleep(0.01)
         self.config.set('digirule', 'DR_MODEL', new_value)
+        self.dr_model = new_value
 
         with open(CONFIG_FILE_PATH, 'w') as configfile:
             self.config.write(configfile)
         
-        # Instanciate a new CPU
-        self.cpu = Cpu(self.config, self.sig_cpu_stopped)
-        # change attribute in editor for coloration
-        self.gui.editor_frame.editor.highlight.init_rules(self.cpu.inst_dic)
-        self.do_view_ram()
+        # Reinstatiate CPU and all the important stuff
+        self.init_state()
     
     @Slot(str)
     def on_cpu_stopped(self, exception):
@@ -251,9 +266,16 @@ class Controller(QObject):
         self.set_run_mode()
     def cb_idle_next(self):
         """button in normal mode"""
-        self.idle_addr = (self.idle_addr + 1) % 256
-        self.cpu.pc = self.idle_addr
-        self.update_idle_leds()
+        if self.save_mode:
+            self.save_mode = False
+            if self.serialctl is None:
+                self.gui.statusbar.sig_temp_message.emit("No serial capability on this model")
+            else:
+                self.serialctl.to_digirule()
+        else:
+            self.idle_addr = (self.idle_addr + 1) % 256
+            self.cpu.pc = self.idle_addr
+            self.update_idle_leds()
     def cb_idle_prev(self):
         """button in normal mode"""
         if self.load_mode:
