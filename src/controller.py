@@ -69,6 +69,7 @@ class Controller(QObject):
 
         # Callbacks
         self.gui.editor_frame.assemble_btn.on_assemble = self.assemble_click
+        self.gui.slider.value_changed = self.on_speedslider_change
 
         # Sets the initial state
         self.set_idle_mode()
@@ -96,6 +97,7 @@ class Controller(QObject):
                 else:
                     self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.REG_ADDRLED], False)
             self.gui.dr_canvas.set_row_state(False, self.cpu.ram[self.cpu.REG_DATALED], True)
+            self.do_view_ram()
         else:
             # we are in idle mode, we handle the animations
             if self.anim_boot != 0:
@@ -148,7 +150,17 @@ class Controller(QObject):
     @Slot(str)
     def on_cpu_speed_chg(self, new_speed):
         # Speed changed, update the speed scale
-        self.gui.statusbar.sig_temp_message.emit("speed changed : " + new_speed)
+        self.gui.statusbar.sig_temp_message.emit("Change CPU speed : " + new_speed)
+        self.gui.slider.setValue(int(new_speed))
+    
+    #
+    # other events methods
+    #
+    def on_speedslider_change(self):
+        """speed slider ha changed"""
+        self.cpu.speed = self.gui.slider.value()
+        self.gui.statusbar.sig_temp_message.emit("Change CPU speed : " + str(self.cpu.speed))
+
     #
     # set modes
     #

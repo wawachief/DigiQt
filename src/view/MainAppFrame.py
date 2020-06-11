@@ -53,7 +53,7 @@ class ExecutionFrame(QWidget):
 
         self.statusbar = StatusBar(window_width - sliderbar_width, bottom_widget_height, config)
         self.dr_canvas = DRCanvas(self.statusbar.sig_temp_message, window_width, self.current_digirule_model, config)
-        self.slider = SpeedSlider(self.statusbar.sig_temp_message, sliderbar_width, bottom_widget_height, config)
+        self.slider = SpeedSlider(sliderbar_width, bottom_widget_height, config)
 
         self._init_tool_bar()
         self._set_layout()
