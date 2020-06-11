@@ -1,6 +1,6 @@
 import serial
 import serial.tools.list_ports as list_ports
-
+from PySide2.QtCore import QObject
 
 TIMEOUT = 0.1 # TODO : move into config
 

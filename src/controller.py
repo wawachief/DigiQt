@@ -82,6 +82,7 @@ class Controller(QObject):
         # Sets the initial state
         self.set_idle_mode()
         self.do_view_ram()
+        self.gui.editor_frame.editor.highlight.init_rules(self.cpu.inst_dic)
 
         #
         # Run cpu thread and UI update
@@ -143,7 +144,8 @@ class Controller(QObject):
         
         # Instanciate a new CPU
         self.cpu = Cpu(self.config, self.sig_cpu_stopped)
-        # TODO : change attribute in editor for coloration
+        # change attribute in editor for coloration
+        self.gui.editor_frame.editor.highlight.init_rules(self.cpu.inst_dic)
         self.do_view_ram()
     
     @Slot(str)
