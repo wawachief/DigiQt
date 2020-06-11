@@ -36,7 +36,7 @@ class ExecutionFrame(QWidget):
         app_version = self.config.get('main', 'APP_VERSION')
         self.setWindowTitle("DigiQt - Emulator for Digirule - " + str(app_version))
         window_width = int(self.config.get('main', 'WINDOW_WIDTH'))
-        self.setFixedSize(window_width, 340)
+        self.setFixedSize(window_width, 320)
 
         self.current_digirule_model = self.config.get('digirule', 'DR_MODEL')
 
@@ -88,8 +88,6 @@ class ExecutionFrame(QWidget):
 
         box.addWidget(self.dr_canvas)
         box.setAlignment(self.dr_canvas, Qt.AlignTop)
-
-        box.addSpacing(20)
 
         bottom_box = QHBoxLayout()
         bottom_box.setContentsMargins(0, 0, 0, 0)
