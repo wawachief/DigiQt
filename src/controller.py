@@ -12,19 +12,23 @@ CONFIG_FILE_PATH = 'src/config.ini'
 
 class CpuThread(QThread):
     """Calls ticks the CPU all the time when CPU is in run mode"""
-    def __init__(self, cpu, parent = None):
+    def __init__(self, cpu, speed_fact=20, parent = None):
         QThread.__init__(self, parent)
-        self.cpu = cpu
-        self.running = True
+        self.cpu        = cpu
+        self.running    = True
+        self.inst_timer = 0
+        self.speed_factor = speed_fact
 
     def run(self):
         while self.running:
             if self.cpu.run:
-                self.cpu.tick()
-                # 1 cyle every millisecond
+                if self.inst_timer >= self.cpu.speed * self.speed_factor :
+                    self.cpu.tick()
+                    self.inst_timer = 0
+                # 50000 cycles per second in speed 0 configuration
                 # adjust speed with cpu.speed value
-                speed = 0.0001 * self.cpu.speed**2
-                sleep(speed)
+                sleep(0.00001)
+                self.inst_timer += 1
 
 class Controller(QObject):
     # Signals declarations
@@ -83,7 +87,7 @@ class Controller(QObject):
         self.cpu_thread.start()
         self.ui_timer = QTimer(parent = self)
         self.connect(self.ui_timer, SIGNAL('timeout()'), self.update_ui)
-        self.ui_timer.start(50)
+        self.ui_timer.start(50) # ui refresh every 50 ms
 
     def update_ui(self):
         """This method is responsible for updating the UI in run mode and
