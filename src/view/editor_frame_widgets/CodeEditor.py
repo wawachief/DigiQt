@@ -41,6 +41,7 @@ class CodeEditor(QPlainTextEdit):
         self.config = config
         self.line_number_area = LineNumberArea(self)
         self.highlight = AssembleHighlighter(self.document(), config)
+        self.setLineWrapMode(QPlainTextEdit.NoWrap)
 
         # default widget Signals binding
         self.blockCountChanged.connect(self.update_line_number_area_width)
