@@ -24,8 +24,48 @@ class InitSerialThread(QThread):
         else:
             self.parent.ser_port = None
 
+class FromDigiruleThread(QThread):
+    """Receive memory dump from Digirule"""
+    def __init__(self, parent):
+        QThread.__init__(self, parent)
+        self.parent = parent
+        self.running = True
+
+    def run(self):
+        try:
+            self.parent.ser_port.open()
+        except serial.serialutil.SerialException as ex:
+            self.parent.statusbar.sig_temp_message.emit(ex)
+        else:
+            # Serial port is open
+            while (self.parent.ser_port.in_waiting == 0) and self.running:
+                # Wait for incoming transmission
+                pass
+            if self.running:
+                self.parent.cpu.run = False
+                self.parent.statusbar.sig_temp_message.emit("Digirule is transmitting")
+                listdump = self.parent.ser_port.readlines()
+                hexdump = ""
+                # Decoding hexdump
+                for line in listdump:
+                    hexdump += line.decode('utf-8')
+                try:
+                    newram = self.parent.hex2ram(hexdump)
+                except ValueError:
+                    self.parent.statusbar.sig_temp_message.emit("Checksum error")
+                else:
+                    # Ram is received and no checksum error
+                    # writing newram in RAM
+                    self.parent.statusbar.sig_temp_message.emit("Memory received")
+                    for i,r in enumerate(newram):
+                        self.parent.cpu.ram[i] = r
+                    self.parent.sig_update.emit("from digirule complete")
+            else:
+                self.parent.statusbar.sig_temp_message.emit("Abort receive")
+            self.parent.ser_port.close()
+
 class SerialControl(QObject):
-    def __init__(self, cpu, monitor_frame, statusbar, config):
+    def __init__(self, cpu, monitor_frame, statusbar, config, sig_update):
         QObject.__init__(self)
 
         self.cpu       = cpu
@@ -34,6 +74,8 @@ class SerialControl(QObject):
         self.config    = config
         self.ser_port  = None
         self.init_serial()
+        self.sig_update = sig_update
+        self.fd_thread = None
         
     def init_serial(self):
         is_thread = InitSerialThread(self)
@@ -59,6 +101,14 @@ class SerialControl(QObject):
                 sleep(2)
                 self.ser_port.close()
                 self.statusbar.sig_temp_message.emit("Memory sent")
+
+    def from_digirule(self):
+        """Lanch receive sequence in background"""
+        if self.ser_port:
+            self.fd_thread = FromDigiruleThread(self)
+            self.fd_thread.start()
+        else:
+            self.update()
 
     def ram2hex(self, ram):
         """converts the content of the ram into hex format"""

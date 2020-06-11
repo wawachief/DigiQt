@@ -35,6 +35,7 @@ class Controller(QObject):
     sig_config_changed = Signal(str)
     sig_cpu_stopped = Signal(str)
     sig_cpu_speed = Signal(str)
+    sig_ram_update = Signal(str)
 
     def __init__(self):
         QObject.__init__(self)
@@ -43,6 +44,7 @@ class Controller(QObject):
         self.sig_config_changed.connect(self.on_config_changed)
         self.sig_cpu_stopped.connect(self.on_cpu_stopped)
         self.sig_cpu_speed.connect(self.on_cpu_speed_chg)
+        self.sig_ram_update.connect(self.update_idle_leds)
 
         # Read configuration
         self.config = ConfigParser()
@@ -101,7 +103,8 @@ class Controller(QObject):
 
         # Instantiate the serial controler
         if self.dr_model == "2U":
-            self.serialctl = SerialControl(self.cpu, self.gui.monitor_frame, self.gui.statusbar, self.config)
+            self.serialctl = SerialControl(self.cpu, self.gui.monitor_frame, 
+                self.gui.statusbar, self.config, self.sig_ram_update)
         else:
             self.serialctl = None
 
@@ -167,7 +170,6 @@ class Controller(QObject):
         self.set_idle_mode()
         self.idle_addr = self.cpu.pc
         self.update_idle_leds()
-        self.do_view_ram()
         # display on statusbar
         self.gui.statusbar.sig_persistent_message.emit("CPU stopped : " + exception)
 
@@ -234,7 +236,7 @@ class Controller(QObject):
     #
     # idle mode methods
     #
-    def update_idle_leds(self):
+    def update_idle_leds(self, arg=""):
         self.idle_data = self.cpu.ram[self.idle_addr]
         self.gui.dr_canvas.set_row_state(True, self.idle_addr, False)
         self.gui.dr_canvas.set_row_state(False, self.idle_data, True)
@@ -265,7 +267,18 @@ class Controller(QObject):
         self.set_run_mode()
     def cb_idle_next(self):
         """button in normal mode"""
-        if self.save_mode:
+        if self.load_mode:
+            # Load from Digirule
+            self.load_mode = False
+            if self.serialctl is None:
+                self.gui.statusbar.sig_temp_message.emit("No serial capability on this model")
+            else:
+                # Switch LEDS
+                self.gui.dr_canvas.set_row_state(True, 0, False)
+                self.gui.dr_canvas.set_row_state(False, 128, True)
+                self.serialctl.from_digirule()
+        elif self.save_mode:
+            # Save to Digirule
             self.save_mode = False
             if self.serialctl is None:
                 self.gui.statusbar.sig_temp_message.emit("No serial capability on this model")
@@ -309,6 +322,9 @@ class Controller(QObject):
         self.cpu.pc = 0
         self.anim_boot = 40
         self.update_idle_leds()
+        if self.serialctl and self.serialctl.fd_thread:
+            # Kill the From Digirule thread if there is one
+            self.serialctl.fd_thread.running = False
     def cb_idle_step(self):
         """step by step button. Cycle the cpu once"""
         self.cpu.tick()
