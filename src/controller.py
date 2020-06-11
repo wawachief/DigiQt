@@ -69,6 +69,7 @@ class Controller(QObject):
 
         # Callbacks
         self.gui.editor_frame.assemble_btn.on_assemble = self.assemble_click
+        self.gui.slider.value_changed = self.on_speedslider_change
 
         # Sets the initial state
         self.set_idle_mode()
@@ -96,14 +97,23 @@ class Controller(QObject):
                 else:
                     self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.REG_ADDRLED], False)
             self.gui.dr_canvas.set_row_state(False, self.cpu.ram[self.cpu.REG_DATALED], True)
+            self.do_view_ram()
         else:
             # we are in idle mode, we handle the animations
             if self.anim_boot != 0:
-                # Animation au boot
+                # Animation clear memory
                 if self.anim_boot % 2 ==0:
                     self.do_blink()
                 self.anim_boot -= 1
                 if self.anim_boot == 1:
+                    # end animation
+                    self.update_idle_leds()
+            if self.anim_adrLED != 0:
+                # Animation de la barre de LED
+                if self.anim_adrLED % 2 ==0:
+                    self.do_progress()
+                self.anim_adrLED -= 1
+                if self.anim_adrLED == 1:
                     # end animation
                     self.update_idle_leds()
 
@@ -125,6 +135,7 @@ class Controller(QObject):
         
         # Instanciate a new CPU
         self.cpu = Cpu(self.config, self.sig_cpu_stopped)
+        # TODO : change attribute in editor for coloration
         self.do_view_ram()
     
     @Slot(str)
@@ -139,7 +150,17 @@ class Controller(QObject):
     @Slot(str)
     def on_cpu_speed_chg(self, new_speed):
         # Speed changed, update the speed scale
-        self.gui.statusbar.sig_temp_message.emit("speed changed : " + new_speed)
+        self.gui.statusbar.sig_temp_message.emit("Change CPU speed : " + new_speed)
+        self.gui.slider.setValue(int(new_speed))
+    
+    #
+    # other events methods
+    #
+    def on_speedslider_change(self):
+        """speed slider ha changed"""
+        self.cpu.speed = self.gui.slider.value()
+        self.gui.statusbar.sig_temp_message.emit("Change CPU speed : " + str(self.cpu.speed))
+
     #
     # set modes
     #
@@ -193,36 +214,35 @@ class Controller(QObject):
         self.idle_data = self.cpu.ram[self.idle_addr]
         self.gui.dr_canvas.set_row_state(True, self.idle_addr, False)
         self.gui.dr_canvas.set_row_state(False, self.idle_data, True)
+        self.do_view_ram()
     def cb_idle_load(self):
         """button in normal mode"""
         self.save_mode = False
         self.load_mode = True
-        self.do_progress()
+        self.anim_adrLED = 16
     def cb_idle_save(self):
         """button in normal mode"""
         self.save_mode = True
         self.load_mode = False
-        self.do_progress()
+        self.anim_adrLED = 16
     def cb_idle_store(self):
         """button in normal mode"""
         self.cpu.ram[self.idle_addr] = self.idle_data
         self.idle_addr = (self.idle_addr + 1) % 256
-        self.do_view_ram()
         self.update_idle_leds()
     def cb_idle_goto(self):
         """button in normal mode"""
         self.idle_addr = self.idle_data
         self.cpu.set_pc(self.idle_addr)
-        self.do_view_ram()
         self.update_idle_leds()
     def cb_idle_run(self):
         """button in normal mode"""
-        self.cpu.pc = self.idle_addr
         self.gui.statusbar.sig_temp_message.emit("Entering run mode")
         self.set_run_mode()
     def cb_idle_next(self):
         """button in normal mode"""
         self.idle_addr = (self.idle_addr + 1) % 256
+        self.cpu.pc = self.idle_addr
         self.update_idle_leds()
     def cb_idle_prev(self):
         """button in normal mode"""
@@ -231,6 +251,7 @@ class Controller(QObject):
             self.load_mode = False
         else:
             self.idle_addr = (self.idle_addr - 1) % 256
+            self.cpu.pc = self.idle_addr
             self.update_idle_leds()
     def cb_idle_dx(self, btn, is_pressed):
         """Button Dx pressed in idle mode"""
@@ -261,7 +282,8 @@ class Controller(QObject):
         """step by step button. Cycle the cpu once"""
         self.cpu.tick()
         self.idle_addr = self.cpu.pc
-        self.do_view_ram()
+        instruction = self.cpu.decode(self.idle_addr, self.symbol_table)
+        self.gui.statusbar.sig_persistent_message.emit(instruction)
         self.update_idle_leds()
 
     #
@@ -328,11 +350,9 @@ class Controller(QObject):
         """
         make a progress bar with the data_leds
         """
-        n = 0
-        for i in range(8):
-            n = 2*n + 1
-            self.gui.dr_canvas.set_row_state(False, n)
-            sleep(.1)
+        n = 10 - self.anim_adrLED//2
+        n = max(1, 2**n - 1)
+        self.gui.dr_canvas.set_row_state(False, n)
 
     def do_quit(self):
         # Kill the cpu thread and quit the app
@@ -360,13 +380,14 @@ class Controller(QObject):
             new_ram.append(int(flash_memory[j][:-1]))
         self.cpu.set_ram(new_ram)
         self.cpu.set_pc(0)
+        self.symbol_table = None
         self.do_view_ram()
 
     def save_ram(self, i): 
         """ saves RAM to a program n°i on the flash memory"""
 
         self.gui.statusbar.sig_temp_message.emit("Saving program "+str(i))
-        with open('flash_memory.txt', 'r', encoding='utf-8') as f:
+        with open('src/flash_memory.txt', 'r', encoding='utf-8') as f:
             flash_memory = f.readlines() 
         start = 256*i # where the program n°i starts in the flash memory
         with open('src/flash_memory.txt', 'w', encoding='utf-8') as f:
