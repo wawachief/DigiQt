@@ -443,6 +443,9 @@ class Controller(QObject):
             # Compilation error
             self.gui.statusbar.sig_persistent_message.emit(res[1])
             self.symbol_table, self.labels_table = None, None
+
+            # Select current line in editor
+            self.gui.editor_frame.editor.goto_line(res[2])
         self.cpu.set_pc(0)
         self.do_view_ram()
     
