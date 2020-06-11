@@ -6,7 +6,7 @@
 #
 
 from PySide2.QtWidgets import QWidget, QPlainTextEdit, QTextEdit
-from PySide2.QtGui import QColor, QTextFormat, QPainter, QSyntaxHighlighter, QTextCharFormat, QFont
+from PySide2.QtGui import QColor, QTextFormat, QPainter, QSyntaxHighlighter, QTextCharFormat, QFont, QTextCursor
 from PySide2.QtCore import QRect, Slot, Qt, QSize, QRegExp
 
 import re
@@ -87,6 +87,16 @@ class CodeEditor(QPlainTextEdit):
         QPlainTextEdit.resizeEvent(self, event)
         cr = self.contentsRect()
         self.line_number_area.setGeometry(QRect(cr.left(), cr.top(), self.get_line_number_area_width(), cr.height()))
+
+    def goto_line(self, line_nb):
+        """
+        Sets the cursor position at the end of the specified line
+        :param line_nb: line number to go to
+        """
+        cursor = QTextCursor(self.document().findBlockByLineNumber(line_nb - 1))  # Line numbers starts at 0
+        cursor.movePosition(QTextCursor.EndOfLine)
+        self.setTextCursor(cursor)
+
 
     @Slot(int)
     def update_line_number_area_width(self, new_bock_count):
