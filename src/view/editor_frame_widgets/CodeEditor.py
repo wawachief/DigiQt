@@ -9,6 +9,8 @@ from PySide2.QtWidgets import QWidget, QPlainTextEdit, QTextEdit
 from PySide2.QtGui import QColor, QTextFormat, QPainter, QSyntaxHighlighter, QTextCharFormat, QFont
 from PySide2.QtCore import QRect, Slot, Qt, QSize, QRegExp
 
+import re
+
 
 class LineNumberArea(QWidget):
     def __init__(self, editor):
@@ -125,6 +127,45 @@ class CodeEditor(QPlainTextEdit):
         if rect.contains(self.viewport().rect()):
             self.blockCountChanged.emit(0)
 
+    def keyPressEvent(self, e):
+        super().keyPressEvent(e)
+
+        if e.key() in (Qt.Key_Return, Qt.Key_Enter):
+            self.auto_indent()
+
+    def auto_indent(self):
+        """
+        Handles the indent operation
+        """
+        lines = self.toPlainText().split("\n")
+        new_line_nb = self.textCursor().blockNumber()
+
+        previous_line = lines[new_line_nb - 1]
+        spaces = self.get_leading_space(previous_line)
+
+        if self.leads_with_label(previous_line):
+            spaces += 4
+
+        self.insertPlainText(" " * spaces)
+
+    def get_leading_space(self, text):
+        """
+        Gets the number of leading whitespaces of the previous line
+        :param text: text to analyze
+        :return: number of leading blank spaces
+        :rtype: int
+        """
+        return [(m.start(), m.end() - m.start()) for m in re.finditer(r'^\s*', text)][0][1]
+
+    def leads_with_label(self, text):
+        """
+        Checks if the specified texts starts with a leading label.
+
+        :param text: text to analyze
+        :return: True if a label leads the line
+        :rtype: bool
+        """
+        return len([(m.start(), m.end() - m.start()) for m in re.finditer(r'(^\s*:\w+)', text)]) > 0
 
 class AssembleHighlighter(QSyntaxHighlighter):
 
