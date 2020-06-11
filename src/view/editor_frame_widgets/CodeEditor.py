@@ -6,8 +6,8 @@
 #
 
 from PySide2.QtWidgets import QWidget, QPlainTextEdit, QTextEdit
-from PySide2.QtGui import QColor, QTextFormat, QPainter
-from PySide2.QtCore import QRect, Slot, Qt, QSize
+from PySide2.QtGui import QColor, QTextFormat, QPainter, QSyntaxHighlighter, QTextCharFormat, QFont
+from PySide2.QtCore import QRect, Slot, Qt, QSize, QRegExp
 
 
 class LineNumberArea(QWidget):
@@ -38,6 +38,7 @@ class CodeEditor(QPlainTextEdit):
 
         self.config = config
         self.line_number_area = LineNumberArea(self)
+        self.highlight = AssembleHighlighter(self.document(), config)
 
         # default widget Signals binding
         self.blockCountChanged.connect(self.update_line_number_area_width)
@@ -123,3 +124,100 @@ class CodeEditor(QPlainTextEdit):
             self.line_number_area.update(0, rect.y(), self.line_number_area.width(), rect.height())
         if rect.contains(self.viewport().rect()):
             self.blockCountChanged.emit(0)
+
+
+class AssembleHighlighter(QSyntaxHighlighter):
+
+    def __init__(self, document, config):
+        """
+        Handles the syntax highlighting for assemble language
+        :param document: QPlaintTextEdit's document to format
+        """
+        QSyntaxHighlighter.__init__(self, document)
+
+        self.styles = {
+            'keyword': self.get_format(config.get('colors', 'asm_keywords')),
+            'comment': self.get_format(config.get('colors', 'asm_comments')),
+            'label': self.get_format(config.get('colors', 'asm_labels'), 'italic'),
+            'directive': self.get_format(config.get('colors', 'asm_directives')),
+            'numbers': self.get_format(config.get('colors', 'asm_numbers'), 'bold')
+        }
+
+        self.rules = []
+        self.init_rules([])  # Initialization with no keywords
+
+    # --- Coloration ---
+    def get_format(self, color, style=''):
+        """
+        Returns a QTextCharFormat with the given attributes
+        :param color:
+        :param style:
+        :return:
+        """
+        c = QColor()
+        c.setNamedColor(color)
+
+        f = QTextCharFormat()
+        f.setForeground(c)
+
+        if 'bold' in style:
+            f.setFontWeight(QFont.Bold)
+
+        if 'italic' in style:
+            f.setFontItalic(True)
+
+        return f
+
+    def init_rules(self, assemble_keywords):
+        """
+        Builds the language rules
+
+        :param assemble_keywords: keywords of the language
+        """
+        rules = []
+
+        # Keywords
+        rules += [(r'\b%s\b' % w, 0, self.styles['keyword']) for w in assemble_keywords]
+
+        # Numeric literals
+        rules += [
+            (r'\b[0-9]+\b', 0, self.styles['numbers']),
+            (r'\b0[xX][0-9A-Fa-f]+\b', 0, self.styles['numbers']),
+            (r'\b0[bB][0-1]+\b', 0, self.styles['numbers'])
+        ]
+
+        # Comments
+        rules += [
+            (r'//[^\n]*', 0, self.styles['comment'])
+        ]
+
+        # Labels
+        rules += [
+            (r'(^\s*:\w+)', 0, self.styles['label'])
+        ]
+
+        # Directives
+        rules += [
+            (r'(^\s*%define\b|^\s*%data\b)', 0, self.styles['directive'])
+        ]
+
+        # Build QRegExp for the above patterns
+        self.rules = [(QRegExp(pattern), index, f) for (pattern, index, f) in rules]
+
+    def highlightBlock(self, text):
+        """
+        Performs the highlight operation
+        :param text: text to format
+        """
+        # For each rules...
+        for expression, nth, f in self.rules:
+            # ...we look for matches
+            index = expression.indexIn(text.lower(), 0)
+            while index >= 0:
+                # We actually want the index of the nth match
+                index = expression.pos(nth)
+                length = len(expression.cap(nth))
+                self.setFormat(index, length, f)  # Format and color the text
+                index = expression.indexIn(text.lower(), index + length)  # update index for next iteration
+
+        self.setCurrentBlockState(0)

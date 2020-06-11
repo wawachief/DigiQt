@@ -5,7 +5,7 @@
 # Edition frame
 #
 
-from PySide2.QtWidgets import QToolBar, QVBoxLayout, QWidget, QPlainTextEdit
+from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget
 from PySide2.QtCore import Qt, QSize
 
 from src.view.editor_frame_widgets.OpenFileButton import OpenFileButton
@@ -59,14 +59,12 @@ class EditorFrame(QWidget):
         """
         Creates this Widget's Layout
         """
-        box = QVBoxLayout()
+        box = QGridLayout()
         box.setContentsMargins(0, 0, 0, 0)
 
-        box.addWidget(self.toolbar)
-        box.setAlignment(self.toolbar, Qt.AlignTop)
+        box.addWidget(self.toolbar, 0, 0)
 
-        box.addWidget(self.editor)
-        box.setAlignment(self.editor, Qt.AlignTop)
+        box.addWidget(self.editor, 1, 0)
 
         self.setLayout(box)
 
@@ -78,7 +76,7 @@ class EditorFrame(QWidget):
     def _set_stylesheet(self):
         self.toolbar.setStyleSheet(style.get_stylesheet("qtoolbar"))
         self.editor.setStyleSheet("background-color: " + self.config.get('colors', 'editor_bg') +
-                                  "; color: " + self.config.get('colors', 'editor_text_default') + ";")
+                                  "; color: " + self.config.get('colors', 'asm_text_default') + ";")
 
         # Execution Frame
         self.setStyleSheet(style.get_stylesheet("common"))
