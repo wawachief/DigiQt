@@ -35,7 +35,7 @@ class Cpu(QObject):
         self.tx   = None       # Byte to send of None
         self.run    = False    # Run mode flag
         self.speed  = 0        # speed attribute changed by the speed instruction
-        self.decoded_inst = "" 
+        # self.decoded_inst = "" 
         self.exception    = ""
 
         # Special RAM addresses
@@ -64,13 +64,13 @@ class Cpu(QObject):
         # Fetch
         opcode = self.ram[self.pc]
         # Decode
-        execute, inst, opcount = self.lookup_table [opcode]
-        self.decoded_inst = inst
+        execute, _, opcount = self.lookup_table [opcode]
+        # self.decoded_inst = inst
         if self.pc + opcount > 255:
             self.do_halt("Illegal RAM access")
         else:
-            for i in range(opcount):
-                self.decoded_inst += " " + str(self.ram[self.pc + 1 + i])
+            # for i in range(opcount):
+            #     self.decoded_inst += " " + str(self.ram[self.pc + 1 + i])
             # Execute
             inc_pc = execute()
             # increment Program Counter
@@ -78,6 +78,23 @@ class Cpu(QObject):
                 # each instruction returns True if PC is to be incremented, False otherwise
                 # jump functions will deal with PC themselves
                 self.set_pc(self.pc + 1 + opcount)
+    
+    def decode(self, addr, symbols = None):
+        """desassemble instruction at address addr
+        try to resolve parameters usin assembler symbol table"""
+        _, inst, opcount = self.lookup_table [self.ram[addr]]
+        for i in range(opcount):
+            # try to resolve the parameter in the symbol table
+            param = self.ram[addr + 1 + i]
+            if not ((i == 0 and inst[-2] == 'l' and inst != "call") or inst == "speed"):
+                # dont resolve litteral parameters
+                if symbols:
+                    for key in symbols:
+                        if symbols[key] == param:
+                            param = key
+                            break
+            inst += " " + str(param)
+        return inst
 
     def set_pc(self, new_pc):
         """Changes Program Counter"""
