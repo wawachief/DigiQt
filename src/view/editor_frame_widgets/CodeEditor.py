@@ -204,6 +204,9 @@ class AssembleHighlighter(QSyntaxHighlighter):
         # Build QRegExp for the above patterns
         self.rules = [(QRegExp(pattern), index, f) for (pattern, index, f) in rules]
 
+        # Update all
+        self.rehighlight()
+
     def highlightBlock(self, text):
         """
         Performs the highlight operation
