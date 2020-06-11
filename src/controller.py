@@ -52,6 +52,9 @@ class Controller(QObject):
         self.save_mode = False
         self.show_run_adr = True 
         self.symbol_table, self.labels_table = None, None
+        # Animation attributes
+        self.anim_boot   = 0   # boot animation
+        self.anim_adrLED = 0   # LED address animation
 
         # Instanciate the view
         self.gui = ExecutionFrame(self.config, self.sig_config_changed)
@@ -82,13 +85,27 @@ class Controller(QObject):
         self.ui_timer.start(50)
 
     def update_ui(self):
+        """This method is responsible for updating the UI in run mode and
+        for the animations in idle mode.
+        Is is called every 50 ms by a timer"""
         if self.cpu.run == True:
+            # we are in run mode, we handle the LEDs
             if self.show_run_adr:
                 if self.cpu.ram[self.cpu.REG_STATUS] & 4 ==0 :
                     self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.pc], False)
                 else:
                     self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.REG_ADDRLED], False)
             self.gui.dr_canvas.set_row_state(False, self.cpu.ram[self.cpu.REG_DATALED], True)
+        else:
+            # we are in idle mode, we handle the animations
+            if self.anim_boot != 0:
+                # Animation au boot
+                if self.anim_boot % 2 ==0:
+                    self.do_blink()
+                self.anim_boot -= 1
+                if self.anim_boot == 1:
+                    # end animation
+                    self.update_idle_leds()
 
     # 
     # Signals handling
@@ -128,6 +145,7 @@ class Controller(QObject):
     #
 
     def set_idle_mode(self):
+        """The digirule enters idle mode. We reconfigure all the calbacks methods"""
         # Stop the CPU
         self.cpu.run = False
 
@@ -149,6 +167,7 @@ class Controller(QObject):
 
 
     def set_run_mode(self):
+        """The digirule enters run mode. We reconfigure all the calbacks methods"""
         # configure the callbacks to the normal mode
         self.gui.dr_canvas.on_btn_load = self.cb_run_load
         self.gui.dr_canvas.on_btn_save = self.cb_run_save
@@ -236,9 +255,10 @@ class Controller(QObject):
         self.do_view_ram()
         self.idle_addr = 0
         self.cpu.pc = 0
-        self.do_blink()
+        self.anim_boot = 40
         self.update_idle_leds()
     def cb_idle_step(self):
+        """step by step button. Cycle the cpu once"""
         self.cpu.tick()
         self.idle_addr = self.cpu.pc
         self.do_view_ram()
@@ -300,11 +320,9 @@ class Controller(QObject):
         85 represents 01010101
         170 represents 10101010
         """
-        for i in range(1, 20):
-            # self.set_running_leds(i % 2 != 0, False)  # Don't repaint yet
-            self.gui.dr_canvas.set_row_state(True, 170 if i % 2 == 0 else 85, False)  # Don't repaint yet
-            self.gui.dr_canvas.set_row_state(False, 85 if i % 2 == 0 else 170)
-            sleep(.08)
+        # self.set_running_leds(i % 2 != 0, False)  # Don't repaint yet
+        self.gui.dr_canvas.set_row_state(True, 170 if (self.anim_boot//2) % 2 == 0 else 85, False)  # Don't repaint yet
+        self.gui.dr_canvas.set_row_state(False, 85 if (self.anim_boot//2) % 2 == 0 else 170)
 
     def do_progress(self):
         """
