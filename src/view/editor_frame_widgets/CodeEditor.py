@@ -6,8 +6,8 @@
 #
 
 from PySide2.QtWidgets import QWidget, QPlainTextEdit, QTextEdit
-from PySide2.QtGui import QColor, QTextFormat, QPainter
-from PySide2.QtCore import QRect, Slot, Qt, QSize
+from PySide2.QtGui import QColor, QTextFormat, QPainter, QSyntaxHighlighter, QTextCharFormat, QFont
+from PySide2.QtCore import QRect, Slot, Qt, QSize, QRegExp
 
 
 class LineNumberArea(QWidget):
@@ -38,6 +38,7 @@ class CodeEditor(QPlainTextEdit):
 
         self.config = config
         self.line_number_area = LineNumberArea(self)
+        self.highlight = AssembleHighlighter(self.document())
 
         # default widget Signals binding
         self.blockCountChanged.connect(self.update_line_number_area_width)
@@ -123,3 +124,75 @@ class CodeEditor(QPlainTextEdit):
             self.line_number_area.update(0, rect.y(), self.line_number_area.width(), rect.height())
         if rect.contains(self.viewport().rect()):
             self.blockCountChanged.emit(0)
+
+
+class AssembleHighlighter(QSyntaxHighlighter):
+
+    def __init__(self, document):
+        """
+        Handles the syntax highlighting for assemble language
+        :param document: QPlaintTextEdit's document to format
+        """
+        QSyntaxHighlighter.__init__(self, document)
+
+        # Build the language's rules
+        rules = []
+
+        # Numeric literals
+        rules += [
+            (r'\b[0-9]+\b', 0, STYLES['numbers']),
+            (r'\b0[xX][0-9A-Fa-f]+\b', 0, STYLES['numbers'])
+        ]
+
+        # Build QRegExp for the above patterns
+        self.rules = [(QRegExp(pattern), index, f) for (pattern, index, f) in rules]
+
+    def highlightBlock(self, text):
+        """
+        Performs the highlight operation
+        :param text: text to format
+        """
+        # For each rules...
+        for expression, nth, f in self.rules:
+            # ...we look for matches
+            index = expression.indexIn(text, 0)
+            while index >= 0:
+                # We actually want the index of the nth match
+                index = expression.pos(nth)
+                length = len(expression.cap(nth))
+                self.setFormat(index, length, f)  # Format and color the text
+                index = expression.indexIn(text, index + length)  # update index for next iteration
+
+        self.setCurrentBlockState(0)
+
+
+# --- Coloration ---
+def get_format(color, style=''):
+    """
+    Returns a QTextCharFormat with the given attributes
+    :param color:
+    :param style:
+    :return:
+    """
+    c = QColor()
+    c.setNamedColor(color)
+
+    f = QTextCharFormat()
+    f.setForeground(c)
+
+    if 'bold' in style:
+        f.setFontWeight(QFont.Bold)
+
+    if 'italic' in style:
+        f.setFontItalic(True)
+
+    return f
+
+
+STYLES = {
+    'keyword': get_format('blue'),
+    'comment': get_format('green'),
+    'label': get_format('orange'),
+    'directive': get_format('darkMagenta', 'bold'),
+    'numbers': get_format('red')
+}

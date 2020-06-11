@@ -128,6 +128,9 @@ class ExecutionFrame(QWidget):
         """
         self.do_quit()
 
+        # Reset status bar
+        self.statusbar.sig_persistent_message.emit("")
+
         # Call the secondary frames close methods as well
         self.editor_frame.on_close()
         self.ram_frame.on_close()
