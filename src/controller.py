@@ -6,6 +6,7 @@ from threading import Thread
 from src.model.cpu import Cpu
 from src.model.assemble import Assemble
 from src.debugger import Debug
+from src.serialControler import SerialControl
 from src.view.MainAppFrame import ExecutionFrame
 
 CONFIG_FILE_PATH = 'src/config.ini'
@@ -70,6 +71,9 @@ class Controller(QObject):
 
         # Instanciate the debugger
         self.dbg = Debug(self.cpu, self.gui.ram_frame)
+
+        # Instantiate the serial controler
+        self.serialctl = SerialControl(self.cpu, self.gui.monitor_frame, self.gui.statusbar, self.config)
 
         # Callbacks
         self.gui.editor_frame.assemble_btn.on_assemble = self.assemble_click
