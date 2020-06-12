@@ -9,22 +9,20 @@ copylr	153 r0
   // Initialize the stack pointer to the second element
 copylr	stack+1 stackPtr	
   
-// When we pop a 0, this is the end !
+
+// Optimized version
 :get_digits                 
-    // input : r0 is dividend, ten is divisor. Output : r0 is the quotient, acc is the remainder
-    div	r0 ten		        
-    bcrsc	ZFlag statusReg
-    // Quotient is null, we stop pushing to the stack and quit
-    jump	the_end
+    div    	r0 ten
     addla	'0'
-    // Push digit into the stack. '0' is not NULL !
-    call	push		    
-    jump 	get_digits  
-:the_end
-    addla	'0'
-    call	push		    // pushes the last digit into the stack
+    incr	stackPtr
+    copyai	stackPtr
+    copyra	r0
+    bcrss	ZFlag statusReg
+    jump	get_digits  
+:serial_out
     halt
     
+
 // The END
 // Result is in stack+1
 // 
