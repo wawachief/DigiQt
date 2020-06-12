@@ -8,15 +8,17 @@
 
 %define 	ZFlag	0
 %define 	CFlag	1
-%define 	PFlag	3	// we use bit 3 of status_reg to store the prime state
+%define 	PFlag	3		// we use bit 3 of status_reg to store the prime state
 
 initsp
 speed 	0
-copyla 	2
-comout
-copyla 	3
-comout
-// prime numbers 
+
+copylr	2 nb
+call	disp_nb
+copylr	3 nb
+call 	disp_nb			// Displays 002 and 003
+
+// compute all primes beginnig with 5 
 copylr 	2 pi 			// 2 and 3 are primes and not computed
 copylr 	5 nb 			// start the prime search with 5
 :primeloop
@@ -33,15 +35,7 @@ copylr 	5 nb 			// start the prime search with 5
 :isprime
     copyrr 	nb dataLED_reg
     // output result to serial
-    call 	int2str
-    copyra 	ascii_str
-    comout
-    copyra 	ascii_str+1
-    comout
-    copyra 	ascii_str+2
-    comout
-    copyla 	' '			// add a space separator
-    comout
+    call disp_nb
     // searching next prime 
     incr pi
     jump pl1
@@ -55,7 +49,7 @@ copylr 	5 nb 			// start the prime search with 5
     decr 	dv
     decr 	dv
     copyrr 	nb r0 			// arg1 is modified by div, 
-    div 	r0 dv   			 // arg1 is the quotient, acc the remainder
+    div 	r0 dv   			// arg1 is the quotient, acc the remainder
     bcrsc 	CFlag status_reg 
     jump 	not_prime
     copyra 	dv
@@ -69,11 +63,23 @@ copylr 	5 nb 			// start the prime search with 5
     cbr 	PFlag status_reg
     return    
 
+// outputs nb (3 digits)  on the serial port
+:disp_nb				
+    call 	int2str
+    copyra 	ascii_str
+    comout
+    copyra 	ascii_str+1
+    comout
+    copyra 	ascii_str+2
+    comout
+    copyla 	' '			// add a space separator
+    comout
+    return
+
 // Transforms an integer to an ASCII representation
 // Input:
 //    nb: int
 //    ascii_str: Address of the first byte of the string
-
 :int2str
     copyrr 	nb t0
     copylr 	10 r0
