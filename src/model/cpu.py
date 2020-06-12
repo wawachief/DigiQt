@@ -428,9 +428,10 @@ class Cpu(QObject):
     def inst_mul(self):                  # on entry arg1 = @multiplicand and arg2 = m@ultiplier; 
         arg1 = self.ram[self.pc + 1]     # on exit arg1 = @product
         arg2 = self.ram[self.pc + 2]
-        self.ram[arg1] = (self.ram[arg1] * self.ram[arg2]) % 256
+        mul = self.ram[arg1] * self.ram[arg2]
+        self.ram[arg1] = mul % 256
         self.status_Z(self.ram[arg1])
-        self.status_C(self.ram[arg1] * self.ram[arg2])
+        self.status_C(mul)
         return True
     def inst_div(self):                  # on entry arg1 = @dividend and arg2 = @divisor; 
         arg1 = self.ram[self.pc + 1]     # on exit arg1 = @quotient and accumulator = remainder
