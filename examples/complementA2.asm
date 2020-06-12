@@ -31,7 +31,7 @@ sbr 2 statusReg // Autorise l’écriture sur les LED d’adresses
 
 // Boucle d’attente de 10*255 tours sur la vraie DGR
 :wait
-    copylr 9 loopTouche
+    copylr 18 loopTouche
 :waitloop
     // copylr 7 loopTouche1  // use this for digimulator
     copylr 255 loopTouche1   // use this for digirule

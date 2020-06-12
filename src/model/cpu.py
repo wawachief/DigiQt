@@ -428,8 +428,9 @@ class Cpu(QObject):
     def inst_mul(self):                  # on entry arg1 = @multiplicand and arg2 = m@ultiplier; 
         arg1 = self.ram[self.pc + 1]     # on exit arg1 = @product
         arg2 = self.ram[self.pc + 2]
-        self.ram[arg1] *= self.ram[arg2]
+        self.ram[arg1] = (self.ram[arg1] * self.ram[arg2]) % 256
         self.status_Z(self.ram[arg1])
+        self.status_C(self.ram[arg1] * self.ram[arg2])
         return True
     def inst_div(self):                  # on entry arg1 = @dividend and arg2 = @divisor; 
         arg1 = self.ram[self.pc + 1]     # on exit arg1 = @quotient and accumulator = remainder
@@ -441,6 +442,11 @@ class Cpu(QObject):
             self.ram[arg1] = dividend // divisor
             self.accu = dividend % divisor
             self.status_Z(self.ram[arg1])
+            if self.accu == 0:
+                # Remainder is 0, we activate the Carry flag
+                self.status_C(256)
+            else:
+                self.status_C(0)
         return True
     #
     # USB instructions
