@@ -45,3 +45,40 @@ class OpenEditorButton(QPushButton):
             self.setToolTip("Open Editor")
 
             self.editor_frame.hide()
+
+
+class OpenRamButton(QPushButton):
+    def __init__(self, ram_frame, config):
+        """
+        Button handling the open/close operation of the ram frame
+
+        :param ram_frame: The ram frame that this button shows/hides
+        """
+        QPushButton.__init__(self)
+
+        self.setIcon(assets_mgr.get_icon("open_editor"))
+        self.setIconSize(assets_mgr.ICON_SIZE)
+        self.setToolTip("Show RAM")
+        self.setStyleSheet('border: none; padding-left: 10px; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
+
+        self.ram_frame = ram_frame
+
+        self.clicked.connect(lambda: self.show_ram_frame(not self.ram_frame.isVisible()))
+
+    def show_ram_frame(self, do_display):
+        """
+        Hides or shows the ram frame
+
+        :param do_display: True will display the ram frame, False will hide it
+        :type do_display: bool
+        """
+        if do_display:
+            self.setIcon(assets_mgr.get_icon("close_editor"))
+            self.setToolTip("Hide RAM")
+
+            self.ram_frame.show()
+        else:
+            self.setIcon(assets_mgr.get_icon("open_editor"))
+            self.setToolTip("Show RAM")
+
+            self.ram_frame.hide()
