@@ -1,36 +1,34 @@
 %define 	ZFlag 0
 %define 	statusReg 252
 
-copylr	51 r0
+copylr	153 r0
 
 //
 // converting binary to decimal
 //
-
-copylr	stack+1 stackPtr	    // Initialize the stack pointer to the second element
-	    
-:get_digits                 // When we pop a 0, this is the end !
-    div	r0 ten		        // input : r0 is dividend, ten is divisor. Output : r0 is the quotient, acc is the remainder
-    bcrsc	ZFlag statusReg	// Quotient is null, we stop pushing to the stack band make the string
-    jump	to_str
+  // Initialize the stack pointer to the second element
+copylr	stack+1 stackPtr	
+  
+// When we pop a 0, this is the end !
+:get_digits                 
+    // input : r0 is dividend, ten is divisor. Output : r0 is the quotient, acc is the remainder
+    div	r0 ten		        
+    bcrsc	ZFlag statusReg
+    // Quotient is null, we stop pushing to the stack and quit
+    jump	the_end
     addla	'0'
-    call	push		    // Push digit into the stack. '0' is not NULL !
+    // Push digit into the stack. '0' is not NULL !
+    call	push		    
     jump 	get_digits  
-:to_str
+:the_end
     addla	'0'
     call	push		    // pushes the last digit into the stack
-    // All the digits should be in the stack, 
-    // now we stack them out into str
-    copylr	str strPtr	    // Initialize the str pointer
-    :loop			
-        call 	pop
-        bcrsc	ZFlag statusReg	// we pop a 0, the 
-        halt	                // String is complete
-        nop
-        copyai 	strptr
-        incr	strptr
-        jump	loop
-        
+    halt
+    
+// The END
+// Result is in stack+1
+// 
+
 //
 // Implementing stack
 //
@@ -50,7 +48,5 @@ copylr	stack+1 stackPtr	    // Initialize the stack pointer to the second elemen
 %data 	r0 0
 %data 	ten 10
 %data 	stackPtr 0
-%data 	strPtr 0
-%data 	stack 0 0 0 0		    // Stack initialized with NULL caracters
-%data 	str "0  "
-
+// Stack initialized with NULL caracters
+%data 	stack 0 0 0 0
