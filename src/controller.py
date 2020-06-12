@@ -29,6 +29,8 @@ class CpuThread(QThread):
                 # adjust speed with cpu.speed value
                 sleep(0.00001)
                 self.inst_timer += 1
+            else:
+                sleep(0.001)
 
 class Controller(QObject):
     # Signals declarations
