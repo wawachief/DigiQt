@@ -6,23 +6,20 @@ copylr	153 r0
 //
 // converting binary to decimal
 //
-  // Initialize the stack pointer to the second element
+// Initialize the stack pointer to the second element
 copylr	stack+1 stackPtr	
   
-
-// Optimized version
 :get_digits                 
-    div    	r0 ten
-    addla	'0'
-    incr	stackPtr
-    copyai	stackPtr
-    copyra	r0
-    bcrss	ZFlag statusReg
-    jump	get_digits  
-:serial_out
+    div        r0 ten
+    addla    '0'
+    incr    stackPtr
+    copyai    stackPtr
+    copyra    r0
+    bcrss    ZFlag statusReg
+    jump    get_digits  
+:the_end
     halt
     
-
 // The END
 // Result is in stack+1
 // 
