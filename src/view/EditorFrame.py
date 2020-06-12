@@ -8,8 +8,8 @@
 from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget
 from PySide2.QtCore import Qt, QSize
 
-from src.view.editor_frame_widgets.OpenFileButton import OpenFileButton
-from src.view.editor_frame_widgets.AssembleButton import AssembleButton
+from src.view.editor_frame_widgets.EditorFrameButtons import OpenFileButton, AssembleButton, SaveAsFileButton
+
 from src.view.editor_frame_widgets.CodeEditor import CodeEditor
 from src.view.style import style
 
@@ -26,7 +26,7 @@ class EditorFrame(QWidget):
         """
         QWidget.__init__(self)
 
-        self.setWindowTitle("DigiQt - Assemble Editor")
+        self.__init_title()
         self.setMinimumSize(QSize(630, 500))
 
         self.config = config
@@ -36,6 +36,11 @@ class EditorFrame(QWidget):
 
         self.open_file_btn = OpenFileButton(config)
         self.open_file_btn.set_content = self.editor.setPlainText  # Reroute text set method directly to the text editor widget
+        self.open_file_btn.set_new_file_name = self.__init_title
+
+        self.save_as_btn = SaveAsFileButton(config)
+        self.save_as_btn.get_content_to_save = self.retrieve_text  # Bind the text retrieve method in order to get the text to save
+        self.save_as_btn.set_new_file_name = self.__init_title
 
         self.assemble_btn = AssembleButton(config)
 
@@ -43,6 +48,16 @@ class EditorFrame(QWidget):
         self._set_layout()
         self._connect_all()
         self._set_stylesheet()
+
+    def __init_title(self, file_name=""):
+        """
+        Sets the currently edited file in this frame's title
+        """
+        if file_name:
+            self.setWindowTitle("DigiQt - Editing '" + file_name + "'")
+        else:
+            # In the case no file name is specified, we have an empty editor, we display default text
+            self.setWindowTitle("DigiQt - Assemble Editor")
 
     def _init_tool_bar(self):
         """
@@ -52,6 +67,7 @@ class EditorFrame(QWidget):
         self.toolbar.setFixedHeight(70)
 
         self.toolbar.addWidget(self.open_file_btn)
+        self.toolbar.addWidget(self.save_as_btn)
         self.toolbar.addSeparator()
         self.toolbar.addWidget(self.assemble_btn)
 

@@ -5,15 +5,14 @@
 # Execution frame
 #
 
-from PySide2.QtWidgets import QToolBar, QVBoxLayout, QHBoxLayout, QWidget, QPushButton
+from PySide2.QtWidgets import QToolBar, QVBoxLayout, QHBoxLayout, QWidget
 from PySide2.QtCore import Qt
 
 from src.view.EditorFrame import EditorFrame
 from src.view.RamFrame import RAMFrame
 from src.view.exec_frame_widgets.DigiruleCanvas import DRCanvas
 from src.view.exec_frame_widgets.DigiruleModelDropdown import DigiruleModelDropdown
-from src.view.exec_frame_widgets.OpenEditorButton import OpenEditorButton
-from src.view.exec_frame_widgets.OpenRamButton import OpenRamButton
+from src.view.exec_frame_widgets.ExecFrameButtons import OpenEditorButton, OpenRamButton
 from src.view.exec_frame_widgets.StatusBar import StatusBar
 from src.view.exec_frame_widgets.SpeedSlider import SpeedSlider
 from src.view.style import style
