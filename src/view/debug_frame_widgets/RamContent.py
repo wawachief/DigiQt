@@ -2,7 +2,7 @@
 # Licence GPL-3
 
 #
-# Widget of editor frame
+# Widget of debug frame
 #
 
 from PySide2.QtWidgets import QPlainTextEdit

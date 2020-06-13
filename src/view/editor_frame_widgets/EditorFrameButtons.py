@@ -65,7 +65,7 @@ class AssembleButton(QPushButton):
         self.setIcon(assets_mgr.get_icon("assemble"))
         self.setIconSize(assets_mgr.ICON_SIZE)
         self.setToolTip("Assemble")
-        self.setStyleSheet('border: none; padding-left: 10px; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
+        self.setStyleSheet('border: none; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
 
         self.clicked.connect(self.on_assemble)
 
@@ -89,7 +89,7 @@ class SaveAsFileButton(QPushButton):
         self.setIconSize(assets_mgr.ICON_SIZE)
         self.setToolTip("Save As")
         self.setStyleSheet(
-            'border: none; padding-left: 10px; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
+            'border: none; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
 
         self.clicked.connect(self.on_save_as)
         self.sig_message = sig_message
@@ -135,7 +135,7 @@ class SaveFileButton(QPushButton):
         self.setIconSize(assets_mgr.ICON_SIZE)
         self.setToolTip("Save")
         self.setStyleSheet(
-            'border: none; padding-left: 10px; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
+            'border: none; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
 
         self.file_path = ""
 

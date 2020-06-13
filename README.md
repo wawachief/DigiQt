@@ -51,7 +51,7 @@ Icons from: https://www.flaticon.com/
 Authors: 
 - *Freepik:* https://www.flaticon.com/authors/freepik
 - *Roundicons:* https://www.flaticon.com/authors/roundicons
-
+- *Pixel perfect:* https://www.flaticon.com/authors/pixel-perfect
 # Licence
 GNU General Public License v3.0
 
