@@ -103,7 +103,7 @@ copylr 	5 nb
     subla	stack
     bcrss	ZFlag status
     jump 	disp_nb
-// Outpouts a space separator
+// Outputs a space separator
     copyla	' '
     comout
     return
