@@ -35,7 +35,7 @@ class FromDigiruleThread(QThread):
         try:
             self.parent.ser_port.open()
         except serial.serialutil.SerialException as ex:
-            self.parent.statusbar.sig_temp_message.emit(ex)
+            self.parent.statusbar.sig_temp_message.emit(ex.strerror)
         else:
             # Serial port is open
             while (self.parent.ser_port.in_waiting == 0) and self.running:
@@ -93,7 +93,7 @@ class SerialControl(QObject):
             try:
                 self.ser_port.open()
             except serial.serialutil.SerialException as ex:
-                self.statusbar.sig_temp_message.emit(ex)
+                self.statusbar.sig_temp_message.emit(ex.strerror)
             else:
                 for line in dump.splitlines():
                     self.ser_port.write(line.encode("utf-8"))

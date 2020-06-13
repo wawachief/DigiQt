@@ -13,6 +13,11 @@
 initsp
 speed	0
 
+// Initialize stack
+copylr	0 stack
+copylr	0 stack+1
+copylr	0 stack+2
+
 // Displays 2 and 3
 copylr	2 nb
 call	int2str
@@ -41,7 +46,9 @@ copylr 	5 nb
         jump	increment_nb
     :the_end
 // We reached 255
-        copyla	'\n'
+        copyla	0x0d
+        comout
+        copyla	0x0a
         comout
         halt
 
