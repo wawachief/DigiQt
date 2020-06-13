@@ -25,7 +25,10 @@ class CpuThread(QThread):
                 if self.inst_timer >= self.cpu.speed * self.speed_factor :
                     self.cpu.tick()
                     self.inst_timer = 0
-                # 50000 cycles per second in speed 0 configuration
+                if self.cpu.tx is not None:
+                    print(chr(self.cpu.tx), end="")
+                    self.cpu.tx = None
+                # 10000 cycles per second in speed 0 configuration
                 # adjust speed with cpu.speed value
                 sleep(0.00001)
                 self.inst_timer += 1
