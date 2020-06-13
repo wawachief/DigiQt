@@ -95,7 +95,6 @@ copylr 	5 nb
 // Outputs the content of the stack over USB
 :disp_nb
     decr	stackPtr
-    subra	stack
     copyia	stackPtr
     addla	'0'
     comout
