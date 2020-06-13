@@ -5,14 +5,15 @@
 # Execution frame
 #
 
-from PySide2.QtWidgets import QToolBar, QVBoxLayout, QHBoxLayout, QWidget
+from PySide2.QtWidgets import QToolBar, QVBoxLayout, QHBoxLayout, QWidget, QSizePolicy
 from PySide2.QtCore import Qt
 
 from src.view.EditorFrame import EditorFrame
 from src.view.RamFrame import RAMFrame
+from src.view.SerialConsoleFrame import SerialConsoleFrame
 from src.view.exec_frame_widgets.DigiruleCanvas import DRCanvas
 from src.view.exec_frame_widgets.DigiruleModelDropdown import DigiruleModelDropdown
-from src.view.exec_frame_widgets.ExecFrameButtons import OpenEditorButton, OpenRamButton
+from src.view.exec_frame_widgets.ExecFrameButtons import OpenEditorButton, OpenRamButton, OpenConsoleButton, AboutButton
 from src.view.exec_frame_widgets.StatusBar import StatusBar
 from src.view.exec_frame_widgets.SpeedSlider import SpeedSlider
 from src.view.style import style
@@ -54,8 +55,9 @@ class ExecutionFrame(QWidget):
         self.open_ram_btn = OpenRamButton(self.ram_frame, config)
         self.ram_frame.on_close = lambda: self.open_ram_btn.show_ram_frame(False)
 
-        # TODO : Instanciate a serial monitor view
-        self.monitor_frame = None
+        self.monitor_frame = SerialConsoleFrame(config)
+        self.open_monitor_btn = OpenConsoleButton(self.monitor_frame, config)
+        self.monitor_frame.on_close = lambda: self.open_monitor_btn.show_console_frame(False)
 
         self._init_tool_bar()
         self._set_layout()
@@ -71,12 +73,20 @@ class ExecutionFrame(QWidget):
         self.toolbar.setFixedHeight(70)
 
         self.toolbar.addWidget(self.open_editor_btn)
-
         self.toolbar.addWidget(self.open_ram_btn)
+        self.toolbar.addWidget(self.open_monitor_btn)
 
         self.toolbar.addSeparator()
         self.digimodel_dropdown = DigiruleModelDropdown(self.on_digimodel_dropdown_changed, self.current_digirule_model)
         self.toolbar.addWidget(self.digimodel_dropdown)
+
+        # Empty space to align the about button to the right
+        spacer = QWidget()
+        spacer.setStyleSheet("background-color: transparent;")
+        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.toolbar.addWidget(spacer)
+
+        self.toolbar.addWidget(AboutButton(self.config, self.statusbar.sig_temp_message))
 
     def _set_layout(self):
         """
@@ -134,4 +144,5 @@ class ExecutionFrame(QWidget):
         # Call the secondary frames close methods as well
         self.editor_frame.on_close()
         self.ram_frame.on_close()
+        self.monitor_frame.on_close()
         event.accept()
