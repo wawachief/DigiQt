@@ -95,7 +95,7 @@ class SerialControl(QObject):
         self.cpu.sig_CPU_comout = self.sig_CPU_comout
         self.cpu.sig_CPU_comin = self.sig_CPU_comin
         
-        self.keydict = {"Return": "\n", "Backspace":chr(8)}
+        self.keydict = {"Return": "\n", "Enter": chr(13), "Backspace":chr(8), "Esc":chr(27), "Del":chr(127)}
 
     def init_serial(self):
         is_thread = InitSerialThread(self)
@@ -107,7 +107,7 @@ class SerialControl(QObject):
     def on_key_pressed(self, key):
         if self.cpu.rx is None:
             if key in self.keydict:
-                self.cpu.rx = self.keydict["key"]
+                self.cpu.rx = self.keydict[key]
             elif len(key) == 1:
                 self.cpu.rx = key 
             else:

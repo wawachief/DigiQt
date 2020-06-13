@@ -446,7 +446,7 @@ class Cpu(QObject):
     #
     def inst_comout(self):
         self.tx = self.accu
-        self.sig_CPU_comout.emit(self.accu)
+        self.sig_CPU_comout.emit(chr(self.accu))
         return True
     def inst_comin(self):
         if self.rx is None:

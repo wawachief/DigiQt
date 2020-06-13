@@ -101,6 +101,7 @@ class SerialConsoleFrame(QWidget):
         """Sends signal to serialControler"""
         # self.set_serial_in(QKeySequence(event.key()).toString())  # TODO signal keyseq to controller for process
         # self.append_serial_out(QKeySequence(event.key()).toString())
+        print (QKeySequence(event.key()).toString())
         self.sig_keyseq_pressed.emit(QKeySequence(event.key()).toString())
 
     def set_serial_in(self, val):
