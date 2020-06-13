@@ -5,8 +5,8 @@
 # Edition frame
 #
 
-from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget
-from PySide2.QtCore import Qt, QSize
+from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QSizePolicy
+from PySide2.QtCore import QSize
 
 from src.view.editor_frame_widgets.EditorFrameButtons import OpenFileButton, AssembleButton, SaveAsFileButton, SaveFileButton
 
@@ -78,7 +78,13 @@ class EditorFrame(QWidget):
         self.toolbar.addWidget(self.open_file_btn)
         self.toolbar.addWidget(self.save_btn)
         self.toolbar.addWidget(self.save_as_btn)
-        self.toolbar.addSeparator()
+
+        # Empty space to align the assemble button to the right
+        spacer = QWidget()
+        spacer.setStyleSheet("background-color: transparent;")
+        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.toolbar.addWidget(spacer)
+
         self.toolbar.addWidget(self.assemble_btn)
 
     def _set_layout(self):

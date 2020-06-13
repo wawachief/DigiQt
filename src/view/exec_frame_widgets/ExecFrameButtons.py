@@ -56,7 +56,7 @@ class OpenRamButton(QPushButton):
         """
         QPushButton.__init__(self)
 
-        self.setIcon(assets_mgr.get_icon("open_editor"))
+        self.setIcon(assets_mgr.get_icon("show_debug"))
         self.setIconSize(assets_mgr.ICON_SIZE)
         self.setToolTip("Show RAM")
         self.setStyleSheet('border: none; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
@@ -73,12 +73,12 @@ class OpenRamButton(QPushButton):
         :type do_display: bool
         """
         if do_display:
-            self.setIcon(assets_mgr.get_icon("close_editor"))
+            self.setIcon(assets_mgr.get_icon("hide_debug"))
             self.setToolTip("Hide RAM")
 
             self.ram_frame.show()
         else:
-            self.setIcon(assets_mgr.get_icon("open_editor"))
+            self.setIcon(assets_mgr.get_icon("show_debug"))
             self.setToolTip("Show RAM")
 
             self.ram_frame.hide()
@@ -130,7 +130,7 @@ class OpenSymbolButton(QPushButton):
         """
         QPushButton.__init__(self)
 
-        self.setIcon(assets_mgr.get_icon("open_editor"))
+        self.setIcon(assets_mgr.get_icon("show_symbols"))
         self.setIconSize(assets_mgr.ICON_SIZE)
         self.setToolTip("Show symbols list frame")
         self.setStyleSheet('border: none; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
@@ -147,12 +147,12 @@ class OpenSymbolButton(QPushButton):
         :type do_display: bool
         """
         if do_display:
-            self.setIcon(assets_mgr.get_icon("close_editor"))
+            self.setIcon(assets_mgr.get_icon("hide_symbols"))
             self.setToolTip("Hide symbols list frame")
 
             self.symbol_frame.show()
         else:
-            self.setIcon(assets_mgr.get_icon("open_editor"))
+            self.setIcon(assets_mgr.get_icon("show_symbols"))
             self.setToolTip("Show symbols list frame")
 
             self.symbol_frame.hide()
