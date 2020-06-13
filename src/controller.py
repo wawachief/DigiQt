@@ -1,8 +1,8 @@
 from configparser import ConfigParser
 from PySide2.QtCore import Signal, Slot, QObject, QThread, QTimer, SIGNAL
 from time import sleep
+from importlib import import_module
 
-from src.model.cpu import Cpu
 from src.model.assemble import Assemble
 from src.debugger import Debug
 from src.serialControler import SerialControl
@@ -89,7 +89,9 @@ class Controller(QObject):
         must be called when digirule changes"""
         
         # Instanciate the CPU
-        self.cpu = Cpu(self.config, self.sig_cpu_stopped, self.sig_cpu_speed)
+
+        CpuModule = import_module("src.model.cpu_" + self.dr_model)
+        self.cpu = CpuModule.Cpu(self.sig_cpu_stopped, self.sig_cpu_speed)
         #
         # Run cpu thread and UI update
         #
@@ -421,7 +423,7 @@ class Controller(QObject):
         """loads a program (n°i) to the RAM from the flash memory """
 
         self.gui.statusbar.sig_temp_message.emit("Loading program "+str(i))
-        with open('src/flash_memory.txt', 'r', encoding='utf-8') as f:
+        with open(f'src/flash_{self.dr_model}.txt', 'r', encoding='utf-8') as f:
             flash_memory = f.readlines() 
         start = 256*i # where the program n°i starts in the flash memory
         new_ram = []
@@ -436,10 +438,10 @@ class Controller(QObject):
         """ saves RAM to a program n°i on the flash memory"""
 
         self.gui.statusbar.sig_temp_message.emit("Saving program "+str(i))
-        with open('src/flash_memory.txt', 'r', encoding='utf-8') as f:
+        with open(f'src/flash_{self.dr_model}.txt', 'r', encoding='utf-8') as f:
             flash_memory = f.readlines() 
         start = 256*i # where the program n°i starts in the flash memory
-        with open('src/flash_memory.txt', 'w', encoding='utf-8') as f:
+        with open(f'src/flash_{self.dr_model}.txt', 'w', encoding='utf-8') as f:
             for j in range(0, start):
                 f.write(flash_memory[j])
             for j in range(start, start + 256):

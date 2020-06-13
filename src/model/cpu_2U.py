@@ -14,23 +14,20 @@ from importlib import import_module
 from random import randint
 
 class Cpu(QObject):
-    def __init__(self, config, sig_cpu_stopped = None, sig_cpu_speed = None):
+    def __init__(self, sig_cpu_stopped = None, sig_cpu_speed = None):
         QObject.__init__(self)
         self.sig_cpu_stopped = sig_cpu_stopped
         self.sig_cpu_speed = sig_cpu_speed
 
-        # Read digirule configuration
-        self.dr_model     = config.get('digirule', 'DR_MODEL')
-        self.stack_size   = int(config.get(self.dr_model, 'STACK_SIZE'))
-        self.sstack_size  = int(config.get(self.dr_model, 'SSTACK_SIZE'))
+        # CPU configuration
+        self.dr_model     = "2U"
+        self.stack_size   = 16
         # attributes initialization
         self.ram = [0] * 256
         self.stack  = [0] * self.stack_size    # CPU Stack
-        self.sstack = [0] * self.sstack_size   # Software stack
         self.accu = 0          # Accumulator
         self.pc   = 0          # Program Counter
         self.sp   = 0          # Stack Pointer
-        self.ssp  = 0          # Software Pointer
         self.rx   = None       # Byte received or None
         self.tx   = None       # Byte to send of None
         self.run    = False    # Run mode flag
@@ -185,22 +182,16 @@ class Cpu(QObject):
         arg1 = self.ram[self.pc + 1] 
         arg2 = self.ram[self.pc + 2] 
         self.ram[arg2] = arg1
-        # Change of behaviour since 2A
-        if self.dr_model != "2A":
-            self.status_Z(arg1)
+        self.status_Z(arg1)
         return True
     def inst_copyla(self):
         self.accu = self.ram[self.pc + 1]
-        # Change of behaviour since 2A
-        if self.dr_model != "2A":
-            self.status_Z(self.accu)
+        self.status_Z(self.accu)
         return True
     def inst_copyar(self):
         arg1 = self.ram[self.pc + 1] 
         self.ram[arg1] = self.accu
-        # Change of behaviour since 2A
-        if self.dr_model != "2A":
-            self.status_Z(self.accu)
+        self.status_Z(self.accu)
         return True
     def inst_copyra(self):
         arg1 = self.ram[self.pc + 1] 
@@ -397,7 +388,6 @@ class Cpu(QObject):
         return False
     def inst_initsp(self):
         self.sp = 0
-        self.ssp = 0
         return True
     def inst_randa(self):
         self.accu = randint(0, 255)
@@ -462,84 +452,4 @@ class Cpu(QObject):
             self.status_Z(0)             # if no character awaits, sets the zeroflag
         else:
             self.status_Z(1)             # if a character is available, clears the zeroflag
-        return True
-    
-    # Unused instructions
-    def inst_shiftar(self):
-        carry = 1 if self.ram[self.REG_STATUS] & 2 else 0 # gets the previous Carry bit on the status register
-        if self.accu % 2 == 1:                            # if odd value => raises a new Carry
-            self.status_C(256)                            # sets Carry bit to 1
-        else:
-            self.status_C(0)                              # sets Carry bit to 0
-        self.accu >>= 1                                   # shifts whitout taking care of the previous Carry bit
-        self.accu += 128 * carry                          # sets the MSB equals to the previous Carry bit
-        return True
-    def inst_shiftal(self):
-        self.accu <<= 1                                   # shifts whitout taking care of the previous Carry bit
-        carry = 1 if self.ram[self.REG_STATUS] & 2 else 0 # gets the previous Carry bit on the status register
-        self.accu += carry                           # sets the LSB equals to the previous Carry bit
-        if self.status_C(self.accu):
-            self.accu -= 256
-        return True
-
-    # Software stack
-    def inst_sspush(self):
-        if self.ssp >= self.sstack_size:
-        	self.do_halt("Software Stack Overflow")
-        else: 
-            self.sstack[self.ssp] = self.accu
-            self.ssp += 1 
-        return True
-    def inst_sspop(self):
-        if self.ssp == 0:
-            self.do_halt("Software Stack Underflow")
-        else:
-            self.ssp -= 1
-            self.accu = self.sstack[self.ssp]
-            self.status_Z(self.accu)
-        return True
-    def inst_sspushr(self):
-        arg1 = self.ram[self.pc + 1]
-        if self.ssp >= self.sstack_size:
-        	self.do_halt("Software Stack Overflow")
-        else: 
-            self.sstack[self.ssp] = self.ram[arg1]
-            self.ssp += 1 
-        return True
-    def inst_sspopr(self):
-        arg1 = self.ram[self.pc + 1]
-        if self.ssp == 0:
-            self.do_halt("Software Stack Underflow")
-        else:
-            self.ssp -= 1
-            self.ram[arg1] = self.sstack[self.ssp]
-            self.status_Z(self.ram[arg1])
-        return True
-    def inst_sspushi(self):
-        arg1 = self.ram[self.pc + 1]
-        if self.ssp >= self.sstack_size:
-        	self.do_halt("Software Stack Overflow")
-        else: 
-            self.sstack[self.ssp] = self.ram[self.ram[arg1]]
-            self.ssp += 1 
-        return True
-    def inst_sspopi(self):
-        arg1 = self.ram[self.pc + 1]
-        if self.ssp == 0:
-            self.do_halt("Software Stack Underflow")
-        else:
-            self.ssp -= 1
-            self.ram[self.ram[arg1]] = self.sstack[self.ssp]
-            self.status_Z(self.ram[self.ram[arg1]])
-        return True
-    def inst_sshead(self):
-        if self.ssp == 0:
-            self.do_halt("Software Stack Underflow")
-        else:
-            self.accu = self.sstack[self.ssp - 1]
-            self.statu_Z(self.accu)
-        return True
-    def inst_ssdepth(self):
-        self.accu = self.ssp
-        self.status_Z(self.accu)
         return True
