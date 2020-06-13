@@ -30,6 +30,8 @@ class SerialConsoleFrame(QWidget):
         self.config = config
         self.setWindowTitle("DigiQt - Serial console")
 
+        self.sig_keyseq_pressed = None # signal configured by serialControler
+
         # Serial out
         self.serial_out = QPlainTextEdit()
         self.serial_out.setReadOnly(True)
@@ -97,8 +99,10 @@ class SerialConsoleFrame(QWidget):
         self.serial_out.setStyleSheet("background-color: #505050; color: white; padding-left: 10px;")
 
     def keyPressEvent(self, event):
-        self.set_serial_in(QKeySequence(event.key()).toString())  # TODO signal keyseq to controller for process
-        self.append_serial_out(QKeySequence(event.key()).toString())
+        """Sends signal to serialControler"""
+        # self.set_serial_in(QKeySequence(event.key()).toString())  # TODO signal keyseq to controller for process
+        # self.append_serial_out(QKeySequence(event.key()).toString())
+        self.sig_keyseq_pressed.emit(QKeySequence(event.key()).toString())
 
     def set_serial_in(self, val):
         """

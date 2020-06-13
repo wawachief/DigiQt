@@ -1,6 +1,6 @@
 import serial
 import serial.tools.list_ports as list_ports
-from PySide2.QtCore import QObject, QThread
+from PySide2.QtCore import QObject, QThread, Signal
 from time import sleep
 
 class InitSerialThread(QThread):
@@ -65,6 +65,10 @@ class FromDigiruleThread(QThread):
             self.parent.ser_port.close()
 
 class SerialControl(QObject):
+    sig_keyseq_pressed = Signal(str)
+    sig_CPU_comout = Signal(str)
+    sig_CPU_comin = Signal(str)
+
     def __init__(self, cpu, monitor_frame, statusbar, config, sig_update):
         QObject.__init__(self)
 
@@ -76,13 +80,46 @@ class SerialControl(QObject):
         self.init_serial()
         self.sig_update = sig_update
         self.fd_thread = None
+        self.monitor_frame = monitor_frame
+
+        # Connect buttons to controler's methods
+        self.monitor_frame.to_dr_btn.to_digirule = self.to_digirule
+        self.monitor_frame.from_dr_btn.to_digirule = self.from_digirule
         
+        # Connect signal
+        self.sig_keyseq_pressed.connect(self.on_key_pressed)
+        self.sig_CPU_comout.connect(self.on_comout)
+        self.sig_CPU_comin.connect(self.on_comin)
+
+        self.monitor_frame.sig_keyseq_pressed = self.sig_keyseq_pressed
+        self.cpu.sig_CPU_comout = self.sig_CPU_comout
+        self.cpu.sig_CPU_comin = self.sig_CPU_comin
+        
+        self.keydict = {"Return": "\n", "Backspace":chr(8)}
+
     def init_serial(self):
         is_thread = InitSerialThread(self)
         is_thread.start()
 
     def init_OK(self):
         self.statusbar.sig_temp_message.emit("Serial port Initialized")
+
+    def on_key_pressed(self, key):
+        if self.cpu.rx is None:
+            if key in self.keydict:
+                self.cpu.rx = self.keydict["key"]
+            elif len(key) == 1:
+                self.cpu.rx = key 
+            else:
+                self.statusbar.sig_temp_message.emit(f"Unknown key: {key}")
+
+    def on_comin(self, char):
+        """Char is handled by CPU, we free the slot"""
+        self.monitor_frame.serial_in.setText(" ")
+
+    def on_comout(self, char):
+        """Append the char to the console"""
+        self.monitor_frame.append_serial_out(char)
 
     def to_digirule(self):
         if self.ser_port is None:

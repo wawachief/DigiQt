@@ -18,6 +18,8 @@ class Cpu(QObject):
         QObject.__init__(self)
         self.sig_cpu_stopped = sig_cpu_stopped
         self.sig_cpu_speed = sig_cpu_speed
+        self.sig_CPU_comout = None # These signals are pushed 
+        self.sig_CPU_comin  = None # by the serial controler
 
         # CPU configuration
         self.dr_model     = "2U"
@@ -444,9 +446,17 @@ class Cpu(QObject):
     #
     def inst_comout(self):
         self.tx = self.accu
+        self.sig_CPU_comout.emit(self.accu)
         return True
     def inst_comin(self):
-        return self.rx is not None
+        if self.rx is None:
+            # Waits for a character to come in
+            return False
+        self.accu = ord(self.rx)
+        self.rx = None
+        self.sig_CPU_comin.emit("Done")
+        # Char is handled, we move on !
+        return True
     def inst_comrdy(self):
         if self.rx is None:              
             self.status_Z(0)             # if no character awaits, sets the zeroflag
