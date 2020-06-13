@@ -116,5 +116,5 @@ copylr 	5 nb
 %data 	r0 0
 %data	nb 0
 // Stack initialized with NULL caracters
-%data 	stack 0 0 0 255
+%data 	stack 0 0 0
 %data 	stackPtr 0
