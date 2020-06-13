@@ -39,7 +39,7 @@ class OpenFileButton(QPushButton):
                 code = file.read()
                 self.set_content(code)
 
-                self.set_new_file_name(file_path.split("/")[-1])
+                self.set_new_file_name(file_path)
 
     def set_content(self, text):
         """
@@ -77,19 +77,22 @@ class AssembleButton(QPushButton):
 
 
 class SaveAsFileButton(QPushButton):
-    def __init__(self, config):
+    def __init__(self, config, sig_message):
         """
-        Button handling the save file operation
+        Button handling the save as operation
+
+        :param sig_message: signal to emit to display a message in the main frame's status bar
         """
         QPushButton.__init__(self)
 
-        self.setIcon(assets_mgr.get_icon("save_as_file"))
+        self.setIcon(assets_mgr.get_icon("save_as"))
         self.setIconSize(assets_mgr.ICON_SIZE)
         self.setToolTip("Save As")
         self.setStyleSheet(
             'border: none; padding-left: 10px; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
 
         self.clicked.connect(self.on_save_as)
+        self.sig_message = sig_message
 
     def on_save_as(self):
         """
@@ -100,7 +103,8 @@ class SaveAsFileButton(QPushButton):
         if file_name[0]:
             with open(file_name[0], "w") as file:
                 file.write(self.get_content_to_save())
-                self.set_new_file_name(file_name[0].split("/")[-1])
+                self.set_new_file_name(file_name[0])
+                self.sig_message.emit("File successfully saved: " + file_name[0])
 
     def get_content_to_save(self):
         """
@@ -116,3 +120,57 @@ class SaveAsFileButton(QPushButton):
         :param file_name: saved file name
         """
         pass
+
+
+class SaveFileButton(QPushButton):
+    def __init__(self, config, sig_message):
+        """
+        Button handling the save file operation
+
+        :param sig_message: signal to emit to display a message in the main frame's status bar
+        """
+        QPushButton.__init__(self)
+
+        self.setIcon(assets_mgr.get_icon("save"))
+        self.setIconSize(assets_mgr.ICON_SIZE)
+        self.setToolTip("Save")
+        self.setStyleSheet(
+            'border: none; padding-left: 10px; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
+
+        self.file_path = ""
+
+        self.clicked.connect(self.on_save)
+
+        self.sig_message = sig_message
+
+    def on_save(self):
+        """
+        Shaves the file at the registered location
+        """
+        if self.file_path:
+            with open(self.file_path, "w") as file:
+                file.write(self.get_content_to_save())
+                self.sig_message.emit("File successfully saved: " + self.file_path)
+
+    def get_content_to_save(self):
+        """
+        Method to reroute in order to return here the content of the file to save.
+
+        :rtype: str
+        """
+        pass
+
+    def set_file_path(self, path):
+        """
+        Method to reroute in order to update the current file name displayed
+        :param path: file path
+        """
+        self.file_path = path
+
+    def setEnabled(self, b):
+        """
+        Changes the tooltip of this button when disabled
+        :param b: True to enable
+        """
+        super().setEnabled(b)
+        self.setToolTip("Save" if b else "No file opened")

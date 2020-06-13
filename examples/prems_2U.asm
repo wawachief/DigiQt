@@ -1,4 +1,4 @@
-// 
+//
 // displays prime numbers from 5 to 255
 // uses DIV instruction - only for 2B and 2U firmwares
 
