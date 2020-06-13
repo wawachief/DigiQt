@@ -22,12 +22,15 @@ class UsbPortCombo(QComboBox):
         self.setFixedSize(QSize(200, 30))
         self.sig_port_change = None # pushed by serial controler
 
-    def set_ports(self, ports):
+    def set_ports(self, ports, selection = None):
         """
         Sets all the given ports in this combo box
         """
-        self.clear()
-        self.addItems(ports)
+        if selection:
+            self.setCurrentText(selection)
+        else:
+            self.clear()
+            self.addItems(ports)
 
     def on_selection_changed(self):
         """

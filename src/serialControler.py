@@ -3,6 +3,10 @@ import serial.tools.list_ports as list_ports
 from PySide2.QtCore import QObject, QThread, Signal, Slot
 from time import sleep
 
+NO_SERIAL = "No serial available"
+SELECT_SERIAL = "Select..."
+
+
 class InitSerialThread(QThread):
     """Initialize the serial port in background"""
     def __init__(self, parent):
@@ -14,15 +18,19 @@ class InitSerialThread(QThread):
         self.baudrate  = int(parent.config.get("serial","baudrate"))
         self.timeout   = float(parent.config.get("serial","TIMEOUT"))
         self.update_combo = None # pushed by controler
+        self.do_refresh = False  # we hit refresh button
 
     def run(self):
         list_available_ports =  [p.device for p in list_ports.comports()]
         if not list_available_ports:
-            list_available_ports = ["No serial available"]
+            list_available_ports = [NO_SERIAL]
         else:
-            list_available_ports.insert(0,'select...')
-        self.update_combo(list_available_ports)
-        if self.port in list_available_ports:
+            list_available_ports.insert(0, SELECT_SERIAL)
+        if self.do_refresh:
+            self.update_combo(list_available_ports)
+            self.do_refresh = False
+        if self.port in list_available_ports and self.port not in (NO_SERIAL, SELECT_SERIAL):
+            self.update_combo(None, self.port)
             self.parent.ser_port = serial.Serial(timeout=self.timeout)
             self.parent.ser_port.baudrate = self.baudrate
             self.parent.ser_port.port = self.port
@@ -110,9 +118,10 @@ class SerialControl(QObject):
 
         self.init_serial()
 
-    def init_serial(self):
+    def init_serial(self, do_refresh = True):
         is_thread = InitSerialThread(self)
         is_thread.update_combo = self.monitor_frame.usb_combo.set_ports
+        is_thread.do_refresh = do_refresh
         is_thread.start()
 
     def init_OK(self):
@@ -142,11 +151,11 @@ class SerialControl(QObject):
     @Slot(str)
     def on_port_change(self, port):
         self.config.set("serial", "port", port)
-
+        if self.ser_port:
+            self.ser_port.port = port
         with open(self.config_file_path, 'w') as configfile:
             self.config.write(configfile)
-
-        self.init_serial()
+        self.init_serial(False)
 
     def to_digirule(self):
         if self.ser_port is None:
