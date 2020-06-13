@@ -20,7 +20,7 @@ copylr	3 nb
 call	int2str
 
 // start the search with 5 
-copylr 	3 nb
+copylr 	5 nb
 :search_loop
     call	prime_test
     bcrsc	PFlag status
@@ -104,7 +104,7 @@ copylr 	3 nb
     subla	stack
     bcrss	ZFlag status
     jump 	disp_nb
-// Outouts a space separator
+// Outpouts a space separator
     copyla	' '
     comout
     return
