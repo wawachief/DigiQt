@@ -30,27 +30,27 @@ copylr 	5 nb
     call	prime_test
     bcrsc	PFlag status
     jump	nb_is_prime
-    :increment_nb
-        incr	nb 
+:increment_nb
+    incr	nb 
 // if null, we reached 256
-        bcrsc	ZFlag status
-        jump	the_end
+    bcrsc	ZFlag status
+    jump	the_end
 // increment nb by 2
-        incr	nb
-        jump	search_loop
-    :nb_is_prime
-        copyrr	nb dataLED
+    incr	nb
+    jump	search_loop
+:nb_is_prime
+    copyrr	nb dataLED
 // output result to serial
-        call	int2str
+    call	int2str
 // searching next prime
-        jump	increment_nb
-    :the_end
+    jump	increment_nb
+:the_end
 // We reached 255
-        copyla	0x0d
-        comout
-        copyla	0x0a
-        comout
-        halt
+    copyla	0x0d
+    comout
+    copyla	0x0a
+    comout
+    halt
 
 // primality test
 // input : nb
@@ -85,26 +85,26 @@ copylr 	5 nb
 :int2str
     copyrr	nb r0
     copylr	stack stackPtr
-    :get_digits                 
-        div	r0 ten
-        addla	'0'
-        copyai	stackPtr
-        incr	stackPtr
-        copyra	r0
-        bcrss	ZFlag status
-        jump	get_digits
+:get_digits                 
+    div	r0 ten
+    addla	'0'
+    copyai	stackPtr
+    incr	stackPtr
+    copyra	r0
+    bcrss	ZFlag status
+    jump	get_digits
 // Outputs the content of the stack over USB
 :disp_nb
     copylr	3 r0
     copylr	stack+3 stackPtr
-    :loop_out
-        decr	stackPtr
-        copyia	stackPtr
-        bcrss	ZFlag status
-        comout
-        nop
-        decrjz	r0
-        jump loop_out
+:loop_out
+    decr	stackPtr
+    copyia	stackPtr
+    bcrss	ZFlag status
+    comout
+    nop
+    decrjz	r0
+    jump loop_out
 // Outouts a space separator
     copyla	' '
     comout
