@@ -50,7 +50,7 @@ class Controller(QObject):
         self.sig_config_changed.connect(self.on_config_changed)
         self.sig_cpu_stopped.connect(self.on_cpu_stopped)
         self.sig_cpu_speed.connect(self.on_cpu_speed_chg)
-        self.sig_ram_update.connect(self.update_idle_leds)
+        self.sig_ram_update.connect(self.ram_reloaded)
         self.sig_rampc_goto.connect(self.on_rampc_goto)
 
         # Read configuration
@@ -141,7 +141,7 @@ class Controller(QObject):
                     self.anim_boot -= 1
                     if self.anim_boot == 1:
                         # end animation
-                        self.update_idle_leds()
+                        self._update_idle_leds()
                 if self.anim_adrLED != 0:
                     # Animation de la barre de LED
                     if self.anim_adrLED % 2 ==0:
@@ -149,7 +149,7 @@ class Controller(QObject):
                     self.anim_adrLED -= 1
                     if self.anim_adrLED == 1:
                         # end animation
-                        self.update_idle_leds()
+                        self._update_idle_leds()
 
     # 
     # Signals handling
@@ -249,16 +249,19 @@ class Controller(QObject):
     #
     # idle mode methods
     #
+    def ram_reloaded(self, dummy = ""):
+        self.symbol_table, self.labels_table = None, None
+        self.set_idle_addr(0)
     def set_idle_addr(self, value):
         """sets idle_addr value"""
         self.idle_addr = value % 256
-        self.cpu.set_pc(self.idle_addr)
-        self.update_idle_leds()
-    def update_idle_leds(self, arg=""):
         self.idle_data = self.cpu.ram[self.idle_addr]
+        self.cpu.set_pc(self.idle_addr)
+        self._update_idle_leds()
+        self.do_view_ram()
+    def _update_idle_leds(self):
         self.gui.dr_canvas.set_row_state(True, self.idle_addr, False)
         self.gui.dr_canvas.set_row_state(False, self.idle_data, True)
-        self.do_view_ram()
     def cb_idle_load(self):
         """button in normal mode"""
         self.save_mode = False
@@ -314,11 +317,10 @@ class Controller(QObject):
             if self.load_mode:
                 self.load_ram(btn)
                 self.load_mode = False
-                self.set_idle_addr(0)
+                self.ram_reloaded()
             elif self.save_mode:
                 self.save_ram(btn)
                 self.save_mode = False
-                self.set_idle_addr(0)
             else:
                 self.idle_data ^= 2**btn
                 self.gui.dr_canvas.set_row_state(False, self.idle_data, True)
@@ -326,8 +328,8 @@ class Controller(QObject):
         """Button clear pressed in clear mode"""
         self.gui.statusbar.sig_temp_message.emit("Memory clear")
         self.cpu.clear_ram()
-        self.set_idle_addr(0)
         self.anim_boot = 40
+        self.ram_reloaded()
         if self.serialctl and self.serialctl.fd_thread:
             # Kill the From Digirule thread if there is one
             self.serialctl.fd_thread.running = False
@@ -412,7 +414,7 @@ class Controller(QObject):
         print("Bye")
 
     def do_view_ram(self):
-        self.dbg.view_ram(0) # decmode
+        self.dbg.view_ram(0) # TODO decmode checkbox
 
     #
     # Other methods
@@ -429,9 +431,6 @@ class Controller(QObject):
         for j in range(start, start+256):
             new_ram.append(int(flash_memory[j][:-1]))
         self.cpu.set_ram(new_ram)
-        self.cpu.set_pc(0)
-        self.symbol_table = None
-        self.do_view_ram()
 
     def save_ram(self, i): 
         """ saves RAM to a program n°i on the flash memory"""
@@ -457,13 +456,12 @@ class Controller(QObject):
             self.gui.statusbar.sig_temp_message.emit("Compilation Success. Occupation " + str(len(res[1])) + " / 252")
             self.symbol_table, self.labels_table = res[2], res[3]
             self.cpu.set_ram(res[1])
-            self.update_idle_leds()
+            self.set_idle_addr(0)
         else:
             # Compilation error
             self.gui.statusbar.sig_persistent_message.emit(res[1])
-            self.symbol_table, self.labels_table = None, None
 
             # Select current line in editor
             self.gui.editor_frame.editor.goto_line(res[2])
-        self.set_idle_addr(0)
+            self.ram_reloaded()
     

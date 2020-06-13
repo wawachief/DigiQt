@@ -108,7 +108,7 @@ class SerialControl(QObject):
             self.fd_thread = FromDigiruleThread(self)
             self.fd_thread.start()
         else:
-            self.update()
+            self.init_serial()
 
     def ram2hex(self, ram):
         """converts the content of the ram into hex format"""
