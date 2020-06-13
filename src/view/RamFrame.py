@@ -24,7 +24,7 @@ class RAMFrame(QWidget):
         QWidget.__init__(self)
 
         self.setWindowTitle("DigiQt - RAM")
-        self.setFixedSize(QSize(330, 630))
+        self.setFixedSize(QSize(330, 650))
 
         self.ram_content = RamDebugText(config)
         self.ram_content.setMinimumSize(QSize(350, 650))
@@ -50,8 +50,8 @@ class RAMFrame(QWidget):
 
         form_layout.addRow(self.lab_ac, self.val_ac)
         form_layout.addRow(self.lab_pc, self.val_pc)
-        form_layout.addRow(self.lab_stack, self.val_stack)
         form_layout.addRow(self.lab_st, self.val_st)
+        form_layout.addRow(self.lab_stack, self.val_stack)
 
         grid = QGridLayout()
         grid.setContentsMargins(0, 0, 0, 0)

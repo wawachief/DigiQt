@@ -1,4 +1,4 @@
-from PySide2.QtCore import QObject
+from PySide2.QtCore import QObject, Signal
 
 class Debug(QObject): 
     def __init__(self, cpu, ram_frame):
@@ -7,7 +7,6 @@ class Debug(QObject):
         self.cpu = cpu
         self.ram_frame = ram_frame
         self.text_ram = ""
-
     #
     # Debugger
     #
@@ -15,42 +14,34 @@ class Debug(QObject):
     def view_ram(self, hexmode):
         """hexmode = 1 means hexadecimal display"""
         self.text_ram = ""
-
-        # computes the current PC position
-        lpc = self.cpu.pc // 8
-        if hexmode == 1 :
-            cpc = self.cpu.pc % 8 * 3 + 5
-            clen=2
-        else:
-            cpc = self.cpu.pc % 8 * 4 + 6
-            clen=3
         
         for l in range(32):
             line = self.d2h(l*8, hexmode) + ":  "
             for c in range(8):
                 line += self.d2h(self.cpu.ram[l*8+c], hexmode) + " "
-            # mark the current PC position
-            if l == lpc :
-                line = line[0:cpc-1] + "²" + line[cpc:cpc+clen] + "²" + line[cpc+clen+1:]
             if l < 31:
                 line += "\n"
             self.text_ram += line
-        
-        self.text_ram += "\n"
-        self.text_ram += "=" * len(line) + "\n"
 
         # Displays the registers values
-        
-        self.text_ram += f"AC = {self.d2b(self.cpu.accu)} (dec : {str(self.cpu.accu)})\n"
         hexmode_str = "hex" if hexmode == 1 else "dec"
-        self.text_ram += f"PC  =  {self.d2b(self.cpu.pc)} ({hexmode_str} : {self.d2h(self.cpu.pc, hexmode)})\n"
-        self.text_ram += "stack : "
-        for i in range(self.cpu.sp):
-            self.text_ram += self.d2h(self.cpu.stack[i], hexmode) + " "
-        self.text_ram += f"\nST  = {self.d2b(self.cpu.ram[self.cpu.REG_STATUS])}"
 
         # Update the RAM text field
         self.ram_frame.set_ram_content(self.text_ram)
+        self.ram_frame.set_pc(f"{self.d2b(self.cpu.pc)} ({hexmode_str} : {self.d2h(self.cpu.pc, hexmode)})")
+        self.ram_frame.set_ac(f"{self.d2b(self.cpu.accu)} (dec : {str(self.cpu.accu)})")
+        stack_str = ""
+        for i in range(self.cpu.sp):
+            stack_str += self.d2h(self.cpu.stack[i], hexmode) + " "
+        self.ram_frame.set_stack(stack_str)
+        self.ram_frame.set_st(f"{self.d2b(self.cpu.ram[self.cpu.REG_STATUS])}")
+
+        # Highlight PC position
+
+        # computes the current PC position
+        lpc = self.cpu.pc // 8
+        cpc = self.cpu.pc % 8
+        self.ram_frame.ram_content.select(lpc, cpc, "ram_pc")
 
     #
     # Conversion methods

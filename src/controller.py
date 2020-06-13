@@ -41,6 +41,7 @@ class Controller(QObject):
     sig_cpu_stopped = Signal(str)
     sig_cpu_speed = Signal(str)
     sig_ram_update = Signal(str)
+    sig_rampc_goto = Signal(str)
 
     def __init__(self):
         QObject.__init__(self)
@@ -50,6 +51,7 @@ class Controller(QObject):
         self.sig_cpu_stopped.connect(self.on_cpu_stopped)
         self.sig_cpu_speed.connect(self.on_cpu_speed_chg)
         self.sig_ram_update.connect(self.update_idle_leds)
+        self.sig_rampc_goto.connect(self.on_rampc_goto)
 
         # Read configuration
         self.config = ConfigParser()
@@ -71,6 +73,7 @@ class Controller(QObject):
         self.gui = ExecutionFrame(self.config, self.sig_config_changed)
         self.gui.dr_canvas.on_btn_power = self.do_quit
         self.gui.do_quit = self.do_quit
+        self.gui.ram_frame.ram_content.sig_rampc_goto = self.sig_rampc_goto
 
         self.cpu = None
         self.init_state()
@@ -185,6 +188,10 @@ class Controller(QObject):
         self.gui.statusbar.sig_temp_message.emit("Change CPU speed : " + new_speed)
         self.gui.slider.setValue(int(new_speed))
     
+    @Slot(str)
+    def on_rampc_goto(self, new_pos):
+        rows, cols = new_pos.split()
+        self.set_idle_addr(int(rows)*8 + int(cols))
     #
     # other events methods
     #
