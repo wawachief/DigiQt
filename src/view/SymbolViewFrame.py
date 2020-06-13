@@ -110,7 +110,9 @@ class SymbolViewFrame(QWidget):
         :param item: new item selected
         :type item: QItemSelection
         """
-        self.sig_symbol_goto.emit(self.__retrieve_text(self.dm_labels, item))
+        text = self.__retrieve_text(self.dm_labels, item)
+        if text:
+            self.sig_symbol_goto.emit(text)
 
     def on_symbol_changed(self, item):
         """
@@ -118,7 +120,9 @@ class SymbolViewFrame(QWidget):
         :param item: new item selected
         :type item: QItemSelection
         """
-        self.sig_symbol_goto.emit(self.__retrieve_text(self.dm_symbols, item))
+        text = self.__retrieve_text(self.dm_symbols, item)
+        if text:
+            self.sig_symbol_goto.emit(text)
 
     def __retrieve_text(self, data_model, item):
         """
@@ -128,7 +132,9 @@ class SymbolViewFrame(QWidget):
         :type data_model: QStandardItemModel
         :rtype: str
         """
-        return data_model.item(QModelIndex(item.indexes()[0]).row()).text()
+        selection = item.indexes()
+        if selection:
+            return data_model.item(QModelIndex(selection[0]).row()).text()
 
     # --- Close handler ---
 
