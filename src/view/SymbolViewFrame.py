@@ -25,6 +25,7 @@ class SymbolViewFrame(QWidget):
         QWidget.__init__(self)
 
         self.setFixedSize(QSize(220, 330))
+        self.setWindowTitle("DigiQt - Symbols")
 
         self.config = config
 
@@ -32,6 +33,8 @@ class SymbolViewFrame(QWidget):
         self.lab_label.setAlignment(Qt.AlignCenter)
         self.lab_symbols = QLabel("Symbols")
         self.lab_symbols.setAlignment(Qt.AlignCenter)
+
+        self.sig_symbol_goto = None # pushed by the controler
 
         # Initialization of the lists
         self.labels_view = QListView()
@@ -107,7 +110,7 @@ class SymbolViewFrame(QWidget):
         :param item: new item selected
         :type item: QItemSelection
         """
-        print(self.__retrieve_text(self.dm_labels, item))
+        self.sig_symbol_goto.emit(self.__retrieve_text(self.dm_labels, item))
 
     def on_symbol_changed(self, item):
         """
@@ -115,7 +118,7 @@ class SymbolViewFrame(QWidget):
         :param item: new item selected
         :type item: QItemSelection
         """
-        print(self.__retrieve_text(self.dm_symbols, item))
+        self.sig_symbol_goto.emit(self.__retrieve_text(self.dm_symbols, item))
 
     def __retrieve_text(self, data_model, item):
         """

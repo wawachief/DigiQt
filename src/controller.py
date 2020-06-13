@@ -39,6 +39,7 @@ class Controller(QObject):
     sig_cpu_speed = Signal(str)
     sig_ram_update = Signal(str)
     sig_rampc_goto = Signal(str)
+    sig_symbol_goto = Signal(str)
 
     def __init__(self):
         QObject.__init__(self)
@@ -49,6 +50,7 @@ class Controller(QObject):
         self.sig_cpu_speed.connect(self.on_cpu_speed_chg)
         self.sig_ram_update.connect(self.ram_reloaded)
         self.sig_rampc_goto.connect(self.on_rampc_goto)
+        self.sig_symbol_goto.connect(self.on_symbol_goto)
 
         # Read configuration
         self.config = ConfigParser()
@@ -71,6 +73,7 @@ class Controller(QObject):
         self.gui.dr_canvas.on_btn_power = self.do_quit
         self.gui.do_quit = self.do_quit
         self.gui.ram_frame.ram_content.sig_rampc_goto = self.sig_rampc_goto
+        self.gui.symbol_frame.sig_symbol_goto = self.sig_symbol_goto
 
         self.cpu = None
         self.init_state()
@@ -148,6 +151,19 @@ class Controller(QObject):
                         # end animation
                         self._update_idle_leds()
 
+    def _update_symbols(self):
+        # preparing the lists
+        if self.labels_table is None:
+            labels_table = []
+        else:
+            labels_table = self.labels_table
+        if self.symbol_table is None:
+            symbol_table = []
+        else:
+            symbol_table = set(self.symbol_table) - set(labels_table)
+        self.gui.symbol_frame.init_labels(labels_table)
+        self.gui.symbol_frame.init_symbols(symbol_table)
+
     # 
     # Signals handling
     # 
@@ -189,6 +205,11 @@ class Controller(QObject):
     def on_rampc_goto(self, new_pos):
         rows, cols = new_pos.split()
         self.set_idle_addr(int(rows)*8 + int(cols))
+
+    @Slot(str)
+    def on_symbol_goto(self, symbol):
+        if self.symbol_table is not None:
+            self.set_idle_addr(self.symbol_table[symbol])
     #
     # other events methods
     #
@@ -248,6 +269,7 @@ class Controller(QObject):
     #
     def ram_reloaded(self, dummy = ""):
         self.symbol_table, self.labels_table = None, None
+        self._update_symbols()
         self.set_idle_addr(0)
     def set_idle_addr(self, value):
         """sets idle_addr value"""
@@ -452,6 +474,7 @@ class Controller(QObject):
             # Compilation success
             self.gui.statusbar.sig_temp_message.emit("Compilation Success. Occupation " + str(len(res[1])) + " / 252")
             self.symbol_table, self.labels_table = res[2], res[3]
+            self._update_symbols()
             self.cpu.set_ram(res[1])
             self.set_idle_addr(0)
         else:
