@@ -24,6 +24,7 @@ class RamDebugText(QPlainTextEdit):
         self.setReadOnly(True)
         self.highlight = RamHighlighter(self.document(), config)
         self.setLineWrapMode(QPlainTextEdit.NoWrap)
+        self.sig_rampc_goto = None # attribute pushed by debugger controler
 
     def select(self, row, column, color):
         """
@@ -42,6 +43,7 @@ class RamDebugText(QPlainTextEdit):
 
         p = self.palette()
         p.setColor(QPalette.Highlight, QColor(self.config.get('colors', color)))
+        p.setColor(QPalette.HighlightedText, QColor('black'))
         self.setPalette(p)
 
     def mouseDoubleClickEvent(self, e):
@@ -67,7 +69,8 @@ class RamDebugText(QPlainTextEdit):
         col -= 2  # to remove beginning spaces counts
 
         if col >= 0:  # to be sure that we click on a valid position
-            print(row, col)  # TODO link to signal
+            # print(row, col)  # TODO link to signal
+            self.sig_rampc_goto.emit(f"{row} {col}")
         else:
             cursor.clearSelection()
             self.setTextCursor(cursor)
