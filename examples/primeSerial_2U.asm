@@ -13,19 +13,12 @@
 initsp
 speed	0
 
-// Initialize stack
-copylr	0 stack
-copylr	0 stack+1
-copylr	0 stack+2
-
 // Displays 2 and 3
 copylr	2 nb
 call	int2str
-copylr	3 nb
-call	int2str
 
 // start the search with 5 
-copylr 	5 nb
+copylr 	3 nb
 :search_loop
     call	prime_test
     bcrsc	PFlag status
@@ -57,9 +50,8 @@ copylr 	5 nb
 // ouput : PFlag on status
 :prime_test
     copyrr	nb dv
+    shiftrr	dv
 :loop_div
-    decr	dv
-    decr	dv
     copyrr	nb r0 			
     div	r0 dv
     // r0 is the quotient, acc the remainder
@@ -67,8 +59,10 @@ copylr 	5 nb
     bcrsc	CFlag status
     jump	not_prime
 // we stop when dv is 3
+    decr	dv
+    decr	dv
     copyra	dv
-    subla	3
+    subla	1
     bcrss	ZFlag status
     jump	loop_div
 // Number is prime
@@ -84,10 +78,10 @@ copylr 	5 nb
 // output : ascii decimal representation in the stack
 :int2str
     copyrr	nb r0
+// Initialize the stack pointer
     copylr	stack stackPtr
 :get_digits                 
     div	r0 ten
-    addla	'0'
     copyai	stackPtr
     incr	stackPtr
     copyra	r0
@@ -95,15 +89,15 @@ copylr 	5 nb
     jump	get_digits
 // Outputs the content of the stack over USB
 :disp_nb
-    copylr	3 r0
-    copylr	stack+3 stackPtr
-:loop_out
     decr	stackPtr
+    subra	stack
     copyia	stackPtr
-    bcrss	ZFlag status
+    addla	'0'
     comout
-    nop
-    decrjz	r0
+// test if we reached the head of the stack
+    copyra	stackPtr
+    subla	stack
+    bcrss	ZFlag status
     jump loop_out
 // Outouts a space separator
     copyla	' '
