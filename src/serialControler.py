@@ -17,6 +17,10 @@ class InitSerialThread(QThread):
 
     def run(self):
         list_available_ports =  [p.device for p in list_ports.comports()]
+        if not list_available_ports:
+            list_available_ports = ["No serial available"]
+        else:
+            list_available_ports.insert(0,'select...')
         self.update_combo(list_available_ports)
         if self.port in list_available_ports:
             self.parent.ser_port = serial.Serial(timeout=self.timeout)
@@ -72,7 +76,7 @@ class SerialControl(QObject):
     sig_CPU_comin = Signal(str)
     sig_port_change = Signal(str)
 
-    def __init__(self, cpu, monitor_frame, statusbar, config, sig_update):
+    def __init__(self, cpu, monitor_frame, statusbar, config, sig_update, config_file_path):
         QObject.__init__(self)
 
         self.cpu       = cpu
@@ -83,6 +87,7 @@ class SerialControl(QObject):
         self.sig_update = sig_update
         self.fd_thread = None
         self.monitor_frame = monitor_frame
+        self.config_file_path = config_file_path
 
         # Connect buttons to controler's methods
         self.monitor_frame.to_dr_btn.to_digirule = self.to_digirule
@@ -137,6 +142,10 @@ class SerialControl(QObject):
     @Slot(str)
     def on_port_change(self, port):
         self.config.set("serial", "port", port)
+
+        with open(self.config_file_path, 'w') as configfile:
+            self.config.write(configfile)
+
         self.init_serial()
 
     def to_digirule(self):

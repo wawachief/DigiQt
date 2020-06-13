@@ -114,7 +114,7 @@ class Controller(QObject):
         # Instantiate the serial controler
         if self.dr_model == "2U":
             self.serialctl = SerialControl(self.cpu, self.gui.monitor_frame, 
-                self.gui.statusbar, self.config, self.sig_ram_update)
+                self.gui.statusbar, self.config, self.sig_ram_update, CONFIG_FILE_PATH)
         else:
             self.serialctl = None
 
