@@ -10,7 +10,8 @@ from PySide2.QtCore import QSize, Qt
 from PySide2.QtGui import QKeySequence, QFont, QTextCursor
 
 from src.view.style import style
-from src.view.console_frame_widgets.ConsoleFrameButtons import ClearButton, ToDigiruleButton, FromDigiruleButton
+from src.view.console_frame_widgets.ConsoleFrameButtons import ClearButton, ToDigiruleButton, FromDigiruleButton, RefreshPortButton
+from src.view.console_frame_widgets.USBPortDropdown import UsbPortCombo
 
 
 class SerialConsoleFrame(QWidget):
@@ -40,7 +41,7 @@ class SerialConsoleFrame(QWidget):
         # Serial in
         self.serial_in = QLabel()
         self.serial_in.setAlignment(Qt.AlignCenter)
-        self.serial_in.setFixedSize(QSize(56, 36))
+        self.serial_in.setFixedSize(QSize(44, 36))
         font = QFont()
         font.setPointSize(30)
         font.setBold(True)
@@ -54,6 +55,11 @@ class SerialConsoleFrame(QWidget):
 
         self.from_dr_btn = FromDigiruleButton(config)
 
+        # Port selection
+        self.lab_port = QLabel("Port:")
+        self.usb_combo = UsbPortCombo()
+        self.refresh_btn = RefreshPortButton(config)
+
         self._init_tool_bar()
         self._set_layout()
         self._set_stylesheet()
@@ -66,16 +72,17 @@ class SerialConsoleFrame(QWidget):
         self.toolbar.setFixedHeight(70)
 
         self.toolbar.addWidget(self.clear_btn)
+
         self.toolbar.addSeparator()
         self.toolbar.addWidget(self.to_dr_btn)
         self.toolbar.addWidget(self.from_dr_btn)
 
-        # Empty space to align the about button to the right
-        spacer = QWidget()
-        spacer.setStyleSheet("background-color: transparent;")
-        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.toolbar.addWidget(spacer)
+        self.toolbar.addSeparator()
+        self.toolbar.addWidget(self.lab_port)
+        self.toolbar.addWidget(self.usb_combo)
+        self.toolbar.addWidget(self.refresh_btn)
 
+        self.toolbar.addSeparator()
         self.toolbar.addWidget(self.serial_in)
 
     def _set_layout(self):
@@ -94,6 +101,7 @@ class SerialConsoleFrame(QWidget):
     def _set_stylesheet(self):
         self.toolbar.setStyleSheet(style.get_stylesheet("qtoolbar"))
         self.setStyleSheet(style.get_stylesheet("common"))
+        self.lab_port.setStyleSheet("background-color: transparent; color: #75BA6D; font-weight: bold;")
         self.serial_in.setStyleSheet(style.get_stylesheet("serial_in"))
         self.serial_out.setStyleSheet("background-color: #505050; color: white; padding-left: 10px;")
 

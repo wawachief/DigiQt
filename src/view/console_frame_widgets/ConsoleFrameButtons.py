@@ -90,3 +90,50 @@ class ClearButton(QPushButton):
 
     def on_clear(self):
         pass
+
+
+class RefreshPortButton(QPushButton):
+    def __init__(self, config):
+        """
+        Button handling the refresh ports operation
+        """
+        QPushButton.__init__(self)
+
+        self.config = config
+
+        self.setIcon(assets_mgr.get_icon("refresh"))
+        self.setIconSize(assets_mgr.ICON_SIZE)
+        self.setToolTip("Refresh")
+        self.set_style()
+
+        self.clicked.connect(self.on_refresh)
+
+    def on_refresh(self):
+        pass
+
+    def set_style(self, is_clicked=False):
+        """
+        Sets a different style whereas this button is clicked or not
+        """
+        if is_clicked:
+            color = self.config.get('colors', 'toolbar_clicked_icon_btn_bg')
+        else:
+            color = self.config.get('colors', 'toolbar_icon_btn_bg')
+
+        self.setStyleSheet(f"border: none; background-color: {color};")
+
+    def mousePressEvent(self, e):
+        """
+        Overrides to call the style update
+        """
+        self.set_style(True)
+
+        super().mousePressEvent(e)
+
+    def mouseReleaseEvent(self, e):
+        """
+        Overrides to call the style update
+        """
+        self.set_style(False)
+
+        super().mouseReleaseEvent(e)
