@@ -1,6 +1,6 @@
 import serial
 import serial.tools.list_ports as list_ports
-from PySide2.QtCore import QObject, QThread, Signal
+from PySide2.QtCore import QObject, QThread, Signal, Slot
 from time import sleep
 
 class InitSerialThread(QThread):
@@ -13,9 +13,11 @@ class InitSerialThread(QThread):
         self.port      = parent.config.get("serial","port")
         self.baudrate  = int(parent.config.get("serial","baudrate"))
         self.timeout   = float(parent.config.get("serial","TIMEOUT"))
+        self.update_combo = None # pushed by controler
 
     def run(self):
         list_available_ports =  [p.device for p in list_ports.comports()]
+        self.update_combo(list_available_ports)
         if self.port in list_available_ports:
             self.parent.ser_port = serial.Serial(timeout=self.timeout)
             self.parent.ser_port.baudrate = self.baudrate
@@ -68,6 +70,7 @@ class SerialControl(QObject):
     sig_keyseq_pressed = Signal(str)
     sig_CPU_comout = Signal(str)
     sig_CPU_comin = Signal(str)
+    sig_port_change = Signal(str)
 
     def __init__(self, cpu, monitor_frame, statusbar, config, sig_update):
         QObject.__init__(self)
@@ -77,7 +80,6 @@ class SerialControl(QObject):
         self.statusbar = statusbar
         self.config    = config
         self.ser_port  = None
-        self.init_serial()
         self.sig_update = sig_update
         self.fd_thread = None
         self.monitor_frame = monitor_frame
@@ -85,25 +87,33 @@ class SerialControl(QObject):
         # Connect buttons to controler's methods
         self.monitor_frame.to_dr_btn.to_digirule = self.to_digirule
         self.monitor_frame.from_dr_btn.from_digirule = self.from_digirule
+        self.monitor_frame.refresh_btn.on_refresh = self.init_serial
+
         
         # Connect signal
         self.sig_keyseq_pressed.connect(self.on_key_pressed)
         self.sig_CPU_comout.connect(self.on_comout)
         self.sig_CPU_comin.connect(self.on_comin)
+        self.sig_port_change.connect(self.on_port_change)
 
         self.monitor_frame.sig_keyseq_pressed = self.sig_keyseq_pressed
         self.cpu.sig_CPU_comout = self.sig_CPU_comout
         self.cpu.sig_CPU_comin = self.sig_CPU_comin
+        self.monitor_frame.usb_combo.sig_port_change = self.sig_port_change
         
         self.keydict = {"Return": "\n", "Enter": chr(13), "Backspace":chr(8), "Esc":chr(27), "Del":chr(127)}
 
+        self.init_serial()
+
     def init_serial(self):
         is_thread = InitSerialThread(self)
+        is_thread.update_combo = self.monitor_frame.usb_combo.set_ports
         is_thread.start()
 
     def init_OK(self):
         self.statusbar.sig_temp_message.emit("Serial port Initialized")
 
+    @Slot(str)
     def on_key_pressed(self, key):
         if self.cpu.rx is None:
             if key in self.keydict:
@@ -114,13 +124,20 @@ class SerialControl(QObject):
             else:
                 self.statusbar.sig_temp_message.emit(f"Unknown key: {key}")
 
+    @Slot(str)
     def on_comin(self, char):
         """Char is handled by CPU, we free the slot"""
         self.monitor_frame.serial_in.setText(" ")
 
+    @Slot(str)
     def on_comout(self, char):
         """Append the char to the console"""
         self.monitor_frame.append_serial_out(char)
+
+    @Slot(str)
+    def on_port_change(self, port):
+        self.config.set("serial", "port", port)
+        self.init_serial()
 
     def to_digirule(self):
         if self.ser_port is None:

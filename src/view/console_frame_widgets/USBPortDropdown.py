@@ -20,6 +20,7 @@ class UsbPortCombo(QComboBox):
         self.setStyleSheet(style.get_stylesheet("qcombobox"))
         self.activated.connect(self.on_selection_changed)
         self.setFixedSize(QSize(200, 30))
+        self.sig_port_change = None # pushed by serial controler
 
     def set_ports(self, ports):
         """
@@ -34,5 +35,4 @@ class UsbPortCombo(QComboBox):
         """
         port = self.currentText()
         self.setToolTip(port)
-
-        print(port)  # TODO bind to signal
+        self.sig_port_change.emit(port)
