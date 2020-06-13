@@ -121,6 +121,43 @@ class OpenConsoleButton(QPushButton):
             self.console_frame.hide()
 
 
+class OpenSymbolButton(QPushButton):
+    def __init__(self, symbol_frame, config):
+        """
+        Button handling the open/close operation of the symbols frame
+
+        :param symbol_frame: The symbol frame that this button shows/hides
+        """
+        QPushButton.__init__(self)
+
+        self.setIcon(assets_mgr.get_icon("open_editor"))
+        self.setIconSize(assets_mgr.ICON_SIZE)
+        self.setToolTip("Show symbols list frame")
+        self.setStyleSheet('border: none; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
+
+        self.symbol_frame = symbol_frame
+
+        self.clicked.connect(lambda: self.show_symbol_frame(not self.symbol_frame.isVisible()))
+
+    def show_symbol_frame(self, do_display):
+        """
+        Hides or shows the symbol frame
+
+        :param do_display: True will display the symbol frame, False will hide it
+        :type do_display: bool
+        """
+        if do_display:
+            self.setIcon(assets_mgr.get_icon("close_editor"))
+            self.setToolTip("Hide symbols list frame")
+
+            self.symbol_frame.show()
+        else:
+            self.setIcon(assets_mgr.get_icon("open_editor"))
+            self.setToolTip("Show symbols list frame")
+
+            self.symbol_frame.hide()
+
+
 class AboutButton(QPushButton):
     def __init__(self, config, sig_message):
         """

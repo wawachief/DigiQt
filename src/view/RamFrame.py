@@ -24,7 +24,7 @@ class RAMFrame(QWidget):
         QWidget.__init__(self)
 
         self.setWindowTitle("DigiQt - RAM")
-        self.setFixedSize(QSize(330, 650))
+        self.setFixedSize(QSize(300, 650))
 
         self.ram_content = RamDebugText(config)
         self.ram_content.setMinimumSize(QSize(350, 650))
@@ -40,7 +40,7 @@ class RAMFrame(QWidget):
         self.val_st = QLabel("")
 
         self._set_layout()
-        self._set_stylesheet()
+        self.setStyleSheet(style.get_stylesheet("debug_frame"))
 
     def _set_layout(self):
         """
@@ -66,9 +66,6 @@ class RAMFrame(QWidget):
         """
         Connects all the buttons to methods
         """
-
-    def _set_stylesheet(self):
-        self.setStyleSheet(style.get_stylesheet("debug_frame"))
 
     def set_ram_content(self, text):
         """

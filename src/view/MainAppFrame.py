@@ -11,9 +11,10 @@ from PySide2.QtCore import Qt
 from src.view.EditorFrame import EditorFrame
 from src.view.RamFrame import RAMFrame
 from src.view.SerialConsoleFrame import SerialConsoleFrame
+from src.view.SymbolViewFrame import SymbolViewFrame
 from src.view.exec_frame_widgets.DigiruleCanvas import DRCanvas
 from src.view.exec_frame_widgets.DigiruleModelDropdown import DigiruleModelDropdown
-from src.view.exec_frame_widgets.ExecFrameButtons import OpenEditorButton, OpenRamButton, OpenConsoleButton, AboutButton
+from src.view.exec_frame_widgets.ExecFrameButtons import OpenEditorButton, OpenRamButton, OpenConsoleButton, AboutButton, OpenSymbolButton
 from src.view.exec_frame_widgets.StatusBar import StatusBar
 from src.view.exec_frame_widgets.SpeedSlider import SpeedSlider
 from src.view.style import style
@@ -47,6 +48,7 @@ class ExecutionFrame(QWidget):
         self.dr_canvas = DRCanvas(self.statusbar.sig_temp_message, window_width, self.current_digirule_model, config)
         self.slider = SpeedSlider(sliderbar_width, bottom_widget_height, config)
 
+        # Buttons open/hide frames
         self.editor_frame = EditorFrame(config, self.statusbar.sig_temp_message)
         self.open_editor_btn = OpenEditorButton(self.editor_frame, config)
         self.editor_frame.on_close = lambda: self.open_editor_btn.show_editor_frame(False)
@@ -58,6 +60,10 @@ class ExecutionFrame(QWidget):
         self.monitor_frame = SerialConsoleFrame(config)
         self.open_monitor_btn = OpenConsoleButton(self.monitor_frame, config)
         self.monitor_frame.on_close = lambda: self.open_monitor_btn.show_console_frame(False)
+
+        self.symbol_frame = SymbolViewFrame(config)
+        self.open_symbol_btn = OpenSymbolButton(self.symbol_frame, config)
+        self.symbol_frame.on_close = lambda: self.open_symbol_btn.show_symbol_frame(False)
 
         self._init_tool_bar()
         self._set_layout()
@@ -72,10 +78,13 @@ class ExecutionFrame(QWidget):
         self.toolbar = QToolBar()
         self.toolbar.setFixedHeight(70)
 
+        # Open/hide buttons
         self.toolbar.addWidget(self.open_editor_btn)
         self.toolbar.addWidget(self.open_ram_btn)
         self.toolbar.addWidget(self.open_monitor_btn)
+        self.toolbar.addWidget(self.open_symbol_btn)
 
+        # Digirule model selection
         self.toolbar.addSeparator()
         self.digimodel_dropdown = DigiruleModelDropdown(self.on_digimodel_dropdown_changed, self.current_digirule_model)
         self.toolbar.addWidget(self.digimodel_dropdown)
@@ -86,6 +95,7 @@ class ExecutionFrame(QWidget):
         spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.toolbar.addWidget(spacer)
 
+        # About button
         self.toolbar.addWidget(AboutButton(self.config, self.statusbar.sig_temp_message))
 
     def _set_layout(self):
