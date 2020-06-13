@@ -94,7 +94,6 @@ class SerialConsoleFrame(QWidget):
     def _set_stylesheet(self):
         self.toolbar.setStyleSheet(style.get_stylesheet("qtoolbar"))
         self.setStyleSheet(style.get_stylesheet("common"))
-        #self.serial_in.setStyleSheet("background-color: #565656; color: cyan; margin-right: 17px; border-radius: 5px;")
         self.serial_in.setStyleSheet(style.get_stylesheet("serial_in"))
         self.serial_out.setStyleSheet("background-color: #505050; color: white; padding-left: 10px;")
 

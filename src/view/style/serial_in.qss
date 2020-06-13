@@ -1,6 +1,6 @@
 QLabel {
     background-color: #565656;
-    color: cyan;
+    color: #E67300;
     margin-right: 17px;
 
     border-radius: 5px;
