@@ -84,7 +84,7 @@ class SerialControl(QObject):
 
         # Connect buttons to controler's methods
         self.monitor_frame.to_dr_btn.to_digirule = self.to_digirule
-        self.monitor_frame.from_dr_btn.to_digirule = self.from_digirule
+        self.monitor_frame.from_dr_btn.from_digirule = self.from_digirule
         
         # Connect signal
         self.sig_keyseq_pressed.connect(self.on_key_pressed)
@@ -109,7 +109,8 @@ class SerialControl(QObject):
             if key in self.keydict:
                 self.cpu.rx = self.keydict[key]
             elif len(key) == 1:
-                self.cpu.rx = key 
+                self.cpu.rx = key
+                self.monitor_frame.serial_in.setText(key)
             else:
                 self.statusbar.sig_temp_message.emit(f"Unknown key: {key}")
 
@@ -140,7 +141,7 @@ class SerialControl(QObject):
                 self.statusbar.sig_temp_message.emit("Memory sent")
 
     def from_digirule(self):
-        """Lanch receive sequence in background"""
+        """Launch receive sequence in background"""
         if self.ser_port:
             self.fd_thread = FromDigiruleThread(self)
             self.fd_thread.start()
