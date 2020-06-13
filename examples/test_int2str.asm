@@ -1,7 +1,7 @@
 %define 	ZFlag 0
 %define 	statusReg 252
 
-copylr	53 r0
+copylr	102 r0
 
 //
 // converting binary to decimal
@@ -10,13 +10,13 @@ copylr	53 r0
 copylr	stack stackPtr	
   
 :get_digits                 
-    div        r0 ten
-    addla    '0'
-    copyai    stackPtr
-    incr    stackPtr
-    copyra    r0
-    bcrss    ZFlag statusReg
-    jump    get_digits  
+    div	r0 ten
+    addla	'0'
+    copyai	stackPtr
+    incr	stackPtr
+    copyra	r0
+    bcrss	ZFlag statusReg
+    jump	get_digits  
 :the_end
     halt
     

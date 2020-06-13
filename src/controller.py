@@ -25,7 +25,10 @@ class CpuThread(QThread):
                 if self.inst_timer >= self.cpu.speed * self.speed_factor :
                     self.cpu.tick()
                     self.inst_timer = 0
-                # 50000 cycles per second in speed 0 configuration
+                if self.cpu.tx is not None:
+                    print(chr(self.cpu.tx), end="")
+                    self.cpu.tx = None
+                # 10000 cycles per second in speed 0 configuration
                 # adjust speed with cpu.speed value
                 sleep(0.00001)
                 self.inst_timer += 1
@@ -172,8 +175,7 @@ class Controller(QObject):
     @Slot(str)
     def on_cpu_stopped(self, exception):
         self.set_idle_mode()
-        self.idle_addr = self.cpu.pc
-        self.update_idle_leds()
+        self.set_idle_addr(self.cpu.pc)
         # display on statusbar
         self.gui.statusbar.sig_persistent_message.emit("CPU stopped : " + exception)
 
@@ -240,6 +242,11 @@ class Controller(QObject):
     #
     # idle mode methods
     #
+    def set_idle_addr(self, value):
+        """sets idle_addr value"""
+        self.idle_addr = value % 256
+        self.cpu.set_pc(self.idle_addr)
+        self.update_idle_leds()
     def update_idle_leds(self, arg=""):
         self.idle_data = self.cpu.ram[self.idle_addr]
         self.gui.dr_canvas.set_row_state(True, self.idle_addr, False)
@@ -258,13 +265,10 @@ class Controller(QObject):
     def cb_idle_store(self):
         """button in normal mode"""
         self.cpu.ram[self.idle_addr] = self.idle_data
-        self.idle_addr = (self.idle_addr + 1) % 256
-        self.update_idle_leds()
+        self.set_idle_addr(self.idle_addr + 1)
     def cb_idle_goto(self):
         """button in normal mode"""
-        self.idle_addr = self.idle_data
-        self.cpu.set_pc(self.idle_addr)
-        self.update_idle_leds()
+        self.set_idle_addr(self.idle_data)
     def cb_idle_run(self):
         """button in normal mode"""
         self.gui.statusbar.sig_temp_message.emit("Entering run mode")
@@ -289,31 +293,25 @@ class Controller(QObject):
             else:
                 self.serialctl.to_digirule()
         else:
-            self.idle_addr = (self.idle_addr + 1) % 256
-            self.cpu.pc = self.idle_addr
-            self.update_idle_leds()
+            self.set_idle_addr(self.idle_addr + 1)
     def cb_idle_prev(self):
         """button in normal mode"""
         if self.load_mode:
             self.cb_idle_clear()
             self.load_mode = False
         else:
-            self.idle_addr = (self.idle_addr - 1) % 256
-            self.cpu.pc = self.idle_addr
-            self.update_idle_leds()
+            self.set_idle_addr(self.idle_addr - 1)
     def cb_idle_dx(self, btn, is_pressed):
         """Button Dx pressed in idle mode"""
         if is_pressed:
             if self.load_mode:
                 self.load_ram(btn)
                 self.load_mode = False
-                self.idle_addr = 0
-                self.update_idle_leds()
+                self.set_idle_addr(0)
             elif self.save_mode:
                 self.save_ram(btn)
                 self.save_mode = False
-                self.idle_addr = 0
-                self.update_idle_leds()
+                self.set_idle_addr(0)
             else:
                 self.idle_data ^= 2**btn
                 self.gui.dr_canvas.set_row_state(False, self.idle_data, True)
@@ -321,21 +319,17 @@ class Controller(QObject):
         """Button clear pressed in clear mode"""
         self.gui.statusbar.sig_temp_message.emit("Memory clear")
         self.cpu.clear_ram()
-        self.do_view_ram()
-        self.idle_addr = 0
-        self.cpu.pc = 0
+        self.set_idle_addr(0)
         self.anim_boot = 40
-        self.update_idle_leds()
         if self.serialctl and self.serialctl.fd_thread:
             # Kill the From Digirule thread if there is one
             self.serialctl.fd_thread.running = False
     def cb_idle_step(self):
         """step by step button. Cycle the cpu once"""
         self.cpu.tick()
-        self.idle_addr = self.cpu.pc
+        self.set_idle_addr(self.cpu.pc)
         instruction = self.cpu.decode(self.idle_addr, self.symbol_table)
         self.gui.statusbar.sig_persistent_message.emit(instruction)
-        self.update_idle_leds()
 
     #
     # run mode methods
@@ -360,10 +354,8 @@ class Controller(QObject):
     def cb_run_run(self):
         """button in run mode"""
         self.set_idle_mode()
-        self.idle_addr = self.cpu.pc
+        self.set_idle_addr(self.cpu.pc)
         self.gui.statusbar.sig_temp_message.emit("Leaving run mode")
-        self.do_view_ram()
-        self.update_idle_leds()
     def cb_run_next(self):
         """button in run mode"""
         pass
@@ -466,6 +458,5 @@ class Controller(QObject):
 
             # Select current line in editor
             self.gui.editor_frame.editor.goto_line(res[2])
-        self.cpu.set_pc(0)
-        self.do_view_ram()
+        self.set_idle_addr(0)
     
