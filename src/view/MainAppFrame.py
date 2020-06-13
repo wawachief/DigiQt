@@ -155,4 +155,5 @@ class ExecutionFrame(QWidget):
         self.editor_frame.on_close()
         self.ram_frame.on_close()
         self.monitor_frame.on_close()
+        self.symbol_frame.on_close()
         event.accept()
