@@ -16,6 +16,8 @@ speed	0
 // Displays 2 and 3
 copylr	2 nb
 call	int2str
+copylr	3 nb
+call	int2str
 
 // start the search with 5 
 copylr 	3 nb
@@ -49,8 +51,11 @@ copylr 	3 nb
 // input : nb
 // ouput : PFlag on status
 :prime_test
+    cbr	CFlag status
     copyrr	nb dv
     shiftrr	dv
+// making sure dv is odd
+    sbr	0 dv
 :loop_div
     copyrr	nb r0 			
     div	r0 dv
@@ -98,7 +103,7 @@ copylr 	3 nb
     copyra	stackPtr
     subla	stack
     bcrss	ZFlag status
-    jump loop_out
+    jump 	disp_nb
 // Outouts a space separator
     copyla	' '
     comout
