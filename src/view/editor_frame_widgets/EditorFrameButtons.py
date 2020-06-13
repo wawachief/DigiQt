@@ -65,7 +65,7 @@ class AssembleButton(QPushButton):
         self.setIcon(assets_mgr.get_icon("assemble"))
         self.setIconSize(assets_mgr.ICON_SIZE)
         self.setToolTip("Assemble")
-        self.setStyleSheet('border: none; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
+        self.setStyleSheet('border: none; margin-right: 10px; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
 
         self.clicked.connect(self.on_assemble)
 
