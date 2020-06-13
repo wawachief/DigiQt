@@ -50,7 +50,7 @@ class ExecutionFrame(QWidget):
         self.open_editor_btn = OpenEditorButton(self.editor_frame, config)
         self.editor_frame.on_close = lambda: self.open_editor_btn.show_editor_frame(False)
 
-        self.ram_frame = RAMFrame()
+        self.ram_frame = RAMFrame(config)
         self.open_ram_btn = OpenRamButton(self.ram_frame, config)
         self.ram_frame.on_close = lambda: self.open_ram_btn.show_ram_frame(False)
 

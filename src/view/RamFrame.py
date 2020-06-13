@@ -5,27 +5,39 @@
 # RAM frame
 #
 
-from PySide2.QtWidgets import QVBoxLayout, QWidget, QPlainTextEdit
-from PySide2.QtCore import Qt, QSize
+from PySide2.QtWidgets import QFormLayout, QGridLayout, QWidget, QPlainTextEdit, QLabel
+from PySide2.QtCore import QSize
 
 from src.view.style import style
+
+from src.view.debug_frame_widgets.RamContent import RamDebugText
 
 
 class RAMFrame(QWidget):
 
     # --- Init methods ---
 
-    def __init__(self):
+    def __init__(self, config):
         """
         Editor frame. Contains a toolbar and an editor widget
         """
         QWidget.__init__(self)
 
         self.setWindowTitle("DigiQt - RAM")
-        self.setMinimumSize(QSize(350, 650))
+        self.setFixedSize(QSize(330, 630))
 
-        self.editor = QPlainTextEdit()  # TODO temporary
-        self.editor.setMinimumSize(QSize(350, 650))
+        self.ram_content = RamDebugText(config)
+        self.ram_content.setMinimumSize(QSize(350, 650))
+
+        self.lab_ac = QLabel("AC:")
+        self.lab_pc = QLabel("PC:")
+        self.lab_stack = QLabel("Stack:")
+        self.lab_st = QLabel("ST:")
+
+        self.val_ac = QLabel("")
+        self.val_pc = QLabel("")
+        self.val_stack = QLabel("")
+        self.val_st = QLabel("")
 
         self._set_layout()
         self._set_stylesheet()
@@ -34,13 +46,21 @@ class RAMFrame(QWidget):
         """
         Creates this Widget's Layout
         """
-        box = QVBoxLayout()
-        box.setContentsMargins(0, 0, 0, 0)
+        form_layout = QFormLayout()
 
-        box.addWidget(self.editor)
-        box.setAlignment(self.editor, Qt.AlignTop)
+        form_layout.addRow(self.lab_ac, self.val_ac)
+        form_layout.addRow(self.lab_pc, self.val_pc)
+        form_layout.addRow(self.lab_stack, self.val_stack)
+        form_layout.addRow(self.lab_st, self.val_st)
 
-        self.setLayout(box)
+        grid = QGridLayout()
+        grid.setContentsMargins(0, 0, 0, 0)
+
+        grid.addLayout(form_layout, 0, 0)
+
+        grid.addWidget(self.ram_content, 1, 0)
+
+        self.setLayout(grid)
 
     def _connect_all(self):
         """
@@ -48,10 +68,7 @@ class RAMFrame(QWidget):
         """
 
     def _set_stylesheet(self):
-        self.editor.setStyleSheet("background-color: #505050; color: white")
-
-        # Execution Frame
-        self.setStyleSheet(style.get_stylesheet("common"))
+        self.setStyleSheet(style.get_stylesheet("debug_frame"))
 
     def set_ram_content(self, text):
         """
@@ -59,7 +76,7 @@ class RAMFrame(QWidget):
 
         :param text: text to set
         """
-        self.editor.setPlainText(text)
+        self.ram_content.setPlainText(text)
 
     # --- Close handler ---
 
@@ -75,3 +92,15 @@ class RAMFrame(QWidget):
         :return:
         """
         pass
+
+    def set_pc(self, val):
+        self.val_pc.setText(val)
+
+    def set_ac(self, val):
+        self.val_ac.setText(val)
+
+    def set_stack(self, val):
+        self.val_stack.setText(val)
+
+    def set_st(self, val):
+        self.val_st.setText(val)

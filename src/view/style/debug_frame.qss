@@ -1,0 +1,14 @@
+QWidget {
+    background-color: #333333;
+}
+
+QPlainTextEdit {
+    background-color: #505050;
+    color: white;
+    border-top: 2px solid QLinearGradient( x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #FFFF00, stop: 0.2 #FF0000, stop: 0.4 #FF00FF, stop: 0.6 #0000FF, stop: 0.8 #00FFFF, stop: 1 #00FF00);
+}
+
+QLabel {
+    color: #75BA6D;
+    font-weight: bold;
+}
