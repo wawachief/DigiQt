@@ -8,7 +8,7 @@
 from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget
 from PySide2.QtCore import Qt, QSize
 
-from src.view.editor_frame_widgets.EditorFrameButtons import OpenFileButton, AssembleButton, SaveAsFileButton
+from src.view.editor_frame_widgets.EditorFrameButtons import OpenFileButton, AssembleButton, SaveAsFileButton, SaveFileButton
 
 from src.view.editor_frame_widgets.CodeEditor import CodeEditor
 from src.view.style import style
@@ -18,15 +18,15 @@ class EditorFrame(QWidget):
 
     # --- Init methods ---
 
-    def __init__(self, config):
+    def __init__(self, config, sig_message):
         """
         Editor frame. Contains a toolbar and an editor widget
 
         :param config: application configuration file
+        :param sig_message: signal to emit to display a message in the main frame's status bar
         """
         QWidget.__init__(self)
 
-        self.__init_title()
         self.setMinimumSize(QSize(630, 500))
 
         self.config = config
@@ -38,12 +38,16 @@ class EditorFrame(QWidget):
         self.open_file_btn.set_content = self.editor.setPlainText  # Reroute text set method directly to the text editor widget
         self.open_file_btn.set_new_file_name = self.__init_title
 
-        self.save_as_btn = SaveAsFileButton(config)
+        self.save_as_btn = SaveAsFileButton(config, sig_message)
         self.save_as_btn.get_content_to_save = self.retrieve_text  # Bind the text retrieve method in order to get the text to save
         self.save_as_btn.set_new_file_name = self.__init_title
 
+        self.save_btn = SaveFileButton(config, sig_message)
+        self.save_btn.get_content_to_save = self.retrieve_text
+
         self.assemble_btn = AssembleButton(config)
 
+        self.__init_title()
         self._init_tool_bar()
         self._set_layout()
         self._connect_all()
@@ -52,12 +56,17 @@ class EditorFrame(QWidget):
     def __init_title(self, file_name=""):
         """
         Sets the currently edited file in this frame's title
+
+        :param file_name: full file path
         """
         if file_name:
-            self.setWindowTitle("DigiQt - Editing '" + file_name + "'")
+            self.setWindowTitle("DigiQt - Editing '" + file_name.split("/")[-1] + "'")
         else:
             # In the case no file name is specified, we have an empty editor, we display default text
             self.setWindowTitle("DigiQt - Assemble Editor")
+
+        self.save_btn.setEnabled(file_name != "")
+        self.save_btn.set_file_path(file_name)
 
     def _init_tool_bar(self):
         """
@@ -67,6 +76,7 @@ class EditorFrame(QWidget):
         self.toolbar.setFixedHeight(70)
 
         self.toolbar.addWidget(self.open_file_btn)
+        self.toolbar.addWidget(self.save_btn)
         self.toolbar.addWidget(self.save_as_btn)
         self.toolbar.addSeparator()
         self.toolbar.addWidget(self.assemble_btn)

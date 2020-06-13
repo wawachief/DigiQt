@@ -42,17 +42,17 @@ class ExecutionFrame(QWidget):
         sliderbar_width = 200
         bottom_widget_height = 26
 
-        self.editor_frame = EditorFrame(config)
+        self.statusbar = StatusBar(window_width - sliderbar_width, bottom_widget_height, config)
+        self.dr_canvas = DRCanvas(self.statusbar.sig_temp_message, window_width, self.current_digirule_model, config)
+        self.slider = SpeedSlider(sliderbar_width, bottom_widget_height, config)
+
+        self.editor_frame = EditorFrame(config, self.statusbar.sig_temp_message)
         self.open_editor_btn = OpenEditorButton(self.editor_frame, config)
         self.editor_frame.on_close = lambda: self.open_editor_btn.show_editor_frame(False)
 
         self.ram_frame = RAMFrame()
         self.open_ram_btn = OpenRamButton(self.ram_frame, config)
         self.ram_frame.on_close = lambda: self.open_ram_btn.show_ram_frame(False)
-
-        self.statusbar = StatusBar(window_width - sliderbar_width, bottom_widget_height, config)
-        self.dr_canvas = DRCanvas(self.statusbar.sig_temp_message, window_width, self.current_digirule_model, config)
-        self.slider = SpeedSlider(sliderbar_width, bottom_widget_height, config)
 
         # TODO : Instanciate a serial monitor view
         self.monitor_frame = None
