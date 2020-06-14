@@ -178,6 +178,7 @@ class SerialControl(QObject):
     def from_digirule(self):
         """Launch receive sequence in background"""
         if self.ser_port:
+            self.statusbar.sig_temp_message.emit("Waiting to receive Digirule on " + self.ser_port.port)
             self.fd_thread = FromDigiruleThread(self)
             self.fd_thread.start()
         else:

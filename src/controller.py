@@ -112,11 +112,13 @@ class Controller(QObject):
         self.do_view_ram()
 
         # Instantiate the serial controler
-        if self.dr_model == "2U":
+        if self.cpu.serial_enable:
             self.serialctl = SerialControl(self.cpu, self.gui.monitor_frame, 
                 self.gui.statusbar, self.config, self.sig_ram_update, CONFIG_FILE_PATH)
+            self.gui.open_monitor_btn.setEnabled(True)
         else:
             self.serialctl = None
+            self.gui.open_monitor_btn.setEnabled(False)
 
     def update_ui(self):
         """This method is responsible for updating the UI in run mode and
