@@ -5,8 +5,8 @@
 # Widget of editor frame
 #
 
-from PySide2.QtWidgets import QWidget, QPlainTextEdit, QTextEdit
-from PySide2.QtGui import QColor, QTextFormat, QPainter, QSyntaxHighlighter, QTextCharFormat, QFont, QTextCursor
+from PySide2.QtWidgets import QWidget, QPlainTextEdit, QTextEdit, QShortcut
+from PySide2.QtGui import QColor, QTextFormat, QPainter, QSyntaxHighlighter, QTextCharFormat, QFont, QTextCursor, QKeySequence
 from PySide2.QtCore import QRect, Slot, Qt, QSize, QRegExp
 
 import re
@@ -47,6 +47,13 @@ class CodeEditor(QPlainTextEdit):
         self.blockCountChanged.connect(self.update_line_number_area_width)
         self.updateRequest.connect(self.update_line_number_area)
         self.cursorPositionChanged.connect(self.highlight_current_line)
+
+        # Shortcuts
+        shortcut_save = QShortcut(QKeySequence("Ctrl+S"), self)
+        shortcut_save.activated.connect(self.on_ctrl_s_activated)
+
+        shortcut_open = QShortcut(QKeySequence("Ctrl+O"), self)
+        shortcut_open.activated.connect(self.on_ctrl_o_activated)
 
         # initialization
         self.blockCountChanged.emit(0)
@@ -98,6 +105,11 @@ class CodeEditor(QPlainTextEdit):
         cursor.movePosition(QTextCursor.EndOfLine)
         self.setTextCursor(cursor)
 
+    def on_ctrl_s_activated(self):
+        pass
+
+    def on_ctrl_o_activated(self):
+        pass
 
     @Slot(int)
     def update_line_number_area_width(self, new_bock_count):

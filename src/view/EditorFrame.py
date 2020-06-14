@@ -31,6 +31,7 @@ class EditorFrame(QWidget):
 
         self.config = config
 
+        # Widgets
         self.editor = CodeEditor(config)
         self.editor.setMinimumSize(QSize(600, 430))
 
@@ -47,6 +48,11 @@ class EditorFrame(QWidget):
 
         self.assemble_btn = AssembleButton(config)
 
+        # Editor's shortcuts binding
+        self.editor.on_ctrl_o_activated = self.open_file_btn.on_open  # Open action
+        self.editor.on_ctrl_s_activated = self.do_save
+
+        # Final initialization
         self.__init_title()
         self._init_tool_bar()
         self._set_layout()
@@ -121,6 +127,15 @@ class EditorFrame(QWidget):
         :return: the code
         """
         return self.editor.toPlainText()
+
+    def do_save(self):
+        """
+        Delegating method triggered upon Ctrl+S action. Performs a Save if a file is opened, or a SaveAs if not.
+        """
+        if self.save_btn.file_path:
+            self.save_btn.on_save()
+        else:
+            self.save_as_btn.on_save_as()
 
     # --- Close handler ---
 
