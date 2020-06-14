@@ -9,6 +9,7 @@ from PySide2.QtWidgets import QPlainTextEdit
 from PySide2.QtGui import QColor, QSyntaxHighlighter, QTextCharFormat, QFont, QPalette, QTextCursor
 from PySide2.QtCore import QRegExp
 
+from src.assets_manager import get_font
 
 class RamDebugText(QPlainTextEdit):
 
@@ -29,9 +30,8 @@ class RamDebugText(QPlainTextEdit):
         # Change the font to get a fix size for characters
         doc = self.document()
         f = doc.defaultFont()
-        f.setFamily(config.get('font', 'font'))
+        f.setFamily(get_font(config))
         doc.setDefaultFont(f)
-        
 
     def select(self, row, column, color):
         """

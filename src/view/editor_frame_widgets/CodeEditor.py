@@ -10,6 +10,7 @@ from PySide2.QtGui import QColor, QTextFormat, QPainter, QSyntaxHighlighter, QTe
 from PySide2.QtCore import QRect, Slot, Qt, QSize, QRegExp
 
 import re
+from src.assets_manager import get_font
 
 
 class LineNumberArea(QWidget):
@@ -58,7 +59,7 @@ class CodeEditor(QPlainTextEdit):
         # Change the font to get a fix size for characters
         doc = self.document()
         f = doc.defaultFont()
-        f.setFamily(config.get('font', 'font'))
+        f.setFamily(get_font(config))
         doc.setDefaultFont(f)
 
         # initialization
