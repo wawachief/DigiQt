@@ -15,7 +15,7 @@ if sys.platform == "win32":
         sys.argv += ['--initial-target-dir', 'c:\DigiQt']
 
 setup(  name = "DigiQt",
-        version = "1.0.beta1",
+        version = "1.0.beta2",
         description = "Digirule2 assembler and simulator",
         author="Olivier Lecluse - Thomas Lecluse",
         options = {"build_exe": build_exe_options},
