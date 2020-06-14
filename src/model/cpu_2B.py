@@ -33,8 +33,8 @@ class Cpu(QObject):
         self.ssp  = 0          # Software Pointer
         self.run    = False    # Run mode flag
         self.speed  = 0        # speed attribute changed by the speed instruction
-        # self.decoded_inst = "" 
         self.exception    = ""
+        self.serial_enable = False # enable Serial capability
 
         # Special RAM addresses
         self.REG_STATUS  = 252
