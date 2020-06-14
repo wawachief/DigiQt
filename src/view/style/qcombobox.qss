@@ -38,7 +38,7 @@ QComboBox:!on
 QComboBox QAbstractItemView
 {
     border: 2px solid darkgray;
-    color: black;
+    color: white;
     selection-background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #111, stop: 1 #333);
 }
 
