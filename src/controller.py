@@ -163,6 +163,7 @@ class Controller(QObject):
             symbol_table = []
         else:
             symbol_table = set(self.symbol_table) - set(labels_table)
+        labels_table.insert(0, "_Prgm Cntr_")
         self.gui.symbol_frame.init_labels(labels_table)
         self.gui.symbol_frame.init_symbols(symbol_table)
 
@@ -210,8 +211,20 @@ class Controller(QObject):
 
     @Slot(str)
     def on_symbol_goto(self, symbol):
-        if self.symbol_table is not None:
-            self.set_idle_addr(self.symbol_table[symbol])
+        """Color symbol and variables, don't change PC"""
+        if symbol == "_Prgm Cntr_":
+            # Program Counter
+            lpc, cpc = self.cpu.pc // 8, self.cpu.pc % 8
+            self.dbg.ram_frame.ram_content.select(lpc, cpc, "ram_pc")
+        elif self.symbol_table is not None:
+            addr = self.symbol_table[symbol]
+            lpc, cpc = addr // 8, addr % 8
+            if symbol in self.labels_table:
+                # label color
+                self.dbg.ram_frame.ram_content.select(lpc, cpc, "ram_label")
+            else:
+                # variable color
+                self.dbg.ram_frame.ram_content.select(lpc, cpc, "ram_variable")
 
     #
     # other events methods
