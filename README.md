@@ -1,6 +1,6 @@
 # DigiQt
 
-https://youtu.be/mRx_jkY8RU8
+![tour](https://youtu.be/mRx_jkY8RU8)
 
 Simulator of digirule 2 (https://bradsprojects.com/digirule2/) written in Python.
 
