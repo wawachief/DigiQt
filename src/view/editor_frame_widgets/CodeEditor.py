@@ -311,6 +311,17 @@ def leads_with_label(text):
     return len([(m.start(), m.end() - m.start()) for m in re.finditer(r'(^\s*:\w+)', text)]) > 0
 
 
+def leads_with_directive(text):
+    """
+    Checks if the specified texts starts with a leading directive.
+
+    :param text: text to analyze
+    :return: True if a directive leads the line
+    :rtype: bool
+    """
+    return len([(m.start(), m.end() - m.start()) for m in re.finditer(r'(^\s*%\w+)', text)]) > 0
+
+
 def re_indent_all(text, keywords):
     """
     Re-format the given text line by line with the following rules:
@@ -325,7 +336,6 @@ def re_indent_all(text, keywords):
     """
     res = ""
     previous_indent = 0
-    previous_label = False
 
     for line in text.split("\n"):
         new_line = ""
@@ -343,15 +353,17 @@ def re_indent_all(text, keywords):
         # Check for labels
         if leads_with_label(line):
             new_line += words[0] + " "  # Label has to be the first element
-            previous_indent = 0  # Reset the indent level
-            previous_label = True
+            previous_indent = INDENT_SPACES  # Reset the indent level
         else:
-            if previous_label:
-                previous_indent += INDENT_SPACES  # Add new indent level if we had a label before
-                previous_label = False
+            # Reset indentation for directives or after 2 blank lines (which makes 3*'\n' because there is a newline before)
+            if leads_with_directive(line) or (len(res) > 2 and res[::-1].replace(" ", "").startswith("\n"*3)):
+                previous_indent = 0
 
-            # Start by adding the indent
-            new_line += " " * previous_indent
+            # If there is no words left after parsing the comment, it means the the line was a comment.
+            # In that case, we do not indent the line-comment
+            if len(words) != 0:
+                # Start by adding the indent
+                new_line += " " * previous_indent
 
             for w in words:
                 if w in keywords:
