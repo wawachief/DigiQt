@@ -5,8 +5,8 @@
 # RAM frame
 #
 
-from PySide2.QtWidgets import QFormLayout, QGridLayout, QWidget, QPlainTextEdit, QLabel
-from PySide2.QtCore import QSize
+from PySide2.QtWidgets import QFormLayout, QGridLayout, QWidget, QCheckBox, QLabel
+from PySide2.QtCore import QSize, Qt
 
 from src.view.style import style
 
@@ -24,10 +24,10 @@ class RAMFrame(QWidget):
         QWidget.__init__(self)
 
         self.setWindowTitle("DigiQt - RAM")
-        self.setFixedSize(QSize(300, 650))
+        self.setFixedWidth(300)
 
         self.ram_content = RamDebugText(config)
-        self.ram_content.setMinimumSize(QSize(350, 650))
+        self.ram_content.setFixedSize(QSize(300, 530))
 
         self.lab_ac = QLabel("AC:")
         self.lab_pc = QLabel("PC:")
@@ -38,6 +38,11 @@ class RAMFrame(QWidget):
         self.val_pc = QLabel("")
         self.val_stack = QLabel("")
         self.val_st = QLabel("")
+
+        self.hexa_checkbox = QCheckBox()
+        self.hexa_checkbox.setText("Hexadecimal mode")
+        self.hexa_checkbox.stateChanged.connect(self.on_hexa_box_changed)
+        self.hexa_checkbox.setFixedHeight(50)
 
         self._set_layout()
         self.setStyleSheet(style.get_stylesheet("debug_frame"))
@@ -60,7 +65,16 @@ class RAMFrame(QWidget):
 
         grid.addWidget(self.ram_content, 1, 0)
 
+        grid.addWidget(self.hexa_checkbox, 2, 0)
+        grid.setAlignment(self.hexa_checkbox, Qt.AlignCenter)
+
         self.setLayout(grid)
+
+    def on_hexa_box_changed(self):
+        """
+        Called when the Hexadecimal mode checkbox is selected or unselected
+        """
+        print(self.hexa_checkbox.isChecked())
 
     def _connect_all(self):
         """
