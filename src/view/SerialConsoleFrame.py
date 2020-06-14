@@ -124,11 +124,11 @@ class SerialConsoleFrame(QWidget):
         Appends the given text inside the serial out area
         """
         # First, we place the cursor at the end (this will also clear the selection before inserting new text)
+        
         cursor = self.serial_out.textCursor()
         cursor.movePosition(QTextCursor.End)
         self.serial_out.setTextCursor(cursor)
         self.serial_out.insertPlainText(text)
-
     # --- Close handler ---
 
     def closeEvent(self, event):
