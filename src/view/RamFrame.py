@@ -24,10 +24,10 @@ class RAMFrame(QWidget):
         QWidget.__init__(self)
 
         self.setWindowTitle("DigiQt - RAM")
-        self.setFixedWidth(300)
+        self.setFixedSize(QSize(280, 700))
 
         self.ram_content = RamDebugText(config)
-        self.ram_content.setFixedSize(QSize(300, 530))
+        self.ram_content.setFixedSize(QSize(280, 560))
 
         self.lab_ac = QLabel("AC:")
         self.lab_pc = QLabel("PC:")
@@ -46,6 +46,8 @@ class RAMFrame(QWidget):
 
         self._set_layout()
         self.setStyleSheet(style.get_stylesheet("debug_frame"))
+
+        self.sig_hexa_mode = None # signal for hexa pushed by debugger Controller
 
     def _set_layout(self):
         """
@@ -74,7 +76,7 @@ class RAMFrame(QWidget):
         """
         Called when the Hexadecimal mode checkbox is selected or unselected
         """
-        print(self.hexa_checkbox.isChecked())
+        self.sig_hexa_mode.emit(self.hexa_checkbox.isChecked())
 
     def _connect_all(self):
         """
