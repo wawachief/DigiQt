@@ -1,5 +1,6 @@
 # DigiQt
-Digimulator (https://github.com/profjahier/digimulator) revisited with Qt GUI.
+
+https://youtu.be/mRx_jkY8RU8
 
 Simulator of digirule 2 (https://bradsprojects.com/digirule2/) written in Python.
 
