@@ -54,6 +54,7 @@ Authors:
 - *Pixel perfect:* https://www.flaticon.com/authors/pixel-perfect
 - *Srip:* https://www.flaticon.com/authors/srip
 - *Surang:* https://www.flaticon.com/free-icon/usb-cable_2890886
+- *Good Ware:* https://www.flaticon.com/authors/good-ware
 # Licence
 GNU General Public License v3.0
 

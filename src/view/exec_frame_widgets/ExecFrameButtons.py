@@ -19,7 +19,7 @@ class OpenEditorButton(QPushButton):
         """
         QPushButton.__init__(self)
 
-        self.setIcon(assets_mgr.get_icon("open_editor"))
+        self.setIcon(assets_mgr.get_icon("show_editor"))
         self.setIconSize(assets_mgr.ICON_SIZE)
         self.setToolTip("Open Editor")
         self.setStyleSheet('border: none; padding-left: 10px; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
@@ -36,12 +36,12 @@ class OpenEditorButton(QPushButton):
         :type do_display: bool
         """
         if do_display:
-            self.setIcon(assets_mgr.get_icon("close_editor"))
+            self.setIcon(assets_mgr.get_icon("hide_editor"))
             self.setToolTip("Close Editor")
 
             self.editor_frame.show()
         else:
-            self.setIcon(assets_mgr.get_icon("open_editor"))
+            self.setIcon(assets_mgr.get_icon("show_editor"))
             self.setToolTip("Open Editor")
 
             self.editor_frame.hide()
