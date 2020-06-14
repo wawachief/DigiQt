@@ -52,6 +52,8 @@ Authors:
 - *Freepik:* https://www.flaticon.com/authors/freepik
 - *Roundicons:* https://www.flaticon.com/authors/roundicons
 - *Pixel perfect:* https://www.flaticon.com/authors/pixel-perfect
+- *Srip:* https://www.flaticon.com/authors/srip
+- *Surang:* https://www.flaticon.com/free-icon/usb-cable_2890886
 # Licence
 GNU General Public License v3.0
 
