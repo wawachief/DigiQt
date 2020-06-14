@@ -3,7 +3,7 @@ from cx_Freeze import setup, Executable
 
 # Dependencies are automatically detected, but it might need fine tuning.
 build_exe_options = {
-    "packages": ["os", "pyside2", "serial"],
+    "packages": ["os", "pyside2", "serial", "ConfigParser"],
     "include_files": ["cli/", "assets/", "examples/", "src/", "README.md", "LICENSE"],
     "excludes": []
 }
