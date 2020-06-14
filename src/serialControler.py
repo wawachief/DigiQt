@@ -80,9 +80,10 @@ class FromDigiruleThread(QThread):
 
 class SerialControl(QObject):
     sig_keyseq_pressed = Signal(str)
-    sig_CPU_comout = Signal(str)
-    sig_CPU_comin = Signal(str)
-    sig_port_change = Signal(str)
+    sig_CPU_comout     = Signal(str)
+    sig_CPU_comin      = Signal(str)
+    sig_port_change    = Signal(str)
+    sig_button_pressed = Signal(int)
 
     def __init__(self, cpu, monitor_frame, statusbar, config, sig_update, config_file_path):
         QObject.__init__(self)
@@ -97,19 +98,15 @@ class SerialControl(QObject):
         self.monitor_frame = monitor_frame
         self.config_file_path = config_file_path
 
-        # Connect buttons to controler's methods
-        self.monitor_frame.to_dr_btn.to_digirule = self.to_digirule
-        self.monitor_frame.from_dr_btn.from_digirule = self.from_digirule
-        self.monitor_frame.refresh_btn.on_refresh = self.init_serial
-
-        
         # Connect signal
         self.sig_keyseq_pressed.connect(self.on_key_pressed)
         self.sig_CPU_comout.connect(self.on_comout)
         self.sig_CPU_comin.connect(self.on_comin)
         self.sig_port_change.connect(self.on_port_change)
+        self.sig_button_pressed.connect(self.on_button_dispatch)
 
         self.monitor_frame.sig_keyseq_pressed = self.sig_keyseq_pressed
+        self.monitor_frame.sig_button_pressed = self.sig_button_pressed
         self.cpu.sig_CPU_comout = self.sig_CPU_comout
         self.cpu.sig_CPU_comin = self.sig_CPU_comin
         self.monitor_frame.usb_combo.sig_port_change = self.sig_port_change
@@ -127,6 +124,9 @@ class SerialControl(QObject):
     def init_OK(self):
         self.statusbar.sig_temp_message.emit("Serial port Initialized")
 
+    #
+    # Signal Handling
+    #
     @Slot(str)
     def on_key_pressed(self, key):
         if self.cpu.rx is None:
@@ -156,6 +156,23 @@ class SerialControl(QObject):
         with open(self.config_file_path, 'w') as configfile:
             self.config.write(configfile)
         self.init_serial(False)
+
+    @Slot(int)
+    def on_button_dispatch(self, btn_nbr):
+        if btn_nbr == 0:
+            self.to_digirule()
+        elif btn_nbr == 1:
+            self.from_digirule()
+        elif btn_nbr == 2:
+            self.init_serial()
+        elif btn_nbr == 3:
+            self.on_clear_button()
+
+    def on_clear_button(self):
+        self.monitor_frame.serial_out.setPlainText("")  # Clear the serial out content
+        self.monitor_frame.serial_in.setText(" ")       # Clear the serial input content
+        self.cpu.rx = None
+        self.cpu.tx = None
 
     def to_digirule(self):
         if self.ser_port is None:

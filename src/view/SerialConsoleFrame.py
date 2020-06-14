@@ -32,6 +32,7 @@ class SerialConsoleFrame(QWidget):
         self.setWindowTitle("DigiQt - Serial console")
 
         self.sig_keyseq_pressed = None # signal configured by serialControler
+        self.sig_button_pressed = None # signal configured by serialControler
 
         # Serial out
         self.serial_out = QPlainTextEdit()
@@ -49,16 +50,19 @@ class SerialConsoleFrame(QWidget):
 
         # Buttons
         self.clear_btn = ClearButton(config)
-        self.clear_btn.on_clear = lambda: self.serial_out.setPlainText("")  # Clear the serial out content
+        self.clear_btn.on_clear = lambda: self.sig_button_pressed.emit(3)
 
-        self.to_dr_btn = ToDigiruleButton(config)
+        self.to_dr_btn = ToDigiruleButton(config,)
+        self.to_dr_btn.to_digirule = lambda: self.sig_button_pressed.emit(0)
 
         self.from_dr_btn = FromDigiruleButton(config)
+        self.from_dr_btn.from_digirule = lambda: self.sig_button_pressed.emit(1)
 
         # Port selection
         self.lab_port = QLabel("Port:")
         self.usb_combo = UsbPortCombo()
         self.refresh_btn = RefreshPortButton(config)
+        self.refresh_btn.on_refresh = lambda: self.sig_button_pressed.emit(2)
 
         self._init_tool_bar()
         self._set_layout()
