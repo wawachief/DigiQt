@@ -11,6 +11,7 @@ from PySide2.QtCore import QRegExp
 
 from src.assets_manager import get_font
 
+
 class RamDebugText(QPlainTextEdit):
 
     def __init__(self, config, parent=None):

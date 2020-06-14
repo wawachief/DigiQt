@@ -12,6 +12,8 @@ from PySide2.QtCore import QRect, Slot, Qt, QSize, QRegExp
 import re
 from src.assets_manager import get_font
 
+INDENT_SPACES = 2
+
 
 class LineNumberArea(QWidget):
     def __init__(self, editor):
@@ -55,6 +57,9 @@ class CodeEditor(QPlainTextEdit):
 
         shortcut_open = QShortcut(QKeySequence("Ctrl+O"), self)
         shortcut_open.activated.connect(self.on_ctrl_o_activated)
+
+        shortcut_indent_all = QShortcut(QKeySequence("Ctrl+T"), self)
+        shortcut_indent_all.activated.connect(lambda: self.setPlainText(re_indent_all(self.toPlainText(), self.highlight.keywords)))
 
         # Change the font to get a fix size for characters
         doc = self.document()
@@ -171,31 +176,13 @@ class CodeEditor(QPlainTextEdit):
         new_line_nb = self.textCursor().blockNumber()
 
         previous_line = lines[new_line_nb - 1]
-        spaces = self.get_leading_space(previous_line)
+        spaces = get_leading_space(previous_line)
 
-        if self.leads_with_label(previous_line):
-            spaces += 4
+        if leads_with_label(previous_line):
+            spaces += INDENT_SPACES
 
         self.insertPlainText(" " * spaces)
 
-    def get_leading_space(self, text):
-        """
-        Gets the number of leading whitespaces of the previous line
-        :param text: text to analyze
-        :return: number of leading blank spaces
-        :rtype: int
-        """
-        return [(m.start(), m.end() - m.start()) for m in re.finditer(r'^\s*', text)][0][1]
-
-    def leads_with_label(self, text):
-        """
-        Checks if the specified texts starts with a leading label.
-
-        :param text: text to analyze
-        :return: True if a label leads the line
-        :rtype: bool
-        """
-        return len([(m.start(), m.end() - m.start()) for m in re.finditer(r'(^\s*:\w+)', text)]) > 0
 
 class AssembleHighlighter(QSyntaxHighlighter):
 
@@ -215,6 +202,7 @@ class AssembleHighlighter(QSyntaxHighlighter):
         }
 
         self.rules = []
+        self.keywords = []
         self.init_rules([])  # Initialization with no keywords
 
     # --- Coloration ---
@@ -245,6 +233,7 @@ class AssembleHighlighter(QSyntaxHighlighter):
 
         :param assemble_keywords: keywords of the language
         """
+        self.keywords = assemble_keywords
         rules = []
 
         # Keywords
@@ -295,3 +284,96 @@ class AssembleHighlighter(QSyntaxHighlighter):
                 index = expression.indexIn(text.lower(), index + length)  # update index for next iteration
 
         self.setCurrentBlockState(0)
+
+
+#
+# Indent feature methods
+#
+
+def get_leading_space(text):
+    """
+    Gets the number of leading whitespaces of the previous line
+    :param text: text to analyze
+    :return: number of leading blank spaces
+    :rtype: int
+    """
+    return [(m.start(), m.end() - m.start()) for m in re.finditer(r'^\s*', text)][0][1]
+
+
+def leads_with_label(text):
+    """
+    Checks if the specified texts starts with a leading label.
+
+    :param text: text to analyze
+    :return: True if a label leads the line
+    :rtype: bool
+    """
+    return len([(m.start(), m.end() - m.start()) for m in re.finditer(r'(^\s*:\w+)', text)]) > 0
+
+
+def re_indent_all(text, keywords):
+    """
+    Re-format the given text line by line with the following rules:
+    - 2 spaces before instruction
+    - 1 tab after instruction
+    - Labels are at the beginning of the line
+
+    :param text: text to indent
+    :param keywords: list of the languages keywords (instructions
+    :return: indent text
+    :rtype: str
+    """
+    res = ""
+    previous_indent = 0
+    previous_label = False
+
+    for line in text.split("\n"):
+        new_line = ""
+
+        words = line.replace("\t", " ").split()  # Replace all the tabs by spaces so that we can reprocess all the indent
+
+        # Check for comments
+        comment = ""
+        if '//' in words:
+            comment_index = words.index('//')
+            comment = __build_comment(words[comment_index:])
+
+            words = words[:comment_index]
+
+        # Check for labels
+        if leads_with_label(line):
+            new_line += words[0] + " "  # Label has to be the first element
+            previous_indent = 0  # Reset the indent level
+            previous_label = True
+        else:
+            if previous_label:
+                previous_indent += INDENT_SPACES  # Add new indent level if we had a label before
+                previous_label = False
+
+            # Start by adding the indent
+            new_line += " " * previous_indent
+
+            for w in words:
+                if w in keywords:
+                    new_line += w + "\t"  # Add tab after keyword
+                else:
+                    new_line += w + " "
+
+        new_line += comment + "\n"
+        res += new_line
+
+    return res
+
+
+def __build_comment(list_words):
+    """
+    Creates a string comment by separating all words with a blank space
+
+    :param list_words: all words to concatenate
+    :rtype: str
+    """
+    comment = ""
+    for w in list_words:
+        comment += w + " "
+
+    return comment
