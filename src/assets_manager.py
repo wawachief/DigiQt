@@ -43,5 +43,4 @@ def get_font(conf):
         font_fam = conf.get('font', 'font_osx')
     else:  # Windows
         font_fam = conf.get('font', 'font_win')
-
     return font_fam
