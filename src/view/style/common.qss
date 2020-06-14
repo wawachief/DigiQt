@@ -6,3 +6,7 @@ QPushButton:hover {
 QWidget {
     background-color: #000000;
 }
+
+QToolTip {
+    color: white;
+}
