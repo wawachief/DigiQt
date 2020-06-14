@@ -5,7 +5,7 @@
 # Serial console frame
 #
 
-from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QLabel, QPlainTextEdit, QSizePolicy
+from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QLabel, QPlainTextEdit, QShortcut
 from PySide2.QtCore import QSize, Qt
 from PySide2.QtGui import QKeySequence, QFont, QTextCursor
 
@@ -31,8 +31,8 @@ class SerialConsoleFrame(QWidget):
         self.config = config
         self.setWindowTitle("DigiQt - Serial console")
 
-        self.sig_keyseq_pressed = None # signal configured by serialControler
-        self.sig_button_pressed = None # signal configured by serialControler
+        self.sig_keyseq_pressed = None  # signal configured by serialControler
+        self.sig_button_pressed = None  # signal configured by serialControler
 
         # Serial out
         self.serial_out = QPlainTextEdit()
@@ -63,6 +63,9 @@ class SerialConsoleFrame(QWidget):
         self.usb_combo = UsbPortCombo()
         self.refresh_btn = RefreshPortButton(config)
         self.refresh_btn.on_refresh = lambda: self.sig_button_pressed.emit(2)
+
+        shortcut_space = QShortcut(QKeySequence(Qt.Key_Space), self)
+        shortcut_space.activated.connect(lambda: self.__send_key(" "))
 
         self._init_tool_bar()
         self._set_layout()
@@ -110,8 +113,17 @@ class SerialConsoleFrame(QWidget):
         self.serial_out.setStyleSheet("background-color: #505050; color: white; padding-left: 10px;")
 
     def keyPressEvent(self, event):
-        """Sends signal to serialControler"""
-        self.sig_keyseq_pressed.emit(QKeySequence(event.key()).toString())
+        """
+        Intercepts key press events
+        """
+        self.__send_key(QKeySequence(event.key()).toString())
+
+    def __send_key(self, key_typed):
+        """
+        Sends signal to serialControler
+        :param key_type: key typed
+        """
+        self.sig_keyseq_pressed.emit(key_typed)
 
     def set_serial_in(self, val):
         """
