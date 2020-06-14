@@ -14,7 +14,7 @@
 initsp	
 speed	0 
 
-copylr	0 status
+copylr	0 status 
 copylr	5 nb 
 
 // Displays init_str 
@@ -125,4 +125,7 @@ copylr	5 nb
 // Stack initialized with NULL caracters 
 %data stack 0 0 0 
 %data stackPtr 0 
+
+
+
 
