@@ -79,10 +79,11 @@ class FromDigiruleThread(QThread):
             self.parent.ser_port.close()
 
 class SerialControl(QObject):
-    sig_keyseq_pressed = Signal(str)
-    sig_CPU_comout = Signal(str)
-    sig_CPU_comin = Signal(str)
-    sig_port_change = Signal(str)
+    sig_keyseq_pressed       = Signal(str)
+    sig_CPU_comout           = Signal(str)
+    sig_CPU_comin            = Signal(str)
+    sig_port_change          = Signal(str)
+    sig_clearconsole_pressed = Signal()
 
     def __init__(self, cpu, monitor_frame, statusbar, config, sig_update, config_file_path):
         QObject.__init__(self)
@@ -108,8 +109,10 @@ class SerialControl(QObject):
         self.sig_CPU_comout.connect(self.on_comout)
         self.sig_CPU_comin.connect(self.on_comin)
         self.sig_port_change.connect(self.on_port_change)
+        self.sig_clearconsole_pressed.connect(self.on_clear_button)
 
         self.monitor_frame.sig_keyseq_pressed = self.sig_keyseq_pressed
+        self.monitor_frame.sig_clearconsole_pressed = self.sig_clearconsole_pressed
         self.cpu.sig_CPU_comout = self.sig_CPU_comout
         self.cpu.sig_CPU_comin = self.sig_CPU_comin
         self.monitor_frame.usb_combo.sig_port_change = self.sig_port_change
@@ -127,6 +130,9 @@ class SerialControl(QObject):
     def init_OK(self):
         self.statusbar.sig_temp_message.emit("Serial port Initialized")
 
+    #
+    # Signal Handling
+    #
     @Slot(str)
     def on_key_pressed(self, key):
         if self.cpu.rx is None:
@@ -156,6 +162,12 @@ class SerialControl(QObject):
         with open(self.config_file_path, 'w') as configfile:
             self.config.write(configfile)
         self.init_serial(False)
+    @Slot()
+    def on_clear_button(self):
+        self.monitor_frame.serial_out.setPlainText("")  # Clear the serial out content
+        self.monitor_frame.serial_in.setText(" ")       # Clear the serial input content
+        self.cpu.rx = None
+        self.cpu.tx = None
 
     def to_digirule(self):
         if self.ser_port is None:

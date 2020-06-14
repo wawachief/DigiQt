@@ -32,6 +32,7 @@ class SerialConsoleFrame(QWidget):
         self.setWindowTitle("DigiQt - Serial console")
 
         self.sig_keyseq_pressed = None # signal configured by serialControler
+        self.sig_clearconsole_pressed = None # signal configured by serialControler
 
         # Serial out
         self.serial_out = QPlainTextEdit()
@@ -49,7 +50,7 @@ class SerialConsoleFrame(QWidget):
 
         # Buttons
         self.clear_btn = ClearButton(config)
-        self.clear_btn.on_clear = lambda: self.serial_out.setPlainText("")  # Clear the serial out content
+        self.clear_btn.on_clear = lambda: self.sig_clearconsole_pressed.emit()
 
         self.to_dr_btn = ToDigiruleButton(config)
 
