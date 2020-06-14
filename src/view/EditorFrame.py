@@ -1,5 +1,5 @@
 # Author: Thomas Lécluse
-# Licence GPL-3
+# License GPL-3
 
 #
 # Edition frame

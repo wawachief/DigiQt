@@ -1,3 +1,10 @@
+# Author: Olivier Lécluse, Thomas Lécluse
+# License GPL-3
+
+#
+# Digirule CPU Core
+#
+
 import sys
 from PySide2.QtWidgets import QApplication
 

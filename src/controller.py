@@ -1,3 +1,10 @@
+# Author: Olivier Lécluse
+# License GPL-3
+
+#
+# Digirule CPU Core
+#
+
 from configparser import ConfigParser
 from PySide2.QtCore import Signal, Slot, QObject, QThread, QTimer, SIGNAL
 from time import sleep

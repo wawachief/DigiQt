@@ -1,5 +1,5 @@
 # Author: Olivier Lécluse
-# Licence GPL-3
+# License GPL-3
 
 #
 # Assembler for digirule 2A

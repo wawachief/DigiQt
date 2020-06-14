@@ -1,5 +1,5 @@
 # Author: Thomas Lécluse
-# Licence GPL-3
+# License GPL-3
 
 #
 # Widget of execution frame
@@ -159,20 +159,33 @@ class OpenSymbolButton(QPushButton):
 
 
 class AboutButton(QPushButton):
-    def __init__(self, config, sig_message):
+    def __init__(self, about_frame, config):
         """
         About
         """
         QPushButton.__init__(self)
 
-        self.sig_messsage = sig_message
+        self.about_frame = about_frame
 
         self.setIcon(assets_mgr.get_icon("info"))
         self.setIconSize(assets_mgr.ICON_SIZE)
         self.setToolTip("About us")
         self.setStyleSheet('border: none; padding-right: 10px; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
 
-        self.clicked.connect(self.on_about)
+        self.clicked.connect(lambda: self.show_about_frame(not self.about_frame.isVisible()))
 
-    def on_about(self):
-        self.sig_messsage.emit("LÉCLUSE - DevCorp. ©")
+    def show_about_frame(self, do_display):
+        """
+        Hides or shows the symbol frame
+
+        :param do_display: True will display the symbol frame, False will hide it
+        :type do_display: bool
+        """
+        if do_display:
+            self.setToolTip("Hide symbols list frame")
+
+            self.about_frame.show()
+        else:
+            self.setToolTip("Show symbols list frame")
+
+            self.about_frame.hide()

@@ -1,5 +1,13 @@
+# Author: Olivier Lécluse
+# License GPL-3
+
+#
+# Digirule CPU Core
+#
+
 import sys
 from cx_Freeze import setup, Executable
+from configparser import ConfigParser
 
 # Dependencies are automatically detected, but it might need fine tuning.
 build_exe_options = {
@@ -14,8 +22,11 @@ if sys.platform == "win32":
     if 'bdist_msi' in sys.argv:
         sys.argv += ['--initial-target-dir', 'c:\DigiQt']
 
+config = ConfigParser()
+config.read("src/config.ini")
+
 setup(  name = "DigiQt",
-        version = "1.0.beta2",
+        version = config.get('main', 'app_version'),
         description = "Digirule2 assembler and simulator",
         author="Olivier Lecluse - Thomas Lecluse",
         options = {"build_exe": build_exe_options},

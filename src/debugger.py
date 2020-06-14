@@ -1,4 +1,11 @@
+# Author: Olivier Lécluse
+# License GPL-3
+
+#
+# Digirule CPU Core
+#
 from PySide2.QtCore import QObject, Signal, Slot
+
 
 class Debug(QObject): 
     sig_hexa_mode = Signal(bool)

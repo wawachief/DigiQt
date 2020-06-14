@@ -1,5 +1,5 @@
 # Author: Thomas Lécluse
-# Licence GPL-3
+# License GPL-3
 
 #
 # This file's purpose is to describe the Digirule 2A model elements position

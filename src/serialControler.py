@@ -1,3 +1,10 @@
+# Author: Olivier Lécluse
+# License GPL-3
+
+#
+# Digirule CPU Core
+#
+
 import serial
 import serial.tools.list_ports as list_ports
 from PySide2.QtCore import QObject, QThread, Signal, Slot

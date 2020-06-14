@@ -1,5 +1,5 @@
 # Author: Thomas Lécluse
-# Licence GPL-3
+# License GPL-3
 
 #
 # Execution frame
@@ -12,6 +12,7 @@ from src.view.EditorFrame import EditorFrame
 from src.view.RamFrame import RAMFrame
 from src.view.SerialConsoleFrame import SerialConsoleFrame
 from src.view.SymbolViewFrame import SymbolViewFrame
+from src.view.AboutFrame import AboutFrame
 from src.view.exec_frame_widgets.DigiruleCanvas import DRCanvas
 from src.view.exec_frame_widgets.DigiruleModelDropdown import DigiruleModelDropdown
 from src.view.exec_frame_widgets.ExecFrameButtons import OpenEditorButton, OpenRamButton, OpenConsoleButton, AboutButton, OpenSymbolButton
@@ -65,6 +66,10 @@ class ExecutionFrame(QWidget):
         self.open_symbol_btn = OpenSymbolButton(self.symbol_frame, config)
         self.symbol_frame.on_close = lambda: self.open_symbol_btn.show_symbol_frame(False)
 
+        self.about_frame = AboutFrame(self.config)
+        self.open_about_btn = AboutButton(self.about_frame, config)
+        self.about_frame.on_close = lambda: self.open_about_btn.show_about_frame(False)
+
         self._init_tool_bar()
         self._set_layout()
         self._set_stylesheets()
@@ -96,7 +101,7 @@ class ExecutionFrame(QWidget):
         self.toolbar.addWidget(spacer)
 
         # About button
-        self.toolbar.addWidget(AboutButton(self.config, self.statusbar.sig_temp_message))
+        self.toolbar.addWidget(self.open_about_btn)
 
     def _set_layout(self):
         """
@@ -156,4 +161,5 @@ class ExecutionFrame(QWidget):
         self.ram_frame.on_close()
         self.monitor_frame.on_close()
         self.symbol_frame.on_close()
+        self.about_frame.on_close()
         event.accept()

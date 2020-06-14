@@ -1,12 +1,8 @@
 # Author: Olivier Lécluse
-# Licence GPL-3
+# License GPL-3
 
 #
 # Digirule CPU Core
-#
-
-#
-# todo add symbol table attribute to better decode instructions
 #
 
 from PySide2.QtCore import Signal, Slot, QObject
