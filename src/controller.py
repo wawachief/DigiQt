@@ -212,6 +212,7 @@ class Controller(QObject):
     def on_symbol_goto(self, symbol):
         if self.symbol_table is not None:
             self.set_idle_addr(self.symbol_table[symbol])
+
     #
     # other events methods
     #
@@ -435,7 +436,7 @@ class Controller(QObject):
         print("Bye")
 
     def do_view_ram(self):
-        self.dbg.view_ram(0) # TODO decmode checkbox
+        self.dbg.view_ram()
 
     #
     # Other methods
