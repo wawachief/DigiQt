@@ -25,8 +25,8 @@ class RAMFrame(QWidget):
 
         self.setWindowTitle("DigiQt - RAM")
 
-        w = 280
-        h = 720
+        w = 310
+        h = 750
 
         self.setFixedSize(QSize(w, h))
 
