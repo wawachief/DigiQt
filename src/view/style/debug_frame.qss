@@ -12,3 +12,8 @@ QLabel {
     color: #75BA6D;
     font-weight: bold;
 }
+
+QCheckBox {
+    color: #99AADE;
+    font-weight: bold;
+}
