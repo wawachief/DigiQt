@@ -55,6 +55,12 @@ class CodeEditor(QPlainTextEdit):
         shortcut_open = QShortcut(QKeySequence("Ctrl+O"), self)
         shortcut_open.activated.connect(self.on_ctrl_o_activated)
 
+        # Change the font to get a fix size for characters
+        doc = self.document()
+        f = doc.defaultFont()
+        f.setFamily(config.get('font', 'font'))
+        doc.setDefaultFont(f)
+
         # initialization
         self.blockCountChanged.emit(0)
         self.cursorPositionChanged.emit()

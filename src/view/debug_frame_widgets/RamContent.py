@@ -24,7 +24,14 @@ class RamDebugText(QPlainTextEdit):
         self.setReadOnly(True)
         self.highlight = RamHighlighter(self.document(), config)
         self.setLineWrapMode(QPlainTextEdit.NoWrap)
-        self.sig_rampc_goto = None # attribute pushed by debugger controler
+        self.sig_rampc_goto = None  # attribute pushed by debugger controler
+
+        # Change the font to get a fix size for characters
+        doc = self.document()
+        f = doc.defaultFont()
+        f.setFamily(config.get('font', 'font'))
+        doc.setDefaultFont(f)
+        
 
     def select(self, row, column, color):
         """
@@ -122,7 +129,7 @@ class RamHighlighter(QSyntaxHighlighter):
 
         # Labels
         rules += [
-            (r'(^[0-9]+:)', 0, self.styles['label'])
+            (r'(^[0-9a-fA-F]+:)', 0, self.styles['label'])
         ]
 
         # Build QRegExp for the above patterns

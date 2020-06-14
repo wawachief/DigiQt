@@ -24,10 +24,14 @@ class RAMFrame(QWidget):
         QWidget.__init__(self)
 
         self.setWindowTitle("DigiQt - RAM")
-        self.setFixedSize(QSize(280, 700))
+
+        w = 280
+        h = 720
+
+        self.setFixedSize(QSize(w, h))
 
         self.ram_content = RamDebugText(config)
-        self.ram_content.setFixedSize(QSize(280, 560))
+        self.ram_content.setFixedSize(QSize(w, h - 160))
 
         self.lab_ac = QLabel("AC:")
         self.lab_pc = QLabel("PC:")
