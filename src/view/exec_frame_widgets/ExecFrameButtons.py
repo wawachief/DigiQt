@@ -93,7 +93,7 @@ class OpenConsoleButton(QPushButton):
         """
         QPushButton.__init__(self)
 
-        self.setIcon(assets_mgr.get_icon("open_editor"))
+        self.setIcon(assets_mgr.get_icon("show_monitor"))
         self.setIconSize(assets_mgr.ICON_SIZE)
         self.setToolTip("Show Serial Console")
         self.setStyleSheet('border: none; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
@@ -110,12 +110,12 @@ class OpenConsoleButton(QPushButton):
         :type do_display: bool
         """
         if do_display:
-            self.setIcon(assets_mgr.get_icon("close_editor"))
+            self.setIcon(assets_mgr.get_icon("hide_monitor"))
             self.setToolTip("Hide Serial Console")
 
             self.console_frame.show()
         else:
-            self.setIcon(assets_mgr.get_icon("open_editor"))
+            self.setIcon(assets_mgr.get_icon("show_monitor"))
             self.setToolTip("Show Serial Console")
 
             self.console_frame.hide()
