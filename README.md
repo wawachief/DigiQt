@@ -56,4 +56,4 @@ Authors:
 GNU General Public License v3.0
 
 
-#### © LÉCLUSE-DevCorp
+![LECLUSE DevCorp.](./assets/LDC-dark)
