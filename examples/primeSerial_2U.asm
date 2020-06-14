@@ -1,5 +1,6 @@
 // PrimeSerial
 // Olivier Lecluse
+// Brent Hauser
 // Platform : Digirule2U
 
 %define	status	252
@@ -13,14 +14,19 @@
 initsp
 speed	0
 
-// Displays 2 and 3
-copylr	2 nb
-call	int2str
-copylr	3 nb
-call	int2str
+copylr 	5 nb
+
+// Displays init_str
+:disp_initstr
+    copyra	init_str
+    bcrsc	ZFlag status
+    jump	search_loop
+    comout
+// Increments argument of copyra instruction
+    incr	disp_initstr+1
+    jump	disp_initstr
 
 // start the search with 5 
-copylr 	5 nb
 :search_loop
     call	prime_test
     bcrsc	PFlag status
@@ -36,7 +42,10 @@ copylr 	5 nb
 :nb_is_prime
     copyrr	nb dataLED
 // output result to serial
-    call	int2str
+    call	int_comout
+// Outputs a space separator
+    copyla	' '
+    comout
 // searching next prime
     jump	increment_nb
 :the_end
@@ -80,8 +89,8 @@ copylr 	5 nb
 
 // converting binary to decimal
 // input : nb
-// output : ascii decimal representation in the stack
-:int2str
+// outputs decimal representation of nb on serial
+:int_comout
     copyrr	nb r0
 // Initialize the stack pointer
     copylr	stack stackPtr
@@ -93,7 +102,7 @@ copylr 	5 nb
     bcrss	ZFlag status
     jump	get_digits
 // Outputs the content of the stack over USB
-:disp_nb
+:stack_out
     decr	stackPtr
     copyia	stackPtr
     addla	'0'
@@ -102,10 +111,7 @@ copylr 	5 nb
     copyra	stackPtr
     subla	stack
     bcrss	ZFlag status
-    jump 	disp_nb
-// Outputs a space separator
-    copyla	' '
-    comout
+    jump 	stack_out
     return
 
 // General Registers
@@ -113,6 +119,8 @@ copylr 	5 nb
 %data 	ten 10
 %data 	r0 0
 %data	nb 0
+%data	init_str "Prime list : 2 3 " 0
+%data	init_strPtr 0
 // Stack initialized with NULL caracters
 %data 	stack 0 0 0
 %data 	stackPtr 0

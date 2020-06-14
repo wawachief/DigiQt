@@ -146,7 +146,11 @@ class SerialControl(QObject):
     @Slot(str)
     def on_comout(self, char):
         """Append the char to the console"""
-        self.monitor_frame.append_serial_out(char)
+        try:
+            self.monitor_frame.append_serial_out(char)
+        except ValueError:            
+            self.monitor_frame.append_serial_out("?")
+
 
     @Slot(str)
     def on_port_change(self, port):
