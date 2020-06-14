@@ -6,8 +6,8 @@
 #
 
 from PySide2.QtWidgets import QVBoxLayout, QLabel, QWidget
-from PySide2.QtGui import QPixmap, Qt
-from PySide2.QtCore import QSize
+from PySide2.QtGui import QPixmap
+from PySide2.QtCore import QSize, Qt
 
 
 from src.view.style import style
