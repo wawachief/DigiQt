@@ -14,17 +14,18 @@
 initsp	
 speed	0 
 
+// Variables initialisations 
 copylr	0 status 
 copylr	5 nb 
+copylr	init_str init_strPtr 
 
 // Displays init_str 
 :disp_initstr 
-  copyra	init_str 
+  copyia	init_strPtr 
   bcrsc	ZFlag status 
   jump	search_loop 
   comout	
-// Increments argument of copyra instruction 
-  incr	disp_initstr+1 
+  incr	init_strPtr 
   jump	disp_initstr 
 
 // start the search with 5 
@@ -56,6 +57,7 @@ copylr	5 nb
   copyla	0x0a 
   comout	
   halt	
+  jump 0
 
 // primality test 
 // input : nb 
@@ -125,7 +127,4 @@ copylr	5 nb
 // Stack initialized with NULL caracters 
 %data stack 0 0 0 
 %data stackPtr 0 
-
-
-
 
