@@ -1,13 +1,13 @@
-// Binary Conversion Trainer
-// Olivier Lecluse
-// Designed for Digirule 2U
+// Binary Conversion Trainer 
+// Olivier Lecluse 
+// Designed for Digirule 2U 
 
-//
-// connect a terminal to the DR
-// Run the program
-// the DR displkays a number on row data row
-// Convert it to hexadecimal
-// and press Return
+// 
+// connect a terminal to the DR 
+// Run the program 
+// the DR displkays a number on row data row 
+// Convert it to hexadecimal 
+// and press Return 
 // 
 
 %define statusReg 252 
@@ -18,8 +18,8 @@
 %define CFlag 1 
 %define AFlag 2 
 
-%define COUNT_SPEED 248 // speed is at address 248
-%define BASE 249 // base is at address 248
+%define COUNT_SPEED 248 // speed is at address 248 
+%define BASE 249        // base is at address 248 
 
 :start 
   initsp	
@@ -27,26 +27,24 @@
   sbr	AFlag statusReg 
 
 // initialize game 
-  copylr	20 COUNT_SPEED
-  copylr	0x10 BASE // you can choose your base here
-  
+
   randa	
-  // copyla	0xAA // This is cheating  
+// copyla 0xAA // This is cheating 
   copyar	nb2guess 
-  copyrr	nb2guess dataLEDReg // prints number to guess on dataLEDs
+  copyrr	nb2guess dataLEDReg // prints number to guess on dataLEDs 
   copylr	0 nbplayer // user guess 
   call	init_timer // time limit 
-  
-:guess_nb
+
+:guess_nb 
 // Wait for user input 
   comrdy	
   bcrss	ZFlag statusReg 
-  jump	read_nb
+  jump	read_nb 
   call	tick_timer 
   bcrsc	CFlag statusReg 
   jump	you_loose 
-  jump	guess_nb
-:read_nb
+  jump	guess_nb 
+:read_nb 
 // a character is available 
   comin	
   comout	// echo on console 
@@ -73,7 +71,7 @@
   mul	nbplayer BASE 
   addra	nbplayer 
   copyar	nbplayer 
-  jump	guess_nb
+  jump	guess_nb 
 :input_end 
   cbr	ZFlag statusReg 
   copyra	nb2guess 
@@ -140,7 +138,7 @@
 // The Carry is Set in case of TimeOut 
   return	
 
-// Variables declaration
+// Variables declaration 
 
 %data cs 0 0 
 %data counter 0 
@@ -149,6 +147,5 @@
 %data nbplayer 0 
 %data strPtr 0 
 %data win_str 13 10 "You win!" 0 
-%data loose_str 13 10 "You loose!" 0
-%data space_str " press SPACE to restart" 13 10 0
-
+%data loose_str 13 10 "You loose!" 0 
+%data space_str " press SPACE to restart" 13 10 0 0 0 0 0 0 0 20 16
