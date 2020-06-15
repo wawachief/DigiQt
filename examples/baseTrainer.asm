@@ -1,3 +1,15 @@
+// Binary Conversion Trainer
+// Olivier Lecluse
+// Designed for Digirule 2U
+
+//
+// connect a terminal to the DR
+// Run the program
+// the DR displkays a number on row data row
+// Convert it to hexadecimal
+// and press Return
+// 
+
 %define statusReg 252 
 %define buttonReg 253 
 %define addrLEDReg 254 
@@ -6,43 +18,44 @@
 %define CFlag 1 
 %define AFlag 2 
 
-// Constants 
-%define COUNT_SPEED 5
+%define COUNT_SPEED 248 // speed is at address 248
+%define BASE 249 // base is at address 248
 
 :start 
   initsp	
   speed	0 
   sbr	AFlag statusReg 
 
-
-randa	
-copyla	0xAA
-copyar	nb2guess 
-copylr	0x10 base // base 16
-// to_hex trainner 
-:to_hex 
-  copyrr	nb2guess dataLEDReg // number to guess 
-  copylr	0 input_nb // user guess 
-  copylr	base 0x10 // 16 base 
-  call	init_timer // time limit
-:guess_hex 
-// Wait for user input
+// initialize game 
+  copylr	20 COUNT_SPEED
+  copylr	0x10 BASE // you can choose your base here
+  
+  randa	
+  // copyla	0xAA // This is cheating  
+  copyar	nb2guess 
+  copyrr	nb2guess dataLEDReg // prints number to guess on dataLEDs
+  copylr	0 nbplayer // user guess 
+  call	init_timer // time limit 
+  
+:guess_nb
+// Wait for user input 
   comrdy	
   bcrss	ZFlag statusReg 
-  jump	read_hex 
+  jump	read_nb
   call	tick_timer 
   bcrsc	CFlag statusReg 
-  jump	you_loose
-  jump	guess_hex 
-:read_hex 
+  jump	you_loose 
+  jump	guess_nb
+:read_nb
 // a character is available 
   comin	
-  copyar	input_char 
-  subla	10
+  comout	// echo on console 
+  copyar	char 
+  subla	13 
   bcrsc	ZFlag statusReg 
 // End of input on Enter key 
-  jump	hexinput_end 
-  copyra	input_char 
+  jump	input_end 
+  copyra	char 
 // to upper case 
   cbr	CFlag statusReg 
   subla	'a' 
@@ -57,41 +70,57 @@ copylr	0x10 base // base 16
   subla	7 // A -> '0' + 10 
   addla	'A' 
   subla	'0' // user input (0-15) is in accumulator 
-  mul	input_nb base 
-  addra	input_nb 
-  copyar	input_nb 
-  jump	guess_hex 
-:hexinput_end 
-  copyra	input_nb
-  call	int_comout 
-  copyla	'/' 
-  comout	
-  copyla	nb2guess 
-  call	int_comout 
+  mul	nbplayer BASE 
+  addra	nbplayer 
+  copyar	nbplayer 
+  jump	guess_nb
+:input_end 
   cbr	ZFlag statusReg 
   copyra	nb2guess 
-  subra	input_nb 
-  bcrss	ZFlag statusReg 
+  subra	nbplayer 
+  bcrsc	ZFlag statusReg 
   jump	you_win 
   jump	you_loose 
 
 :you_win 
   copylr	0xff dataLEDReg 
-  jump 	you_win
+  copylr	win_str strPtr 
+  call	print_message 
+  call	wait_for_space 
   jump	start 
 :you_loose 
   copylr	0 dataLEDReg 
-  jump 	you_loose
+  copylr	loose_str strPtr 
+  call	print_message 
+  call	wait_for_space 
   jump	start 
 
+// Displays message string 
+:print_message 
+  copyia	strPtr 
+  bcrsc	ZFlag statusReg 
+  return	
+  nop	
+  comout	
+  incr	strPtr 
+  jump	print_message 
+
+:wait_for_space 
+  copylr	space_str strPtr 
+  call	print_message 
+  comin	
+  subla	' ' 
+  bcrss	ZFlag statusReg 
+  jump	wait_for_space 
+  return	
 
 :init_timer 
 // Initialize timer 
   copylr	0 counter 
-  copylr	COUNT_SPEED cs 
+  copyrr	COUNT_SPEED cs 
   copylr	0xFF cs+1 
   copylr	0 addrLEDReg 
-  cbr 	CFlag statusReg
+  cbr	CFlag statusReg 
   return	
 :tick_timer 
 // Non blocking timer 
@@ -102,55 +131,24 @@ copylr	0x10 base // base 16
   decrjz	cs 
   return	
   nop	
-  copylr	COUNT_SPEED cs 
+  copyrr	COUNT_SPEED cs 
 // displays a progress bar on ADDR leds 
   cbr	CFlag statusReg 
-  shiftrl counter 
+  shiftrl	counter 
   incr	counter 
   copyrr	counter addrLEDReg 
-// The Carry is Set in case of TimeOut
-  return
-  
-
-// DEBUG 
-// outputs decimal representation of ACC on serial 
-:int_comout 
-  copyar	r0 
-// Initialize the stack pointer 
-  copylr	stack stackPtr 
-:get_digits 
-  div	r0 ten 
-  copyai	stackPtr 
-  incr	stackPtr 
-  copyra	r0 
-  bcrss	ZFlag statusReg 
-  jump	get_digits 
-// Outputs the content of the stack over USB 
-:stack_out 
-  decr	stackPtr 
-  copyia	stackPtr 
-  addla	'0' 
-  comout	
-// test if we reached the head of the stack 
-  copyra	stackPtr 
-  subla	stack 
-  bcrss	ZFlag statusReg 
-  jump	stack_out 
+// The Carry is Set in case of TimeOut 
   return	
 
+// Variables declaration
 
 %data cs 0 0 
 %data counter 0 
 %data nb2guess 0 
-%data input_char 0 
-%data input_nb 0 
-
-%data ten 10 
-%data base 0
-%data r0 0 
-%data stack 0 0 0 
-%data stackPtr 0 
-
-
-
+%data char 0 
+%data nbplayer 0 
+%data strPtr 0 
+%data win_str 13 10 "You win!" 0 
+%data loose_str 13 10 "You loose!" 0
+%data space_str " press SPACE to restart" 13 10 0
 

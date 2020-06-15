@@ -118,7 +118,7 @@ class SerialControl(QObject):
         self.cpu.sig_CPU_comin = self.sig_CPU_comin
         self.monitor_frame.usb_combo.sig_port_change = self.sig_port_change
         
-        self.keydict = {"Return": "\n", "Enter": chr(13), "Backspace":chr(8), "Esc":chr(27), "Del":chr(127)}
+        self.keydict = {"Return": chr(13), "Enter": chr(13), "Backspace":chr(8), "Esc":chr(27), "Del":chr(127)}
 
         self.init_serial()
 

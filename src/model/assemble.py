@@ -191,4 +191,6 @@ class Assemble:
                     ram[i] = keywords[r]
                 else:
                     return error(r, 0)
+        if len(ram) > 255:
+            return error("Program too long !", 0)
         return (True, ram, keywords, labels)
