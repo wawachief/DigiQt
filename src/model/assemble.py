@@ -52,7 +52,7 @@ class Assemble:
                 if is_space(c) and not inString:
                     if word: words_list.append(word)
                     word = ""
-                elif is_comment(c):
+                elif is_comment(c) and not inString:
                     comment_mode = True
                 else:
                     if inString:
