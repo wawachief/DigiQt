@@ -258,7 +258,7 @@ class AssembleHighlighter(QSyntaxHighlighter):
 
         # Directives
         rules += [
-            (r'(^\s*%define\b|^\s*%data\b)', 0, self.styles['directive'])
+            (r'(^\s*%\w+)', 0, self.styles['directive'])
         ]
 
         # Build QRegExp for the above patterns

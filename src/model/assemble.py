@@ -21,7 +21,7 @@ class Assemble:
             comments and empty lines are removed"""
 
         def is_space(c):
-            return c == " " or c == "\t"
+            return c == " " or c == "\t" or c == ","
 
         def is_eol(c):
             return c == "\n"
@@ -71,7 +71,12 @@ class Assemble:
                 return (False, "unknown keyword " + msg, l, msg)
             else:
                 return (False, msg + " on line " + str(l), l)
-
+        
+        def find_line(keyword):
+            for line in self.lines:
+                if keyword in line :
+                    return line[-1]
+            return 0
         PC = 0
         ram = []
 
@@ -86,7 +91,7 @@ class Assemble:
             if PC >= 252:
                 return error("no space left in program memory", line[-1])
             if line[0] == "%define":
-                # variable definition
+                # variable definition directive
                 try:
                     if line[2][0:2] == '0b':
                         keywords[line[1]] = int(line[2], 2)
@@ -97,7 +102,7 @@ class Assemble:
                 except:
                     return error("error in keyword definition", line[3])
             elif line[0] == "%data":
-                # Data definitions
+                # Data definition directire
                 keywords[line[1]] = PC
                 for d in line[2:-1]:
                     try:
@@ -120,6 +125,23 @@ class Assemble:
                     else:
                         ram.append(code)
                         PC += 1
+            elif line[0] == "%org":
+                # Memory relocation directive
+                adr = line[1]
+                try:
+                    if adr[0:2] == '0b':
+                        adr = int(adr, 2)
+                    elif adr[0:2] == '0x':
+                        adr = int(adr, 16)
+                    else:
+                        adr = int(adr)
+                except:
+                    return error("error in %org directive", line[-1])
+                if adr < PC :
+                    return error("Illegal memory relocation", line[-1])
+                for _ in range(adr-PC):
+                    PC += 1
+                    ram.append(0)
             elif line[0][0] == ":":
                 # label definition
                 try:
@@ -186,11 +208,11 @@ class Assemble:
                     try:
                         ram[i] = keywords[arg1] + int(arg2)
                     except:
-                        return error(r, 0)
+                        return error("Undefined ofset " + r, find_line(r))
                 elif r in keywords:
                     ram[i] = keywords[r]
                 else:
-                    return error(r, 0)
+                    return error("Undefined keyword " + r, find_line(r))
         if len(ram) > 255:
             return error("Program too long !", 0)
         return (True, ram, keywords, labels)
