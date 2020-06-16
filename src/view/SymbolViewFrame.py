@@ -52,8 +52,8 @@ class SymbolViewFrame(QWidget):
         self.init_labels([])
         self.init_symbols([])
 
-        self.labels_view.selectionModel().selectionChanged.connect(self.on_label_changed)
-        self.symbols_view.selectionModel().selectionChanged.connect(self.on_symbol_changed)
+        self.labels_view.clicked.connect(self.on_label_changed)
+        self.symbols_view.clicked.connect(self.on_symbol_changed)
 
         self.__set_layout()
         self.setStyleSheet(style.get_stylesheet("listviews_frame"))
@@ -110,7 +110,7 @@ class SymbolViewFrame(QWidget):
         :param item: new item selected
         :type item: QItemSelection
         """
-        text = self.__retrieve_text(self.dm_labels, item)
+        text = item.data()
         if text:
             self.sig_symbol_goto.emit(text)
 
@@ -120,7 +120,7 @@ class SymbolViewFrame(QWidget):
         :param item: new item selected
         :type item: QItemSelection
         """
-        text = self.__retrieve_text(self.dm_symbols, item)
+        text = item.data()
         if text:
             self.sig_symbol_goto.emit(text)
 
