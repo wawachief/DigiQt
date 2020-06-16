@@ -5,7 +5,7 @@
 # Edition frame
 #
 
-from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QSizePolicy
+from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QSizePolicy, QLineEdit
 from PySide2.QtCore import QSize
 
 from src.view.editor_frame_widgets.EditorFrameButtons import OpenFileButton, AssembleButton, SaveAsFileButton, SaveFileButton
@@ -48,9 +48,14 @@ class EditorFrame(QWidget):
 
         self.assemble_btn = AssembleButton(config)
 
+        self.search_field = QLineEdit()
+        self.search_field.setPlaceholderText("Search (press return)")
+        self.search_field.returnPressed.connect(self.do_search)
+
         # Editor's shortcuts binding
         self.editor.on_ctrl_o_activated = self.open_file_btn.on_open  # Open action
         self.editor.on_ctrl_s_activated = self.do_save
+        self.editor.on_ctrl_f_activated = self.do_search
 
         # Final initialization
         self.__init_title()
@@ -58,6 +63,8 @@ class EditorFrame(QWidget):
         self._set_layout()
         self._connect_all()
         self._set_stylesheet()
+
+        self.editor.setFocus()  # Set the default focus on the Editor
 
     def __init_title(self, file_name=""):
         """
@@ -84,6 +91,9 @@ class EditorFrame(QWidget):
         self.toolbar.addWidget(self.open_file_btn)
         self.toolbar.addWidget(self.save_btn)
         self.toolbar.addWidget(self.save_as_btn)
+
+        self.toolbar.addSeparator()
+        self.toolbar.addWidget(self.search_field)
 
         # Empty space to align the assemble button to the right
         spacer = QWidget()
@@ -116,6 +126,9 @@ class EditorFrame(QWidget):
         self.editor.setStyleSheet("background-color: " + self.config.get('colors', 'editor_bg') +
                                   "; color: " + self.config.get('colors', 'asm_text_default') + ";")
 
+        self.search_field.setStyleSheet(
+            "border: 2px solid gray; border-radius: 10px; padding: 0 8px; background: #585858; color: white")
+
         # Execution Frame
         self.setStyleSheet(style.get_stylesheet("common"))
 
@@ -136,6 +149,18 @@ class EditorFrame(QWidget):
             self.save_btn.on_save()
         else:
             self.save_as_btn.on_save_as()
+
+    def do_search(self, text=None):
+        """
+        Searches the value present in the search field, or the places the specified text if there is one as search
+        value, but does not triggers the search.
+
+        :param text: Text to search (None will trigger a search on the field content)
+        """
+        if text:
+            self.search_field.setText(text)
+        else:
+            self.editor.selectNext(self.search_field.text())
 
     # --- Close handler ---
 

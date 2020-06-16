@@ -6,7 +6,7 @@
 #
 
 from PySide2.QtWidgets import QWidget, QPlainTextEdit, QTextEdit, QShortcut
-from PySide2.QtGui import QColor, QTextFormat, QPainter, QSyntaxHighlighter, QTextCharFormat, QFont, QTextCursor, QKeySequence
+from PySide2.QtGui import QColor, QTextFormat, QPainter, QSyntaxHighlighter, QTextCharFormat, QFont, QTextCursor, QKeySequence, QPalette
 from PySide2.QtCore import QRect, Slot, Qt, QSize, QRegExp
 
 import re
@@ -59,7 +59,10 @@ class CodeEditor(QPlainTextEdit):
         shortcut_open.activated.connect(self.on_ctrl_o_activated)
 
         shortcut_indent_all = QShortcut(QKeySequence("Ctrl+T"), self)
-        shortcut_indent_all.activated.connect(lambda: self.setPlainText(re_indent_all(self.toPlainText(), self.highlight.keywords)))
+        shortcut_indent_all.activated.connect(self.indent_file)
+
+        shortcut_search = QShortcut(QKeySequence("Ctrl+F"), self)
+        shortcut_search.activated.connect(self.on_ctrl_f_activated)
 
         # Change the font to get a fix size for characters
         doc = self.document()
@@ -70,6 +73,28 @@ class CodeEditor(QPlainTextEdit):
         # initialization
         self.blockCountChanged.emit(0)
         self.cursorPositionChanged.emit()
+
+    def indent_file(self):
+        """
+        Processes a full indent process on the file
+        """
+        cursor = self.textCursor()
+
+        pos = self.verticalScrollBar().value()
+
+        # Current row and column is current position
+        row = cursor.blockNumber()
+        column = cursor.columnNumber()
+
+        self.setPlainText(re_indent_all(self.toPlainText(), self.highlight.keywords))
+
+        # Put back the cursor where it was
+        cursor.setPosition(0)  # Go at the beginning before moving to the previous location, relatively
+        cursor.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, row)
+        cursor.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor, column)
+        self.setTextCursor(cursor)
+
+        self.verticalScrollBar().setValue(pos)
 
     def line_number_area_paint(self, event):
         """
@@ -122,6 +147,47 @@ class CodeEditor(QPlainTextEdit):
 
     def on_ctrl_o_activated(self):
         pass
+
+    def on_ctrl_f_activated(self):
+        pass
+
+    def selectNext(self, word):
+        """
+        Highlights the next occurrence of the given word
+        """
+        # This case should not occur, but to make sure, we don't process a word that is not in the file
+        if word.lower() not in self.toPlainText().lower():
+            return
+
+        cursor = self.textCursor()
+
+        # Beginning row and column is current position
+        row = cursor.blockNumber()
+        column = cursor.columnNumber()
+
+        lines = self.toPlainText().lower().split("\n")  # Retrieve the document's lines
+        current_line = lines[row][column:]  # We start the search at the beginning row/column in the file
+        offset = len(lines[row][:column])  # Offset position, in case there is a match before
+
+        cursor.movePosition(QTextCursor.StartOfLine, QTextCursor.MoveAnchor)  # Move to the start of the line
+
+        # If we are here, we know that the word is in the document, so this loop will stop
+        while word.lower() not in current_line:
+            offset = 0  # Reset the offset, we no longer need it
+            row += 1
+            cursor.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor)  # Move to the next row
+
+            if row == len(lines):  # Go back to the beginning if we've reached the end
+                row = 0
+                cursor.movePosition(QTextCursor.Start, QTextCursor.MoveAnchor)  # Move to the file's start
+
+            current_line = lines[row]
+
+        cursor.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor, offset + current_line.index(word.lower()))  # Move to the word start
+
+        cursor.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor, len(word))  # Select the word
+
+        self.setTextCursor(cursor)
 
     @Slot(int)
     def update_line_number_area_width(self, new_bock_count):

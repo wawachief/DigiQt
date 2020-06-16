@@ -65,6 +65,7 @@ class ExecutionFrame(QWidget):
         self.symbol_frame = SymbolViewFrame(config)
         self.open_symbol_btn = OpenSymbolButton(self.symbol_frame, config)
         self.symbol_frame.on_close = lambda: self.open_symbol_btn.show_symbol_frame(False)
+        self.symbol_frame.place_search_text = self.editor_frame.do_search
 
         self.about_frame = AboutFrame(self.config)
         self.open_about_btn = AboutButton(self.about_frame, config)

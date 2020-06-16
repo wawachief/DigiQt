@@ -24,7 +24,7 @@ class SymbolViewFrame(QWidget):
         """
         QWidget.__init__(self)
 
-        self.setFixedSize(QSize(220, 330))
+        self.setFixedSize(QSize(320, 330))
         self.setWindowTitle("DigiQt - Symbols")
 
         self.config = config
@@ -38,13 +38,13 @@ class SymbolViewFrame(QWidget):
 
         # Initialization of the lists
         self.labels_view = QListView()
-        self.labels_view.setFixedSize(QSize(100, 300))
+        self.labels_view.setFixedSize(QSize(150, 300))
         self.labels_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.labels_view.setSelectionMode(QAbstractItemView.SingleSelection)
         self.dm_labels = QStandardItemModel(self.labels_view)
 
         self.symbols_view = QListView()
-        self.symbols_view.setFixedSize(QSize(100, 300))
+        self.symbols_view.setFixedSize(QSize(150, 300))
         self.symbols_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.symbols_view.setSelectionMode(QAbstractItemView.SingleSelection)
         self.dm_symbols = QStandardItemModel(self.symbols_view)
@@ -113,6 +113,7 @@ class SymbolViewFrame(QWidget):
         text = item.data()
         if text:
             self.sig_symbol_goto.emit(text)
+            self.place_search_text(text)
 
     def on_symbol_changed(self, item):
         """
@@ -123,6 +124,15 @@ class SymbolViewFrame(QWidget):
         text = item.data()
         if text:
             self.sig_symbol_goto.emit(text)
+            self.place_search_text(text)
+
+    def place_search_text(self, text):
+        """
+        Updates the searched value in the editor search field.
+
+        :param text: label or symbol to place as search text
+        """
+        pass
 
     def __retrieve_text(self, data_model, item):
         """
