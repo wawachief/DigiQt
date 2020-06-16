@@ -8,7 +8,8 @@
 // the DR displkays a number on row data row 
 // Convert it to hexadecimal 
 // and press Return 
-// 
+// speed is at address 248 
+// base is at address 249 
 
 %define statusReg 252 
 %define buttonReg 253 
@@ -17,9 +18,6 @@
 %define ZFlag 0 
 %define CFlag 1 
 %define AFlag 2 
-
-%define COUNT_SPEED 248 // speed is at address 248 
-%define BASE 249        // base is at address 248 
 
 :start 
   initsp	
@@ -88,7 +86,7 @@
   jump	start 
 :you_loose 
   copylr	0 dataLEDReg 
-  copylr	loose_str strPtr 
+  copylr	lose_str strPtr 
   call	print_message 
   call	wait_for_space 
   jump	start 
@@ -147,5 +145,9 @@
 %data nbplayer 0 
 %data strPtr 0 
 %data win_str 13 10 "You win!" 0 
-%data loose_str 13 10 "You loose!" 0 
-%data space_str " press SPACE to restart" 13 10 0 0 0 0 0 0 0 20 16
+%data lose_str 13 10 "You lose!" 0 
+%data space_str " press SPACE to restart" 13 10 
+
+%org 248
+%data COUNT_SPEED 20 
+%data BASE 16 
