@@ -9,6 +9,8 @@ from configparser import ConfigParser
 from PySide2.QtCore import Signal, Slot, QObject, QThread, QTimer, SIGNAL
 from time import sleep
 from importlib import import_module
+from os import path
+import shutil
 
 from src.model.assemble import Assemble
 from src.debugger import Debug
@@ -60,8 +62,20 @@ class Controller(QObject):
         self.sig_symbol_goto.connect(self.on_symbol_goto)
 
         # Read configuration
+        # Copy config file into home directory
+        self.config_path = path.expanduser("~/.DigiQtrc")
+        if not path.exists(self.config_path):
+            shutil.copyfile(CONFIG_FILE_PATH, self.config_path)
+        # Compare local version with app version
+        config_ori = ConfigParser()
+        config_ori.read(CONFIG_FILE_PATH)
         self.config = ConfigParser()
-        self.config.read(CONFIG_FILE_PATH)
+        self.config.read(self.config_path)
+        if config_ori.get('main', 'app_version') != self.config.get('main', 'app_version'):
+            # .DigiQtrc is obsolete, We overwrite the config file
+            shutil.copyfile(CONFIG_FILE_PATH, self.config_path)
+            self.config.read(self.config_path)
+
         self.dr_model = self.config.get('digirule', 'DR_MODEL')
 
         # Controller attributes
@@ -121,7 +135,7 @@ class Controller(QObject):
         # Instantiate the serial controler
         if self.cpu.serial_enable:
             self.serialctl = SerialControl(self.cpu, self.gui.monitor_frame, 
-                self.gui.statusbar, self.config, self.sig_ram_update, CONFIG_FILE_PATH)
+                self.gui.statusbar, self.config, self.sig_ram_update, self.config_path)
             self.gui.open_monitor_btn.setEnabled(True)
         else:
             self.serialctl = None
@@ -192,7 +206,7 @@ class Controller(QObject):
         self.config.set('digirule', 'DR_MODEL', new_value)
         self.dr_model = new_value
 
-        with open(CONFIG_FILE_PATH, 'w') as configfile:
+        with open(self.config_path, 'w') as configfile:
             self.config.write(configfile)
         
         # Reinstatiate CPU and all the important stuff
