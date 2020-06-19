@@ -19,6 +19,8 @@
 %define zero_f 0 
 %define hide_a 2 
 
+copylr	0 score
+copylr	0 score+1
 :start 
   sbr	hide_a sts_reg 
   randa	
@@ -30,42 +32,34 @@
 // lookupPtr contains the address of the random logic function 
   copyir	lookupPtr lookupPtr 
 // Button configuration for the answer 
-  copylr	0b00000100 buttonsGate
+  copylr	0b10000000 buttonsGate 
   copyrr	gate r0 
-:s_loop
-  bcrsc	zero_f sts_reg
-  jump 	mainloop
-  shiftrl	buttonsGate
-  decr	r0
-  jump s_loop
+:s_loop 
+  bcrsc	zero_f sts_reg 
+  jump	mainloop 
+  shiftrr	buttonsGate 
+  decr	r0 
+  jump	s_loop 
 :mainloop 
   copyra	btn_reg 
   copyar	dta_reg 
 // Acc contains buttons - Indirect call to random gate 
   calli	lookupPtr 
+  call	test_answer 
+  bcrsc	zero_f sts_reg // zero_f set -> no answer yet 
   jump	mainloop 
+  jump	start 
 
 :test_answer 
 // search for an answer 
 // Ignore Gate inputs 
   copyra	btn_reg 
-  andla	0b11111100 
-  copyar	buttonsTmp 
-// Count the number of pressed buttons 
-  copyla	0 
-  copylr	7 r0 
-:ta_loop 
-  bcrsc	r0 buttonsTmp 
-  addla	1 
-  decrjz	r0 
-  jump	ta_loop 
-// If 0, no answer yet 
-  addla	0 
-  bcrsc	zero_f sts_reg 
+  andla	0b11111100 // zero_f -> no answer yet 
+  bcrsc	zero_f sts_reg
   return	
   nop	
-:check_answer 
-  copyra	buttonsTmp 
+// An answer button is pressed 
+// Check the answer
   subra	buttonsGate 
   bcrsc	zero_f sts_reg 
   jump	you_win 
@@ -79,9 +73,22 @@
   copylr	255 dta_reg 
   jump	wait 
 :wait 
+  copyrr	score buttonsTmp 
+  shiftrl	buttonsTmp 
+  shiftrl	buttonsTmp 
+  shiftrl	buttonsTmp 
+  shiftrl	buttonsTmp 
+  copyra	buttonsTmp 
+  addra	score+1 
+  copyar	add_reg 
   copylr	255 r0 
+  speed	8
+:w_loop 
+// Add some delay by doing n times the same operation 
   decrjz	r0 
-  jump	wait 
+  jump	w_loop 
+  speed	0 
+  cbr	zero_f sts_reg // zero_f clear -> new game 
   return	
 
 // check the answer 
@@ -147,8 +154,3 @@
 %data six 6 
 %data score 0 0 // # of games - # of wins 
 %data r0 0 
-
-
-
-
-
