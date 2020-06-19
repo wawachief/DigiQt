@@ -1,14 +1,16 @@
+// Olivier Lecluse
+// Logic Trainer for Digirule 2B - 2U
+
 // Guess which logic gate the rule chose 
 // by experimenting around truth tables 
 // 
 // D0 : Input A / D1 : input B 
 // Answer with buttons D7 -> D2 : 
-// 
 // D7 : AND -> 0 
 // D6 : OR -> 1 
 // D5 : XOR -> 2 
-// D4 : NOR -> 3 
-// D3 : NAND -> 4 
+// D4 : NAND -> 3 
+// D3 : NOR -> 4 
 // D2 : XNOR -> 5 
 
 %define sts_reg 252 
@@ -19,8 +21,10 @@
 %define zero_f 0 
 %define hide_a 2 
 
+// Init scores
 copylr	0 score
 copylr	0 score+1
+
 :start 
   sbr	hide_a sts_reg 
   randa	
@@ -146,7 +150,7 @@ copylr	0 score+1
   jump	logic_1 
   jump	logic_0 
 
-%data lookupLogic and or xor nor nand xnor 
+%data lookupLogic and or xor nand nor xnor 
 %data lookupPtr 0 
 %data buttonsTmp 0 
 %data buttonsGate 0 
