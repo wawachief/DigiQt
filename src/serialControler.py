@@ -118,8 +118,6 @@ class SerialControl(QObject):
         self.cpu.sig_CPU_comin = self.sig_CPU_comin
         self.monitor_frame.usb_combo.sig_port_change = self.sig_port_change
         
-        self.keydict = {"Return": chr(13), "Enter": chr(13), "Backspace":chr(8), "Esc":chr(27), "Del":chr(127)}
-
         self.init_serial()
 
     def init_serial(self, do_refresh = True):
@@ -136,14 +134,9 @@ class SerialControl(QObject):
     #
     @Slot(str)
     def on_key_pressed(self, key):
-        if self.cpu.rx is None:
-            if key in self.keydict:
-                self.cpu.rx = self.keydict[key]
-            elif len(key) == 1:
-                self.cpu.rx = key
-                self.monitor_frame.serial_in.setText(key)
-            else:
-                self.statusbar.sig_temp_message.emit(f"Unknown key: {key}")
+        if self.cpu.rx is None and len(key) == 1:
+            self.cpu.rx = key
+            self.monitor_frame.serial_in.setText(key)
 
     @Slot(str)
     def on_comin(self, char):

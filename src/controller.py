@@ -429,10 +429,15 @@ class Controller(QObject):
         pass
     def cb_run_dx(self, btn, is_pressed):
         """Button Dx pressed in run mode"""
-        if is_pressed:
-            self.cpu.ram[self.cpu.REG_BUTTON] = 2**btn
+        if self.gui.dr_canvas.is_ctrl_pressed():
+        # CRTL press : multi button
+            if is_pressed:
+                self.cpu.ram[self.cpu.REG_BUTTON] ^= 2**btn
         else:
-            self.cpu.ram[self.cpu.REG_BUTTON] = 0
+            if is_pressed:
+                self.cpu.ram[self.cpu.REG_BUTTON] = 2**btn
+            else:
+                self.cpu.ram[self.cpu.REG_BUTTON] = 0
     def cb_run_clear(self):
         """Button clear pressed in run mode"""
         self.gui.statusbar.sig_temp_message.emit("Don't clear memory while running !!")
