@@ -13,6 +13,8 @@ QListView {
     background: #AAAAAA;
     border: 2px solid #333333;
     border-radius: 5px;
+
+    color: black;
 }
 
 QListView::item:selected:!active {

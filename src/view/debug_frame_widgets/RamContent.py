@@ -5,7 +5,7 @@
 # Widget of debug frame
 #
 
-from PySide2.QtWidgets import QPlainTextEdit
+from PySide2.QtWidgets import QPlainTextEdit, QTextEdit
 from PySide2.QtGui import QColor, QSyntaxHighlighter, QTextCharFormat, QFont, QPalette, QTextCursor
 from PySide2.QtCore import QRegExp
 
@@ -34,25 +34,61 @@ class RamDebugText(QPlainTextEdit):
         f.setFamily(get_font(config))
         doc.setDefaultFont(f)
 
+        self.pc_selection = ()
+        self.variable_selection = ()
+        self.label_selection = ()
+
     def select(self, row, column, color):
         """
         Highlights the given position
         """
-        cursor = self.textCursor()
+        if color == 'ram_pc':
+            self.pc_selection = (row, column)
+        elif color == 'ram_variable':
+            # Reset when selection is identical
+            if self.variable_selection == (row, column):
+                self.variable_selection = ()
+            else:
+                self.variable_selection = (row, column)
+        else:  # color == 'ram_label'
+            # Reset when selection is identical
+            if self.label_selection == (row, column):
+                self.label_selection = ()
+            else:
+                self.label_selection = (row, column)
 
-        cursor.setPosition(0)  # Move to the beggining
-        cursor.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, row)  # Move to the row
-        cursor.movePosition(QTextCursor.WordRight, QTextCursor.MoveAnchor, column + 2)  # Move to the column
+        selections = []
+        selections += self.__get_selection(self.variable_selection, "ram_variable")
+        selections += self.__get_selection(self.label_selection, "ram_label")
+        selections += self.__get_selection(self.pc_selection, "ram_pc")
 
-        cursor.movePosition(QTextCursor.WordRight, QTextCursor.KeepAnchor, 1)  # Select the color
-        cursor.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, 1)  # un-select blank space
+        self.setExtraSelections(selections)
 
-        self.setTextCursor(cursor)
+    def __get_selection(self, posi, color):
+        """
+        Performs the selection of the given the specified row, column and background color.
+        Uses a QTextEdit.ExtraSelection.
 
-        p = self.palette()
-        p.setColor(QPalette.Highlight, QColor(self.config.get('colors', color)))
-        p.setColor(QPalette.HighlightedText, QColor('black'))
-        self.setPalette(p)
+        Returns an empty list if the position is not valid
+        """
+        if not posi:
+            return []
+
+        row, column = posi
+
+        selection = QTextEdit.ExtraSelection()
+        selection.format.setBackground(QColor(self.config.get('colors', color)))
+        selection.format.setForeground(QColor('black'))
+        selection.cursor = self.textCursor()
+        selection.cursor.setPosition(0)  # Move to the beggining
+        selection.cursor.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, row)  # Move to the row
+        selection.cursor.movePosition(QTextCursor.WordRight, QTextCursor.MoveAnchor, column + 2)  # Move to the column
+
+        selection.cursor.movePosition(QTextCursor.WordRight, QTextCursor.KeepAnchor, 1)  # Select the color
+        selection.cursor.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, 1)  # un-select blank space
+
+        return [selection]
+
 
     def mouseDoubleClickEvent(self, e):
         """
