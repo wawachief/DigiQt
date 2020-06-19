@@ -116,7 +116,7 @@ class SerialConsoleFrame(QWidget):
         """
         Intercepts key press events
         """
-        self.__send_key(QKeySequence(event.key()).toString())
+        self.__send_key(event.text())
 
     def __send_key(self, key_typed):
         """
