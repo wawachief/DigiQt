@@ -5,9 +5,9 @@
 # Widget of execution frame
 #
 
-from PySide2.QtWidgets import QLabel
+from PySide2.QtWidgets import QLabel, QApplication
 from PySide2.QtGui import QPixmap, QPainter, QColor, QPen, QMatrix
-from PySide2.QtCore import QPoint, QRect
+from PySide2.QtCore import QPoint, QRect, Qt
 
 from src.digirules.DigiruleInfo import DigiruleInfo
 
@@ -140,6 +140,12 @@ class DRCanvas(QLabel):
                 pen.setColor(QColor("black"))
             painter.setPen(pen)
             painter.drawPoint(QPoint(led[0], led[1]))
+
+    def is_ctrl_pressed(self):
+        """
+        :return: True if "ctrl" keyboard key is held down
+        """
+        return QApplication.keyboardModifiers() == Qt.ControlModifier
 
     def mouseReleaseEvent(self, event):
         """
