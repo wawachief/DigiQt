@@ -105,10 +105,12 @@ class Assemble:
                 # Data definition directire
                 keywords[line[1]] = PC
                 for d in line[2:-1]:
+                    isStr = False
                     try:
                         if d[0] == "'" or d[0] == '"':
                             # data is a string
                             code = eval(d)
+                            isStr = True
                         elif d[0:2] == '0b':
                             code = int(d, 2)
                         elif d[0:2] == '0x':
@@ -116,8 +118,8 @@ class Assemble:
                         else:
                             code = int(d)
                     except:
-                        return error("error in data definition", line[-1])
-                    if type(code) is str:
+                        code = d # symbol will be dealt with in second phase
+                    if isStr:
                         # append all characters
                         for c in code:
                             ram.append(ord(c))
