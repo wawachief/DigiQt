@@ -25,25 +25,66 @@
   copyar	gate 
   div	gate six 
   copyar	gate // Random number beetween 0 and 5 
-  addla	lookupLogic
-  copyar	lookupPtr
+  addla	lookupLogic 
+  copyar	lookupPtr 
+// lookupPtr contains the address of the random logic function 
   copyir	lookupPtr lookupPtr 
-  // lookupPtr contains the address of the random logic function 
-  
+// Button configuration for the answer 
+  copylr	0b00000100 buttonsGate
+  copyrr	gate r0 
+:s_loop
+  bcrsc	zero_f sts_reg
+  jump 	mainloop
+  shiftrl	buttonsGate
+  decr	r0
+  jump s_loop
 :mainloop 
   copyra	btn_reg 
   copyar	dta_reg 
-  // Acc contains buttons - Indirect call to random gate
-  calli	lookupPtr
+// Acc contains buttons - Indirect call to random gate 
+  calli	lookupPtr 
   jump	mainloop 
 
-:test_answer
-  // search for an answer
-  copyla	0
-  bcrsc	7 r0
-:ta_loop
-  
-  // check the answer
+:test_answer 
+// search for an answer 
+// Ignore Gate inputs 
+  copyra	btn_reg 
+  andla	0b11111100 
+  copyar	buttonsTmp 
+// Count the number of pressed buttons 
+  copyla	0 
+  copylr	7 r0 
+:ta_loop 
+  bcrsc	r0 buttonsTmp 
+  addla	1 
+  decrjz	r0 
+  jump	ta_loop 
+// If 0, no answer yet 
+  addla	0 
+  bcrsc	zero_f sts_reg 
+  return	
+  nop	
+:check_answer 
+  copyra	buttonsTmp 
+  subra	buttonsGate 
+  bcrsc	zero_f sts_reg 
+  jump	you_win 
+:you_lose 
+  incr	score // # games 
+  copylr	0 dta_reg 
+  jump	wait 
+:you_win 
+  incr	score // # games 
+  incr	score+1 // # wins 
+  copylr	255 dta_reg 
+  jump	wait 
+:wait 
+  copylr	255 r0 
+  decrjz	r0 
+  jump	wait 
+  return	
+
+// check the answer 
 
 // Logic operations Results 
 :logic_0 
@@ -99,10 +140,15 @@
   jump	logic_0 
 
 %data lookupLogic and or xor nor nand xnor 
-%data lookupPtr 0
-%data buttons 0 0 0 0 0 0 0 0 
-%data buttonsPtr 0 
+%data lookupPtr 0 
 %data buttonsTmp 0 
+%data buttonsGate 0 
 %data gate 0 
 %data six 6 
+%data score 0 0 // # of games - # of wins 
 %data r0 0 
+
+
+
+
+
