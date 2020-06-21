@@ -5,7 +5,7 @@
 # This file's purpose is to describe the Digirule 2B model elements position
 #
 
-IMG_NAME = "DR_2.png"  # Image file name
+IMG_NAME = "DR_2B.png"  # Image file name
 BUTTONS_WIDTH = 30  # Push buttons width
 
 # The drawing painter in which is drawn buttons and LEDs needs to be rescaled.
@@ -27,7 +27,7 @@ buttons_positions = {
     (490, 70): "btn_store",
     (490, 136): "btn_next",
     (432, 136): "btn_prev",
-    (793, 136): "btn_run",
+    (793, 120): "btn_run",
     (904, 136): "btn_save",
     (904, 70): "btn_load",
 }
@@ -57,6 +57,6 @@ led_positions = {
     (264, 100): "bottomLed2",
     (312, 100): "bottomLed1",
     (360, 100): "bottomLed0",
-    (831, 105): "stopLed",
-    (755, 105): "runLed"
+    (830, 155): "stopLed",
+    (753, 155): "runLed"
 }
