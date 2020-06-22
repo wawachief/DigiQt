@@ -15,28 +15,28 @@ OFFSET_SCALE = (1000/399, 500/200)
 
 # All the positions for buttons
 buttons_positions = {
-    (25, 140): "d_btn7",
-    (71, 140): "d_btn6",
-    (117, 140): "d_btn5",
-    (165, 140): "d_btn4",
-    (213, 140): "d_btn3",
-    (262, 140): "d_btn2",
-    (310, 140): "d_btn1",
-    (360, 140): "d_btn0",
+    (25, 144): "d_btn7",
+    (71, 144): "d_btn6",
+    (117, 144): "d_btn5",
+    (165, 144): "d_btn4",
+    (213, 144): "d_btn3",
+    (262, 144): "d_btn2",
+    (310, 144): "d_btn1",
+    (357, 144): "d_btn0",
     (432, 70): "btn_goto",
     (490, 70): "btn_store",
-    (490, 136): "btn_next",
-    (432, 136): "btn_prev",
-    (793, 120): "btn_run",
-    (904, 136): "btn_save",
-    (904, 70): "btn_load",
+    (490, 140): "btn_next",
+    (432, 140): "btn_prev",
+    (793, 123): "btn_run",
+    (904, 146): "btn_save",
+    (904, 75): "btn_load",
 }
 
 # Rectangle-shape buttons and larger buttons
 special_buttons_rectangles = {
     (559, 108, 605, 155): "btn_ram",
-    (670, 118, 703, 128): "btn_clear",
-    (970, 50, 1050, 130): "btn_power"
+    (670, 120, 703, 135): "btn_clear",
+    (970, 55, 1050, 140): "btn_power"
 }
 
 # Rows of LEDs
