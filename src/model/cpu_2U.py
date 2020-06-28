@@ -239,32 +239,52 @@ class Cpu(QObject):
         return True
     def inst_addla(self):
         arg1 = self.ram[self.pc + 1]
-        if self.status_C(self.accu + arg1):
-            self.accu += arg1 - 256
+        if self.ram[self.REG_STATUS] & 2 != 0:
+            # Carry flag is set
+            self.accu -= 256
+        if self.status_C(self.accu + arg1, True):
+            self.accu += arg1 - 256 
+        elif self.status_C(self.accu + arg1, False):
+            self.accu += 256 + arg1
         else:
             self.accu += arg1
         self.status_Z(self.accu)
         return True
     def inst_addra(self):
         arg1 = self.ram[self.pc + 1]
-        if self.status_C(self.accu + self.ram[arg1]):
+        if self.ram[self.REG_STATUS] & 2 != 0:
+            # Carry flag is set
+            self.accu -= 256
+        if self.status_C(self.accu - self.ram[arg1], True):
             self.accu += self.ram[arg1] - 256
+        elif self.status_C(self.accu - self.ram[arg1], False):
+            self.accu += 256 + self.ram[arg1]
         else:
             self.accu += self.ram[arg1]
         self.status_Z(self.accu)
         return True
     def inst_subla(self):
         arg1 = self.ram[self.pc + 1]
+        if self.ram[self.REG_STATUS] & 2 != 0:
+            # Carry flag is set
+            self.accu += 256
         if self.status_C(self.accu - arg1, False):
             self.accu += 256 - arg1
+        elif self.status_C(self.accu - arg1, True):
+            self.accu += -256 - arg1
         else:
             self.accu -= arg1
         self.status_Z(self.accu)
         return True
     def inst_subra(self):
         arg1 = self.ram[self.pc + 1]
+        if self.ram[self.REG_STATUS] & 2 != 0:
+            # Carry flag is set
+            self.accu += 256
         if self.status_C(self.accu - self.ram[arg1], False):
             self.accu += 256 - self.ram[arg1]
+        elif self.status_C(self.accu - self.ram[arg1], True):
+            self.accu += -256 - self.ram[arg1]
         else:
             self.accu -= self.ram[arg1]
         self.status_Z(self.accu)

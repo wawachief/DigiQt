@@ -56,10 +56,11 @@
 %define zeroFlag 0 
 %define carryFlag 1 
 
+
 // Clear number of tries and show data on address LED 
 :start 
   copylr	4 statusReg 
-  copylr	0 numberTries+3 // [numberTries+3] - reset number of tries 
+  copylr	0 213 // [numberTries+3] - reset number of tries 
 
 // Compute four random digits by asking four times for a random number and 
 // keeping the three least significant bits each time. The digit is copied 
@@ -78,9 +79,8 @@
   andla	7 // keep only first three bits (so it's 0-7) 
   copyar	code_4 // and copy into memory 
 
-
 :startNewTry 
-  //copylr 0 dataLEDReg // clear number of tries display 
+  copylr	0 dataLEDReg // clear number of tries display 
 
 // Copy guess into working copy 
   copyrr	code_1 copy_1 
@@ -93,8 +93,8 @@
 
 // We must now wait for the user to press a button 
 :testButton 
-  copyrr	buttonReg tempI //XX 
-  //addla 0 //XX 
+  copyra	buttonReg 
+  xorla	0 
   bcrsc	zeroFlag statusReg 
   jump	testButton 
 
@@ -102,7 +102,7 @@
 // we must now convert bit 0 to 7 pressed 
 // to value from 0 to 7. To do so, we shift right until bit found 
 // and increment digit each time. 
-  //copyar tempI //XX 
+  copyar	tempI 
   copylr	255 tempE // start with 255 so first 'incr' brings it to 0 
 :value 
   incr	tempE 
@@ -115,17 +115,16 @@
 // We now compare it to the digit in code (working copy) 
 // that is at the same place. 
 // Prepare Address to be tested 
-  cbr	carryFlag statusReg //XX 
-  copyla	userDigit_4 // [copy_1-1] 
+  copyla	243 // [copy_1-1] 
   addra	AddLEDReg // (is between 4 and 1) 
 
 // Now Acc 'points' to location copy_1 to _4 (copy_1-1 + AddLEDReg) 
 // Update location below to point to correct digit 
-  copyar	index+1 // [index+1] 
-  copyar	index2+2 // [index2+2] 
+  copyar	78 // [index+1] 
+  copyar	88 // [index2+2] 
   copyra	tempE // get digit back and compute digit - copy_i 
 :index 
-  xorra	255 // XX 255 is the placeholer for the correct address 
+  subra	255 // 255 is the placeholer for the correct address 
   bcrss	zeroFlag statusReg // digits are equal? 
   jump	noMatch 
 :match 
@@ -138,18 +137,18 @@
 
 :noMatch 
 // Prepare Address to store digit 
-  copyla	code_4 // [userDigit_1-1] 
+  copyla	239 // [userDigit_1-1] 
   addra	AddLEDReg 
 // Now Acc 'points' to location userDigit_1 to _4 (userDigit_1-1 + AddLEDReg) 
 // Update location below to store digit 
-  copyar	index3+2 // [index3+2] 
+  copyar	100 // [index3+2] 
 :index3 
   copyrr	tempE 255 // 255 is the placeholer for the correct address 
 
 // We now have to wait until user releases the button 
 :testButtonReleased 
   copyra	buttonReg 
-  addla	0 
+  xorla	0 
   bcrss	zeroFlag statusReg 
   jump	testButtonReleased 
 
@@ -167,33 +166,32 @@
   copylr	4 tempI 
 :innerComparLoop 
   copyra	copy_1 
-  xorra	userDigit_1 //XX 
+  subra	userDigit_1 
   bcrss	zeroFlag statusReg // if ZeroFlag=1, match 
   jump	noMatch2 
   incr	wrongPlace // increment number of wrong placed guesses 
   copylr	41 copy_1 // and change code for next digit 
   copylr	44 userDigit_1 // in copy and userDigit (dummy values) 
 :noMatch2 
-  incr	innerComparLoop+1 // [innerComparLoop+1] - next digit for copy_1 
-  incr	innerComparLoop+13 // [innerComparLoop+13] - next digit in userDigits_1 
+  incr	121 // [innerComparLoop+1] - next digit for copy_1 
+  incr	133 // [innerComparLoop+13] - next digit in userDigits_1 
   decrjz	tempI 
   jump	innerComparLoop // next inner loop iteration 
-  copylr	copy_1 innerComparLoop+1 // [innerComparLoop+1] - put back to original addresses 
-  copylr	copy_1 innerComparLoop+13 // [innerComparLoop+13] 
+  copylr	copy_1 121 // [innerComparLoop+1] - put back to original addresses 
+  copylr	copy_1 133 // [innerComparLoop+13] 
 // next outer loop iteration 
-  incr	innerComparLoop+3 // [innerComparLoop+3] 
-  incr	innerComparLoop+16 // [innerComparLoop+16] 
+  incr	123 // [innerComparLoop+3] 
+  incr	136 // [innerComparLoop+16] 
   decrjz	tempE 
   jump	innerLoop 
-  copylr	userDigit_1 innerComparLoop+3 // [innerComparLoop+3] 
-  copylr	userDigit_1 innerComparLoop+16 // [innerComparLoop+16] 
+  copylr	userDigit_1 123 // [innerComparLoop+3] 
+  copylr	userDigit_1 136 // [innerComparLoop+16] 
 
 // Now we must show the results 
 // First compute as many leds as correctly placed digits 
 // We just add 16 (LED 4) for each correctPlace and shift 
 // copylr 0 tempE // we know tempE==0 from above 
-
-  cbr	carryFlag statusReg //XX 
+  xorla	0 // just to clear Carry Flag because some issues with shift 
   incr	correctPlace 
 :checkCP 
   decr	correctPlace 
@@ -201,7 +199,6 @@
   jump	next 
   shiftrl	tempE 
   copyra	tempE 
-
   addla	16 
   copyar	tempE 
   jump	checkCP 
@@ -222,8 +219,8 @@
 // combine the two displays 
 :next2 
   copyra	tempE 
-
-  orra	correctPlace //XX 
+  //cbr carryFlag statusReg
+  addra	correctPlace 
   copyar	AddLEDReg 
 
   copylr	0 correctPlace // put back to 0 for next guess 
@@ -234,7 +231,7 @@
 // (correct places with leds 7-4 and wrong places with leds 3-0) 
 
 :numberTries 
-  incr	numberTries+3 // [numberTries+3] 
+  incr	213 // [numberTries+3] 
   copylr	255 dataLEDReg 
 // 255 is a placeholder where the real counter will be put 
 
@@ -247,7 +244,7 @@
   bcrsc	7 buttonReg 
   jump	waitButton2 
 
-  xorla	240 // XX is Acc=11110000 (win)?  XX
+  subla	240 // is Acc=11110000 (win)? 
   bcrsc	zeroFlag statusReg 
   jump	start // if yes, jump to newgame 
   jump	startNewTry // if not, jump to another try 
@@ -257,22 +254,20 @@
 // variables are at the end of memory (last availbale address = 251) 
 
 
-%org 236 
-
-//********** Variables ********************** 
+  //********** Variables ********************** 
 
 // My memory locations 
 // Random combinaison to guess 
-%data code_1 0 
-%data code_2 0 
+%data code_1 0
+%data code_2 0
 %data code_3 0 
-%data code_4 0 
+%data code_4 0
 
 // User combinaison 
-%data userDigit_1 0 
-%data userDigit_2 0 
-%data userDigit_3 0 
-%data userDigit_4 0 
+%data userDigit_1 0
+%data userDigit_2 0
+%data userDigit_3 0
+%data userDigit_4 0
 
 // Temporary locations to test digits 
 %data copy_1 0 
@@ -285,7 +280,5 @@
 %data wrongPlace 0 
 %data tempE 0 
 %data tempI 0 
-
-
 
 
