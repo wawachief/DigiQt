@@ -27,7 +27,7 @@ buttons_positions = {
     (490, 70): "btn_store",
     (490, 136): "btn_next",
     (432, 136): "btn_prev",
-    (793, 70): "btn_run",
+    (793, 136): "btn_run",
     (904, 136): "btn_save",
     (904, 70): "btn_load",
 }

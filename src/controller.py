@@ -209,6 +209,9 @@ class Controller(QObject):
         with open(self.config_path, 'w') as configfile:
             self.config.write(configfile)
         
+        # Close the onitor window
+        self.gui.monitor_frame.on_close()
+
         # Reinstatiate CPU and all the important stuff
         self.init_state()
     

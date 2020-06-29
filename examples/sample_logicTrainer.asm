@@ -1,5 +1,5 @@
-// Olivier Lecluse
-// Logic Trainer for Digirule 2B - 2U
+// Olivier Lecluse 
+// Logic Trainer for Digirule 2B - 2U 
 
 // Guess which logic gate the rule chose 
 // by experimenting around truth tables 
@@ -21,9 +21,9 @@
 %define zero_f 0 
 %define hide_a 2 
 
-// Init scores
-copylr	0 score
-copylr	0 score+1
+// Init scores 
+copylr	0 score 
+copylr	0 score+1 
 
 :start 
   sbr	hide_a sts_reg 
@@ -59,11 +59,11 @@ copylr	0 score+1
 // Ignore Gate inputs 
   copyra	btn_reg 
   andla	0b11111100 // zero_f -> no answer yet 
-  bcrsc	zero_f sts_reg
+  bcrsc	zero_f sts_reg 
   return	
   nop	
 // An answer button is pressed 
-// Check the answer
+// Check the answer 
   subra	buttonsGate 
   bcrsc	zero_f sts_reg 
   jump	you_win 
@@ -77,6 +77,7 @@ copylr	0 score+1
   copylr	255 dta_reg 
   jump	wait 
 :wait 
+  cbr	carry_f sts_reg 
   copyrr	score buttonsTmp 
   shiftrl	buttonsTmp 
   shiftrl	buttonsTmp 
@@ -86,7 +87,7 @@ copylr	0 score+1
   addra	score+1 
   copyar	add_reg 
   copylr	255 r0 
-  speed	8
+  speed	8 
 :w_loop 
 // Add some delay by doing n times the same operation 
   decrjz	r0 

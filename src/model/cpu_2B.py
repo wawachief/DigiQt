@@ -128,13 +128,14 @@ class Cpu(QObject):
         self.ram[self.REG_STATUS] &= 254   # sets Zero bit to 0
         return False
     
-    def status_C(self, n, way_up=True):
+    def status_C(self, n):
         """ toggles the Carry bit (bit 1) on the status register if necessary """
-        if (n > 255 and way_up) or (n < 0 and not way_up):
-            self.ram[self.REG_STATUS] |= 2 # sets Carry bit to 1
-            return True
-        self.ram[self.REG_STATUS] &= 253   # sets Carry bit to 0
-        return False
+        if (0 <= n <= 255):
+            self.ram[self.REG_STATUS] &= 253 # sets Carry bit to 0
+            return n
+        else:
+            self.ram[self.REG_STATUS] |= 2   # sets Carry bit to 1
+            return n%256
 
     #
     # Stack methods
@@ -238,34 +239,26 @@ class Cpu(QObject):
         return True
     def inst_addla(self):
         arg1 = self.ram[self.pc + 1]
-        if self.status_C(self.accu + arg1):
-            self.accu += arg1 - 256
-        else:
-            self.accu += arg1
+        carry = (self.ram[self.REG_STATUS] & 2) # 0 or 2
+        self.accu = self.status_C(self.accu + arg1 + carry*128)
         self.status_Z(self.accu)
         return True
     def inst_addra(self):
         arg1 = self.ram[self.pc + 1]
-        if self.status_C(self.accu + self.ram[arg1]):
-            self.accu += self.ram[arg1] - 256
-        else:
-            self.accu += self.ram[arg1]
+        carry = (self.ram[self.REG_STATUS] & 2) # 0 or 2
+        self.accu = self.status_C(self.accu + self.ram[arg1] + carry*128)
         self.status_Z(self.accu)
         return True
     def inst_subla(self):
         arg1 = self.ram[self.pc + 1]
-        if self.status_C(self.accu - arg1, False):
-            self.accu += 256 - arg1
-        else:
-            self.accu -= arg1
+        carry = (self.ram[self.REG_STATUS] & 2) # 0 or 2
+        self.accu = self.status_C(self.accu - arg1 + carry*128)
         self.status_Z(self.accu)
         return True
     def inst_subra(self):
         arg1 = self.ram[self.pc + 1]
-        if self.status_C(self.accu - self.ram[arg1], False):
-            self.accu += 256 - self.ram[arg1]
-        else:
-            self.accu -= self.ram[arg1]
+        carry = (self.ram[self.REG_STATUS] & 2) # 0 or 2
+        self.accu = self.status_C(self.accu - self.ram[arg1] + carry*128)
         self.status_Z(self.accu)
         return True
     def inst_andla(self):
@@ -321,14 +314,13 @@ class Cpu(QObject):
     def inst_shiftrl(self):
         arg1 = self.ram[self.pc + 1]
         self.ram[arg1] <<= 1                              # shifts whitout taking care of the previous Carry bit
-        carry = 1 if self.ram[self.REG_STATUS] & 2 else 0 # gets the previous Carry bit on the status register
+        carry = (self.ram[self.REG_STATUS] & 2) // 2      # 0 or 2 # gets the previous Carry bit on the status register
         self.ram[arg1] += carry                           # sets the LSB equals to the previous Carry bit
-        if self.status_C(self.ram[arg1]):
-            self.ram[arg1] -= 256
+        self.ram[arg1] = self.status_C(self.ram[arg1])
         return True
     def inst_shiftrr(self):
         arg1 = self.ram[self.pc + 1]
-        carry = 1 if self.ram[self.REG_STATUS] & 2 else 0 # gets the previous Carry bit on the status register
+        carry = (self.ram[self.REG_STATUS] & 2) // 2      # gets the previous Carry bit on the status register
         if self.ram[arg1] % 2 == 1:                       # if odd value => raises a new Carry
             self.status_C(256)                            # sets Carry bit to 1
         else:
@@ -416,10 +408,8 @@ class Cpu(QObject):
     def inst_mul(self):                  # on entry arg1 = @multiplicand and arg2 = m@ultiplier; 
         arg1 = self.ram[self.pc + 1]     # on exit arg1 = @product
         arg2 = self.ram[self.pc + 2]
-        mul = self.ram[arg1] * self.ram[arg2]
-        self.ram[arg1] = mul % 256
+        self.ram[arg1] = self.status_C(self.ram[arg1] * self.ram[arg2])
         self.status_Z(self.ram[arg1])
-        self.status_C(mul)
         return True
     def inst_div(self):                  # on entry arg1 = @dividend and arg2 = @divisor; 
         arg1 = self.ram[self.pc + 1]     # on exit arg1 = @quotient and accumulator = remainder

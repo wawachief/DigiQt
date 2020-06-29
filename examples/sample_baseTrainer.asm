@@ -71,7 +71,7 @@
   copyar	nbplayer 
   jump	guess_nb 
 :input_end 
-  cbr	ZFlag statusReg 
+  copylr	0 statusReg 
   copyra	nb2guess 
   subra	nbplayer 
   bcrsc	ZFlag statusReg 
