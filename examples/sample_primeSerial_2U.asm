@@ -79,7 +79,7 @@ copylr	init_str init_strPtr
   decr	dv 
   decr	dv 
   copyra	dv 
-  subla	1 
+  xorla	1 
   bcrss	ZFlag status 
   jump	loop_div 
 // Number is prime 
@@ -112,7 +112,7 @@ copylr	init_str init_strPtr
   comout	
 // test if we reached the head of the stack 
   copyra	stackPtr 
-  subla	stack 
+  xorla	stack 
   bcrss	ZFlag status 
   jump	stack_out 
   return	
