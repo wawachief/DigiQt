@@ -1,10 +1,15 @@
 %define status 252 
 %define Carry 1 
-
+copylr 0 status
+sbr 2 status
 sbr Carry status
 copyra val
-subla 180
+subla 10
 
-%data val 170
+copyar 255
+copyrr status 254 
 
-
+:loop
+  jump loop
+  
+%data val 0

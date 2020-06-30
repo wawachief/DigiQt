@@ -108,7 +108,7 @@ copylr	init_str init_strPtr
 :stack_out 
   decr	stackPtr 
   copyia	stackPtr 
-  addla	'0' 
+  orla	'0' 
   comout	
 // test if we reached the head of the stack 
   copyra	stackPtr 

@@ -31,6 +31,8 @@ copylr	0 score+1
   copyar	gate 
   div	gate six 
   copyar	gate // Random number beetween 0 and 5 
+  // Careful, carry may be set by DIV !!
+  cbr 	carry_f sts_reg
   addla	lookupLogic 
   copyar	lookupPtr 
 // lookupPtr contains the address of the random logic function 
@@ -84,7 +86,7 @@ copylr	0 score+1
   shiftrl	buttonsTmp 
   shiftrl	buttonsTmp 
   copyra	buttonsTmp 
-  addra	score+1 
+  orra	score+1 
   copyar	add_reg 
   copylr	255 r0 
   speed	8 

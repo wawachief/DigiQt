@@ -80,7 +80,7 @@
 
 
 :startNewTry 
-  //copylr 0 dataLEDReg // clear number of tries display 
+  copylr 0 dataLEDReg // clear number of tries display 
 
 // Copy guess into working copy 
   copyrr	code_1 copy_1 
@@ -149,7 +149,6 @@
 // We now have to wait until user releases the button 
 :testButtonReleased 
   copyra	buttonReg 
-  addla	0 
   bcrss	zeroFlag statusReg 
   jump	testButtonReleased 
 
@@ -255,7 +254,6 @@
   //********** End of code ******************** 
 // These nop instructions are just for padding so that 
 // variables are at the end of memory (last availbale address = 251) 
-
 
 %org 236 
 

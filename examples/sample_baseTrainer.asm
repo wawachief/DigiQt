@@ -20,7 +20,6 @@
 %define AFlag 2 
 
 :start 
-  initsp	
   speed	0 
   sbr	AFlag statusReg 
 
@@ -57,14 +56,16 @@
   subla	'a' 
   bcrss	CFlag statusReg 
   subla	32 // ord('a') - ord('A') 
-  addla	'a' 
+// Carry is set, we have to take this into account for addla 
+  addla	96 // 'a' is 97 
 // letter is uppercase 
 // test if digit or letter 
   cbr	CFlag statusReg 
   subla	'A' 
   bcrss	CFlag statusReg 
   subla	7 // A -> '0' + 10 
-  addla	'A' 
+// Carry is set, we have to take this into account for addla 
+  addla	64 // 'A' is 65 
   subla	'0' // user input (0-15) is in accumulator 
   mul	nbplayer BASE 
   addra	nbplayer 
@@ -144,10 +145,10 @@
 %data char 0 
 %data nbplayer 0 
 %data strPtr 0 
-%data win_str 13 10 "You win!" 0 
-%data lose_str 13 10 "You lose!" 0 
-%data space_str " press SPACE to restart" 13 10 
+%data win_str 13 10 "You win," 0 
+%data lose_str 13 10 "You lose," 0 
+%data space_str " hit SPACE to restart" 13 10 
 
-%org 248
+%org 248 
 %data COUNT_SPEED 20 
 %data BASE 16 
