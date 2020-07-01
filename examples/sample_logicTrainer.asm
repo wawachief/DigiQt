@@ -66,7 +66,7 @@ copylr	0 score+1
   nop	
 // An answer button is pressed 
 // Check the answer 
-  subra	buttonsGate 
+  xorra	buttonsGate 
   bcrsc	zero_f sts_reg 
   jump	you_win 
 :you_lose 
@@ -111,7 +111,7 @@ copylr	0 score+1
 // Logic operations 
 :and 
   andla	0b00000011 
-  subla	0b00000011 
+  xorla	0b00000011 
   bcrss	zero_f sts_reg 
   jump	logic_0 
   jump	logic_1 
@@ -126,7 +126,7 @@ copylr	0 score+1
   andla	0b00000011 
   bcrsc	zero_f sts_reg 
   jump	logic_0 
-  subla	0b00000011 
+  xorla	0b00000011 
   bcrsc	zero_f sts_reg 
   jump	logic_0 
   jump	logic_1 
@@ -139,7 +139,7 @@ copylr	0 score+1
 
 :nand 
   andla	0b00000011 
-  subla	0b00000011 
+  xorla	0b00000011 
   bcrss	zero_f sts_reg 
   jump	logic_1 
   jump	logic_0 
@@ -148,7 +148,7 @@ copylr	0 score+1
   andla	0b00000011 
   bcrsc	zero_f sts_reg 
   jump	logic_1 
-  subla	0b00000011 
+  xorla	0b00000011 
   bcrsc	zero_f sts_reg 
   jump	logic_1 
   jump	logic_0 

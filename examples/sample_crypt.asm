@@ -1,6 +1,6 @@
 // Olivier Lecluse 
 // Designed for Digirule 2U 
-// Ceasar crypting
+// Ceasar crypting 
 
 %define status_reg 252 
 %define button_reg 253 
@@ -23,30 +23,32 @@ speed	0
   comin	
 
 // to upper case 
-  cbr	CFlag status_reg 
+  sbr	CFlag status_reg 
   subla	'a' 
-  bcrss	CFlag status_reg 
+  bcrsc	CFlag status_reg 
   subla	32 // ord('a') - ord('A') 
   addla	'a' 
 // dont crypt non alpha characters 
-  cbr	CFlag status_reg 
+  sbr	CFlag status_reg 
   subla	'A' 
-  bcrsc	CFlag status_reg 
+  bcrss	CFlag status_reg 
   jump	print 
 
 // crypt the char 
   call	crypt 
 :print 
+  cbr	CFlag status_reg 
   addla	'A' 
   comout	
   jump	read_char 
 
 :crypt 
+  cbr	CFlag status_reg 
   addra	offset 
   copylr	26 c_26 
   copyar	r0 
   div	r0 c_26 
-  // acc contains r0 mod 26
+// acc contains r0 mod 26 
   return	
 :the_end 
 
@@ -54,4 +56,5 @@ speed	0
 %data c_26 0 
 %data char 0 
 %org 248 
-%data offset 1 
+%data offset 25 
+

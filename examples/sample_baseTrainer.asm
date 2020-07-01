@@ -46,26 +46,26 @@
   comin	
   comout	// echo on console 
   copyar	char 
-  subla	13 
+  xorla	13 
   bcrsc	ZFlag statusReg 
 // End of input on Enter key 
   jump	input_end 
   copyra	char 
 // to upper case 
-  cbr	CFlag statusReg 
+  sbr	CFlag statusReg // XX Set Carry for "normal" substraction
   subla	'a' 
-  bcrss	CFlag statusReg 
+  bcrsc	CFlag statusReg 
   subla	32 // ord('a') - ord('A') 
 // Carry is set, we have to take this into account for addla 
-  addla	96 // 'a' is 97 
+  addla	'a' // 'a' is 97 
 // letter is uppercase 
 // test if digit or letter 
-  cbr	CFlag statusReg 
+  sbr	CFlag statusReg // XX
   subla	'A' 
-  bcrss	CFlag statusReg 
-  subla	7 // A -> '0' + 10 
+  bcrsc	CFlag statusReg // XX
+  subla	7 // A -> '0' + 10 /XX
 // Carry is set, we have to take this into account for addla 
-  addla	64 // 'A' is 65 
+  addla	'A' // 'A' is 65 
   subla	'0' // user input (0-15) is in accumulator 
   mul	nbplayer BASE 
   addra	nbplayer 
@@ -74,7 +74,7 @@
 :input_end 
   copylr	0 statusReg 
   copyra	nb2guess 
-  subra	nbplayer 
+  xorra	nbplayer 
   bcrsc	ZFlag statusReg 
   jump	you_win 
   jump	you_loose 
@@ -106,7 +106,7 @@
   copylr	space_str strPtr 
   call	print_message 
   comin	
-  subla	' ' 
+  xorla	' ' 
   bcrss	ZFlag statusReg 
   jump	wait_for_space 
   return	

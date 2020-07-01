@@ -250,15 +250,26 @@ class Cpu(QObject):
         self.status_Z(self.accu)
         return True
     def inst_subla(self):
+        # Carry = no borrow
         arg1 = self.ram[self.pc + 1]
-        carry = (self.ram[self.REG_STATUS] & 2) # 0 or 2
-        self.accu = self.status_C(self.accu - arg1 + carry*128)
+        ncarry = 1-(self.ram[self.REG_STATUS] & 2) // 2
+        self.accu = self.accu - arg1 - ncarry
+        if self.accu < 0:
+            self.accu += 256
+            self.status_C(0)
+        else:
+            self.status_C(256)
         self.status_Z(self.accu)
         return True
     def inst_subra(self):
         arg1 = self.ram[self.pc + 1]
-        carry = (self.ram[self.REG_STATUS] & 2) # 0 or 2
-        self.accu = self.status_C(self.accu - self.ram[arg1] + carry*128)
+        ncarry = 1-(self.ram[self.REG_STATUS] & 2) // 2
+        self.accu = self.accu - self.ram[arg1] - ncarry
+        if self.accu < 0:
+            self.accu += 256
+            self.status_C(0)
+        else:
+            self.status_C(256)
         self.status_Z(self.accu)
         return True
     def inst_andla(self):

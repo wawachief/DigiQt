@@ -65,11 +65,11 @@ copylr	stack stackPtr
 // pops out the stack into serial 
   decr	stackPtr 
   copyia	stackPtr 
-  addla	'0' 
+  orla	'0' 
   comout	
 // test if we reached the head of the stack 
   copyra	stackPtr 
-  subla	stack 
+  xorla	stack 
   bcrss	Zero status 
   jump	stack_out 
   return	
@@ -82,6 +82,3 @@ copylr	stack stackPtr
 %data idx 0 
 %data stack 0 0 0 0 0 0 
 %data stackPtr 0 
-
-
-
