@@ -61,7 +61,7 @@ class Assemble:
                         word += c.lower()
         return lines_list
 
-    def parse(self):
+    def parse(self, breakpoints):
         """converts the lines into machine code
         returns (True, list of bytes) if the compilation succeeds
                 (False, error message, line of error) if it fails"""
@@ -79,6 +79,7 @@ class Assemble:
             return 0
         PC = 0
         ram = []
+        brk_pc = []
 
         # Keywords dictionary (variable definitions and labels)
         keywords = { 
@@ -95,6 +96,11 @@ class Assemble:
 
         # Premiere passe
         for line in self.lines:
+            # line format : [Instruction, param1, ..., paramn, #line] 
+            # Breakoint search
+            if line[-1]-1 in breakpoints:
+                brk_pc.append(PC)
+
             if PC >= 252:
                 return error("no space left in program memory", line[-1])
             if line[0] == "%define":
@@ -224,4 +230,4 @@ class Assemble:
                     return error("Undefined keyword " + r, find_line(r))
         if len(ram) > 255:
             return error("Program too long !", 0)
-        return (True, ram, keywords, labels)
+        return (True, ram, keywords, labels, brk_pc)

@@ -28,6 +28,7 @@ class Cpu(QObject):
         self.speed  = 0        # speed attribute changed by the speed instruction
         self.exception    = ""
         self.serial_enable = False # enable Serial capability
+        self.brk_PC = []       # Breakpoints
 
         # Special RAM addresses
         self.REG_STATUS  = 252
@@ -69,6 +70,8 @@ class Cpu(QObject):
                 # each instruction returns True if PC is to be incremented, False otherwise
                 # jump functions will deal with PC themselves
                 self.set_pc(self.pc + 1 + opcount)
+                if self.pc in self.brk_PC :
+                    self.do_halt("Hit Breakpoint !")
     
     def decode(self, addr, symbols = None):
         """desassemble instruction at address addr
@@ -109,6 +112,7 @@ class Cpu(QObject):
         if self.run:
             self.do_halt("Clear RAM while running")
         self.ram = [0] * 256
+        self.brk_PC = []
 
     def set_ram(self, new_ram):
         self.clear_ram()

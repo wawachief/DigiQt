@@ -514,13 +514,15 @@ class Controller(QObject):
     def assemble_click(self):
         text = self.gui.editor_frame.retrieve_text()
         asm = Assemble(text,self.cpu.inst_dic)
-        res = asm.parse()
+        breakpoints =  self.gui.editor_frame.editor.get_breakpoints()
+        res = asm.parse(breakpoints)
         if res[0]:
             # Compilation success
             self.gui.statusbar.sig_temp_message.emit("Compilation Success. Occupation " + str(len(res[1])) + " / 252")
             self.symbol_table, self.labels_table = res[2], res[3]
             self._update_symbols()
             self.cpu.set_ram(res[1])
+            self.cpu.brk_PC = res[4]
             self.set_idle_addr(0)
         else:
             # Compilation error
