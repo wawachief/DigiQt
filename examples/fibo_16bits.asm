@@ -1,81 +1,95 @@
-%define status 252 
-%define adrled 254 
-%define dataled 255 
-%define Zero 0 
-%define Carry 1 
-%define Adroff 2 
+// Computes first terms of fibonacci sequence 
+// On 2-bytes integers 
+// 
+// Conversion of 2-bytes integer into a string 
+// Uses Ben Easter's algorithm 
+// described here : https://youtu.be/v3-a-zqKfgA 
+// Adaptation to Digirule by Olivier Lecluse 
+// 
 
-sbr	Adroff status 
+initsp	
+speed	0 
+
+sbr	_sar, _sr 
 // Initialize value to be the number to convert 
-:start
-  copyla 0
-  copyar number_1
-  copyar number+1
-  copyar number_1+1
-  copyla 1
-  copyar number
+:start 
+  copyla	0 
+  copyar	number_1 
+  copyar	number+1 
+  copyar	number_1+1 
+  copyla	1 
+  copyar	number 
 
 :fibo 
   call	print_number 
   copyla	' ' 
   comout	
-  cbr	Carry status 
+  cbr	_c, _sr 
   copyra	number_1 
   addra	number 
   copyar	number_t 
   copyra	number_1+1 
   addra	number+1 
   copyar	number_t+1 
-  copyrr	number number_1 
-  copyrr	number_t number 
-  copyrr	number+1 number_1+1 
-  copyrr	number_t+1 number+1 
-  bcrss	Carry status 
+  copyrr	number, number_1 
+  copyrr	number_t, number 
+  copyrr	number+1, number_1+1 
+  copyrr	number_t+1, number+1 
+  bcrss	_c, _sr 
   jump	fibo 
   halt	
-  jump	start
+  jump	start 
 
 :print_number 
-  copyrr	number value 
-  copyrr	number+1 value+1 
+  copyrr	number, value 
+  copyrr	number+1, value+1 
 // Initialize the stack pointer 
-  copylr	stack stackPtr 
+  copylr	stack, stackPtr 
 
 :divide 
 // Initialize the remainder to 0 
-  copylr	0 mod10 
-  copylr	0 mod10+1 
-  cbr	Carry status 
+  copylr	0, mod10 
+  copylr	0, mod10+1 
+  sbr	_c, _sr // XX Carry is inverted later 
 
-  copylr	16 idx 
+  copylr	16, idx 
 :divloop 
 // Rotate quotient and remainder 
-  copyrr	value dataled 
-  copyrr	value+1 adrled 
+// Carry is taken into account for shifting 
+// We have to invert it // XX 
+  call	invert_carry 
+
+  copyrr	value, _dr 
+  copyrr	value+1, _ar 
   shiftrl	value 
   shiftrl	value+1 
   shiftrl	mod10 
   shiftrl	mod10+1 
 
 // Acc, tmp = dividend - divisor 
-  sbr	Carry status 
+// Here, carry is borrow 
+  cbr	_c, _sr // XX 
   copyra	mod10 
-  subla	10 // BUG : CARRY should go to 0 ?? 
+  subla	10 
   copyar	tmp 
   copyra	mod10+1 
   subla	0 
-  bcrss	Carry status 
+
+  bcrsc	_c, _sr // XX 
   jump	ignore_result // branch if dividend < divisor 
-  copyrr	tmp mod10 
+  copyrr	tmp, mod10 
   copyar	mod10+1 
 :ignore_result 
   decrjz	idx 
   jump	divloop 
+// Carry is taken into account for shifting 
+// We have to invert it // XX 
+  call	invert_carry 
   shiftrl	value // shift in the last bit of the quotient 
   shiftrl	value+1 
 
   copyra	mod10 
-  cbr	Carry status 
+// cbr _c, _sr // XX 
 // push the remainder into the stack 
   copyai	stackPtr 
   incr	stackPtr 
@@ -83,10 +97,17 @@ sbr	Adroff status
 // if value != 0, then continue dividing 
   copyra	value 
   orra	value+1 
-  bcrss	Zero status 
+  bcrss	_z, _sr 
   jump	divide // branch if value is not zero 
 
   call	stack_out 
+  return	
+
+:invert_carry 
+// ACC is lost in this operation 
+  copyra	_sr // XX 
+  xorla	2 // XX 
+  copyar	_sr // XX 
   return	
 
 :stack_out 
@@ -98,7 +119,7 @@ sbr	Adroff status
 // test if we reached the head of the stack 
   copyra	stackPtr 
   xorla	stack 
-  bcrss	Zero status 
+  bcrss	_z, _sr 
   jump	stack_out 
   return	
 
@@ -112,6 +133,3 @@ sbr	Adroff status
 %data idx 0 
 %data stack 0 0 0 0 0 0 
 %data stackPtr 0 
-
-
-

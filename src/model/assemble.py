@@ -80,9 +80,16 @@ class Assemble:
         PC = 0
         ram = []
 
-        keywords = dict()  # keywords dictionary (variable definitions and labels)
-        # example of entry (True, value) for a variable definition
-        #                  (False, PC) for a label - PC is the program counter value for the Jump
+        # Keywords dictionary (variable definitions and labels)
+        keywords = { 
+            "_z" :   0,
+            "_c" :   1,
+            "_sar" : 2,
+            "_sr" : 252,
+            "_br" : 253,
+            "_ar" : 254,
+            "_dr" : 255,
+        }
         # the key is the variable or the label name
         labels = []
 

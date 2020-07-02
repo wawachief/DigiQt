@@ -47,7 +47,7 @@
 // to the start, with the computer picking up a new secret code. 
 //**************************************************************************** 
 
-
+initsp
 // Constants 
 %define statusReg 252 
 %define buttonReg 253 

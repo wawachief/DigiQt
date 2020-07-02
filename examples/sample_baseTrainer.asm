@@ -11,34 +11,27 @@
 // speed is at address 248 
 // base is at address 249 
 
-%define statusReg 252 
-%define buttonReg 253 
-%define addrLEDReg 254 
-%define dataLEDReg 255 
-%define ZFlag 0 
-%define CFlag 1 
-%define AFlag 2 
-
+initsp
 :start 
   speed	0 
-  sbr	AFlag statusReg 
+  sbr	_sar, _sr 
 
 // initialize game 
 
   randa	
 // copyla 0xAA // This is cheating 
   copyar	nb2guess 
-  copyrr	nb2guess dataLEDReg // prints number to guess on dataLEDs 
-  copylr	0 nbplayer // user guess 
+  copyrr	nb2guess, _dr // prints number to guess on dataLEDs 
+  copylr	0, nbplayer // user guess 
   call	init_timer // time limit 
 
 :guess_nb 
 // Wait for user input 
   comrdy	
-  bcrss	ZFlag statusReg 
+  bcrss	_z, _sr 
   jump	read_nb 
   call	tick_timer 
-  bcrsc	CFlag statusReg 
+  bcrsc	_c, _sr 
   jump	you_loose 
   jump	guess_nb 
 :read_nb 
@@ -47,47 +40,47 @@
   comout	// echo on console 
   copyar	char 
   xorla	13 
-  bcrsc	ZFlag statusReg 
+  bcrsc	_z, _sr 
 // End of input on Enter key 
   jump	input_end 
   copyra	char 
 // to upper case 
-  sbr	CFlag statusReg // XX Set Carry for "normal" substraction
+  cbr	_c, _sr // XX Set Carry for "normal" substraction
   subla	'a' 
-  bcrsc	CFlag statusReg 
-  subla	32 // ord('a') - ord('A') 
-// Carry is set, we have to take this into account for addla 
-  addla	'a' // 'a' is 97 
+  bcrss	_c, _sr // XX
+  subla	32 // ord('a') - ord('A') = 32
+  addla	96 // XX C is set 'a' is 97 
 // letter is uppercase 
 // test if digit or letter 
-  sbr	CFlag statusReg // XX
+  cbr	_c, _sr // XX
   subla	'A' 
-  bcrsc	CFlag statusReg // XX
-  subla	7 // A -> '0' + 10 /XX
-// Carry is set, we have to take this into account for addla 
-  addla	'A' // 'A' is 65 
-  subla	'0' // user input (0-15) is in accumulator 
-  mul	nbplayer BASE 
+  bcrss	_c _sr // XX
+  subla	7 // A -> '0' + 10
+  addla	64 // XX C is set 'A' is 65 
+  subla	47 // XX C is set. '0' is 48.
+  
+  // user input (0-15) is in accumulator 
+  mul	nbplayer, BASE 
   addra	nbplayer 
   copyar	nbplayer 
   jump	guess_nb 
 :input_end 
-  copylr	0 statusReg 
+  copylr	0, _sr 
   copyra	nb2guess 
   xorra	nbplayer 
-  bcrsc	ZFlag statusReg 
+  bcrsc	_z, _sr 
   jump	you_win 
   jump	you_loose 
 
 :you_win 
-  copylr	0xff dataLEDReg 
-  copylr	win_str strPtr 
+  copylr	0xff, _dr 
+  copylr	win_str, strPtr 
   call	print_message 
   call	wait_for_space 
   jump	start 
 :you_loose 
-  copylr	0 dataLEDReg 
-  copylr	lose_str strPtr 
+  copylr	0 _dr 
+  copylr	lose_str, strPtr 
   call	print_message 
   call	wait_for_space 
   jump	start 
@@ -95,7 +88,7 @@
 // Displays message string 
 :print_message 
   copyia	strPtr 
-  bcrsc	ZFlag statusReg 
+  bcrsc	_z, _sr 
   return	
   nop	
   comout	
@@ -103,37 +96,37 @@
   jump	print_message 
 
 :wait_for_space 
-  copylr	space_str strPtr 
+  copylr	space_str, strPtr 
   call	print_message 
   comin	
   xorla	' ' 
-  bcrss	ZFlag statusReg 
+  bcrss	_z, _sr 
   jump	wait_for_space 
   return	
 
 :init_timer 
 // Initialize timer 
-  copylr	0 counter 
-  copyrr	COUNT_SPEED cs 
-  copylr	0xFF cs+1 
-  copylr	0 addrLEDReg 
-  cbr	CFlag statusReg 
+  copylr	0, counter 
+  copyrr	COUNT_SPEED, cs 
+  copylr	0xFF, cs+1 
+  copylr	0, _ar 
+  cbr	_c, _sr 
   return	
 :tick_timer 
 // Non blocking timer 
   decrjz	cs+1 
   return	
   nop	
-  copylr	0xFF cs+1 
+  copylr	0xFF, cs+1 
   decrjz	cs 
   return	
   nop	
-  copyrr	COUNT_SPEED cs 
+  copyrr	COUNT_SPEED, cs 
 // displays a progress bar on ADDR leds 
-  cbr	CFlag statusReg 
+  cbr	_c, _sr 
   shiftrl	counter 
   incr	counter 
-  copyrr	counter addrLEDReg 
+  copyrr	counter, _ar 
 // The Carry is Set in case of TimeOut 
   return	
 

@@ -2,20 +2,13 @@
 // Designed for Digirule 2U 
 // Ceasar crypting 
 
-%define status_reg 252 
-%define button_reg 253 
-%define addrLED_reg 254 
-%define dataLED_reg 255 
-%define ZFlag 0 
-%define CFlag 1 
-
 initsp	
 speed	0 
 
 :read_char 
 // Wait for user input 
   comrdy	
-  bcrsc	ZFlag status_reg 
+  bcrsc	_z, _sr 
   jump	read_char 
 
 // a character is available 
@@ -23,31 +16,31 @@ speed	0
   comin	
 
 // to upper case 
-  sbr	CFlag status_reg 
+  cbr	_c, _sr 
   subla	'a' 
-  bcrsc	CFlag status_reg 
+  bcrss	_c, _sr 
   subla	32 // ord('a') - ord('A') 
-  addla	'a' 
+  addla	96 
 // dont crypt non alpha characters 
-  sbr	CFlag status_reg 
+  cbr	_c, _sr 
   subla	'A' 
-  bcrss	CFlag status_reg 
+  bcrsc	_c, _sr 
   jump	print 
 
 // crypt the char 
   call	crypt 
 :print 
-  cbr	CFlag status_reg 
+  cbr	_c, _sr 
   addla	'A' 
   comout	
   jump	read_char 
 
 :crypt 
-  cbr	CFlag status_reg 
+  cbr	_c, _sr 
   addra	offset 
-  copylr	26 c_26 
+  copylr	26, c_26 
   copyar	r0 
-  div	r0 c_26 
+  div	r0, c_26 
 // acc contains r0 mod 26 
   return	
 :the_end 
@@ -57,4 +50,3 @@ speed	0
 %data char 0 
 %org 248 
 %data offset 25 
-
