@@ -6,8 +6,8 @@
 #
 
 from PySide2.QtWidgets import QWidget, QPlainTextEdit, QTextEdit, QShortcut
-from PySide2.QtGui import QColor, QTextFormat, QPainter, QSyntaxHighlighter, QTextCharFormat, QFont, QTextCursor, QKeySequence, QPalette
-from PySide2.QtCore import QRect, Slot, Qt, QSize, QRegExp
+from PySide2.QtGui import QColor, QTextFormat, QPainter, QSyntaxHighlighter, QTextCharFormat, QFont, QTextCursor, QKeySequence
+from PySide2.QtCore import QRect, Slot, Qt, QSize, QRegExp, QPoint
 
 import re
 from src.assets_manager import get_font
@@ -29,6 +29,12 @@ class LineNumberArea(QWidget):
     def paintEvent(self, event):
         self.codeEditor.line_number_area_paint(event)
 
+    def mousePressEvent(self, event):
+        self.on_click(QPoint(0, event.y()))
+
+    def on_click(self, pos):
+        pass
+
 
 class CodeEditor(QPlainTextEdit):
 
@@ -43,6 +49,8 @@ class CodeEditor(QPlainTextEdit):
 
         self.config = config
         self.line_number_area = LineNumberArea(self)
+        self.line_number_area.on_click = self.process_breakpoint
+
         self.highlight = AssembleHighlighter(self.document(), config)
         self.setLineWrapMode(QPlainTextEdit.NoWrap)
 
@@ -71,6 +79,7 @@ class CodeEditor(QPlainTextEdit):
         doc.setDefaultFont(f)
 
         # initialization
+        self.breakpoints = []
         self.blockCountChanged.emit(0)
         self.cursorPositionChanged.emit()
 
@@ -96,13 +105,36 @@ class CodeEditor(QPlainTextEdit):
 
         self.verticalScrollBar().setValue(pos)
 
+    def get_breakpoints(self):
+        """
+        :return: Breakpoints list
+        """
+        return self.breakpoints
+
+    def process_breakpoint(self, pos):
+        """
+        Adds or remove a breakpoint at the given position. It also sets the text cursor to the clicked line
+
+        :param pos: mouse clicked position (x=0, y=y)
+        :type pos: QPoint
+        """
+        cursor = self.cursorForPosition(pos)  # Set the cursor position
+        self.setTextCursor(cursor)
+
+        line = self.textCursor().blockNumber()
+
+        # Add or remove the line in the breakpoints list
+        if line in self.breakpoints:
+            self.breakpoints.remove(line)
+        else:
+            self.breakpoints.append(line)
+
     def line_number_area_paint(self, event):
         """
         Paints the line numbers next to the code editor
         """
         painter = QPainter(self.line_number_area)
         painter.fillRect(event.rect(), QColor(self.config.get('colors', 'editor_lines_area_bg')))
-        painter.setPen(QColor(self.config.get('colors', 'editor_lines_area_text')))
 
         block = self.firstVisibleBlock()
         block_number = block.blockNumber()
@@ -112,6 +144,12 @@ class CodeEditor(QPlainTextEdit):
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
                 number = str(block_number + 1)
+
+                if block_number in self.breakpoints:
+                    painter.setPen(QColor(self.config.get('colors', 'editor_breakpoint')))
+                else:
+                    painter.setPen(QColor(self.config.get('colors', 'editor_lines_area_text')))
+
                 painter.drawText(0, top, self.line_number_area.width(),
                                  self.fontMetrics().height(),
                                  Qt.AlignRight, number)
@@ -439,6 +477,9 @@ def re_indent_all(text, keywords):
 
         new_line += comment + "\n"
         res += new_line
+
+    if res.endswith('\n'):  # To prevent adding a new line each time we re-indent
+        res = res[:-1]
 
     return res
 
