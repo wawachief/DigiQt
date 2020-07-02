@@ -3,29 +3,25 @@
 // Utiliser les boutons pour choisir un nombre 
 // Le complément a2 s’affiche en temps réel 
 
-%define statusReg 252 
-%define buttonReg 253 
-%define addLEDReg 254 
-%define dataLEDReg 255 
-%define zeroFlag 0 
 
 initsp	
 speed	0 
-sbr	2 statusReg // Autorise l’écriture sur les LED d’adresses 
+sbr	_sar _sr // Autorise l’écriture sur les LED d’adresses 
 
 :debut 
+  cbr _c _sr
   copyla	0 
-  subra	dataLEDReg // Acc = 0 – dataLEDRegister 
-  copyar	addLEDReg 
-  copyrr	dataLEDReg lastData 
-  copyra	buttonReg 
+  subra	_dr // Acc = 0 – dataLEDRegister 
+  copyar	_ar 
+  copyrr	_dr lastData 
+  copyra	_br 
 // Réalise un XOR entre les boutons et dataLED 
 // afin de prendre en compte une éventuelle saisie 
-  xorra	dataLEDReg 
-  copyar	dataLEDReg 
+  xorra	_dr 
+  copyar	_dr 
   subra	lastData 
 // Si aucun bouton n’a été préssé, on revient au début 
-  bcrss	zeroFlag statusReg 
+  bcrss	_z _sr 
   call	wait 
   jump	debut 
 

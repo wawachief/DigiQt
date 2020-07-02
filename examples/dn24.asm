@@ -3,7 +3,7 @@
 
 sbr	_sar,_sr 
 copylr	0, byte2 
-copylr	64, byte1 
+copylr	0, byte1 
 
 :loop 
   cbr	_c,_sr 
