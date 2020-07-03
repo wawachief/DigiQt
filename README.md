@@ -6,22 +6,57 @@ Application Tour on video to see the main features!
 
 Simulator of digirule 2 (https://bradsprojects.com/digirule2/) written in Python.
 
+# Installation 
+
+## Windows platform
+
+You can get the MSI installer here : https://drive.google.com/drive/folders/1dwLxvtCJGBuTdACno-ls_LYQgG-knT0l
+
+Just install the program. Launch **Main.exe**.
+
+## Linux platform
+
+A standalone AppImage can be found here : https://drive.google.com/drive/folders/1dwLxvtCJGBuTdACno-ls_LYQgG-knT0l
+
+Just download the .AppImage file, make it executable and clic on it.
+
+## Osx
+
+I don't have a valid developper certificate, so my build won't launch for security reasons. You have to proceed manually and launch the program from source.
+
+## Launching from sources 
+
+- You must have python 3.7 or later installed
+- Install the following packages via your favorite Python package manager (*pip* or *conda*)
+	- pyside2 
+	- serial
+	- serial-tool
+- Launch the program : `python3 main.py`
+
 # Instruction set
 
-DigiQt offers the *Digirule 2A, 2B & 2U* enhanced instruction set. See https://github.com/wawachief/DGR2B for more informations.
+DigiQt offers the *Digirule 2A, 2B & 2U* instruction set. Choose in the button the model corresponding to the hardware you want to simulate.
 
 # Assembler Quick guide
 
-## Assembler special commands
+## Assembler special directives
 
 - **%define** : defines constants. Usage : `%define NAME VALUE`
 ```
 // Constants
-%define statusRegister  252
-%define dataLEDRegister 255
-%define hideAddressBit  2
+%define myNumber  42
 ```
-- **%data** : inserts one or many bytes in the code. Usage : `%data NAME byte1 byte2 ... byten`
+
+Some symbols corresponding to Digirule registers are already defined :
+	- `_sr` : Status Register (252)
+	- `_br` : Button Register (253)
+	- `_ar` : Address Register (254)
+	- `_dr` : Data Register (255)
+	- `_z` : Zero FLag (0)
+	- `_c` : Carry FLag (1)
+	- `_sar` : Show Address Register FLag (2)
+
+- **%data** : Inserts one or many bytes in the code. Usage : `%data NAME byte1 byte2 ... byten`
 ```
 // Variables declarations
 %data index 0
@@ -31,11 +66,24 @@ DigiQt offers the *Digirule 2A, 2B & 2U* enhanced instruction set. See https://g
 %data POV 126 129 165 129 165 153 129 126
 ```
 
+- **%org** : Allows you to choose the value of program counter where the following code will take place. This can be useful if you want your variables to take place at a specific location.
+
+Example : 
+```
+// some stuff
+// ...
+
+%org 248
+%data myVariable 0xFF
+%data otherVariable 0x01
+```
+The `myVariable` variable will be at location 248, `otherVariable` will be at location 249.
+
 ## Labels
 Labels begin with `:`.
 ```
 :loop
-	copyir lineadr dataLEDRegister
+	copyir lineadr _dr
 	incr lineadr
 	decrjz index
 	jump loop
@@ -44,9 +92,24 @@ Labels begin with `:`.
 
 Comments begin with `//`
 
+## Ofsets
+You can put ofsets just after a symbol (variable name or label). It will allow you to deal easily with multi-bytes variables.
+
+Example : you want to access second byte of the `bigNumber` variable
+```
+// copies 0xC1 into acccumulator
+copyra bigNumber 
+// copies 0x06 into acccumulator
+copyra bigNumber+1 
+
+%data bigNumber 0xC1 0x06
+```
+
+Ofsets are not additions !
+
 ## Numbers 
 
-Numbers are 8 bits long and can be in decimal (`127` for example) or in binary , beginning with `0b` (`0b11110101` for example).
+Numbers are 8 bits long and can be in decimal (`127` for example), in hexadecimal beginning with **0x**(`0xC1`) or in binary beginning with **0b** (`0b11110101`).
 
 # Attribution
 Icons from: https://www.flaticon.com/
