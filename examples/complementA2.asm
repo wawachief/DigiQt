@@ -5,40 +5,32 @@
 
 
 initsp	
-speed	0 
 sbr	_sar _sr // Autorise l’écriture sur les LED d’adresses 
 
-:debut 
-  cbr _c _sr
-  copyla	0 
-  subra	_dr // Acc = 0 – dataLEDRegister 
-  copyar	_ar 
-  copyrr	_dr lastData 
+:mainLoop 
   copyra	_br 
-// Réalise un XOR entre les boutons et dataLED 
-// afin de prendre en compte une éventuelle saisie 
-  xorra	_dr 
-  copyar	_dr 
-  subra	lastData 
-// Si aucun bouton n’a été préssé, on revient au début 
   bcrss	_z _sr 
-  call	wait 
-  jump	debut 
+  jump	wait4release 
+  jump	mainLoop 
 
-// Boucle d’attente de 10*255 tours sur la vraie DGR 
-:wait 
-  copylr	18 loopTouche 
-:waitloop 
-// copylr 7 loopTouche1 // use this for digimulator 
-  copylr	255 loopTouche1 // use this for digirule 
-:waitloop1 
-  decrjz	loopTouche1 
-  jump	waitloop1 
-  decrjz	loopTouche 
-  jump	waitloop 
-  return	
+:wait4release 
+  copyrr	_br btntmp 
+  bcrsc	_z _sr 
+  jump	release 
+  copyra	input 
+  xorra	btntmp 
+  copyar	_dr 
+// display 2-complement of input 
+  cbr	_c _sr 
+  copyla	0 
+  subra	_dr 
+  copyar	_ar 
+  jump	wait4release 
+:release 
+// button is released 
+  copyrr	_dr input 
+  jump	mainLoop 
 
-%data lastData 0 
-%data loopTouche 0 
-%data loopTouche1 0 
 
+%data input 0 
+%data btntmp 0 

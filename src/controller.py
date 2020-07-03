@@ -49,6 +49,7 @@ class Controller(QObject):
     sig_ram_update = Signal(str)
     sig_rampc_goto = Signal(str)
     sig_symbol_goto = Signal(str)
+    sig_brk_change = Signal()
 
     def __init__(self):
         QObject.__init__(self)
@@ -60,6 +61,7 @@ class Controller(QObject):
         self.sig_ram_update.connect(self.ram_reloaded)
         self.sig_rampc_goto.connect(self.on_rampc_goto)
         self.sig_symbol_goto.connect(self.on_symbol_goto)
+        self.sig_brk_change.connect(self.make_brk_pc)
 
         # Read configuration
         # Copy config file into home directory
@@ -88,6 +90,7 @@ class Controller(QObject):
         # Animation attributes
         self.anim_boot   = 0   # boot animation
         self.anim_adrLED = 0   # LED address animation
+        self.line_pc = dict()
 
         # Instanciate the view
         self.gui = ExecutionFrame(self.config, self.sig_config_changed)
@@ -102,6 +105,7 @@ class Controller(QObject):
         # Callbacks
         self.gui.editor_frame.assemble_btn.on_assemble = self.assemble_click
         self.gui.slider.value_changed = self.on_speedslider_change
+        self.gui.editor_frame.editor.sig_brk_change = self.sig_brk_change
 
         # Sets the initial state
         self.set_idle_mode()
@@ -514,15 +518,15 @@ class Controller(QObject):
     def assemble_click(self):
         text = self.gui.editor_frame.retrieve_text()
         asm = Assemble(text,self.cpu.inst_dic)
-        breakpoints =  self.gui.editor_frame.editor.get_breakpoints()
-        res = asm.parse(breakpoints)
+        res = asm.parse()
         if res[0]:
             # Compilation success
             self.gui.statusbar.sig_temp_message.emit("Compilation Success. Occupation " + str(len(res[1])) + " / 252")
             self.symbol_table, self.labels_table = res[2], res[3]
             self._update_symbols()
             self.cpu.set_ram(res[1])
-            self.cpu.brk_PC = res[4]
+            self.line_pc = res[4]
+            self.make_brk_pc()
             self.set_idle_addr(0)
         else:
             # Compilation error
@@ -532,3 +536,15 @@ class Controller(QObject):
             self.gui.editor_frame.editor.goto_line(res[2])
             self.ram_reloaded()
     
+    def make_brk_pc(self):
+        # Gives the CPU a list of PC for breakpoints
+        breaklines =  self.gui.editor_frame.editor.get_breakpoints()
+        self.cpu.brk_PC = []
+        for l in breaklines:
+            if l+1 in self.line_pc:
+                self.cpu.brk_PC.append(self.line_pc[l+1])
+            else:
+                # line_pc is out of date. Need to recompile
+                # remove all breakpoints
+                self.cpu.brk_PC = []
+                break

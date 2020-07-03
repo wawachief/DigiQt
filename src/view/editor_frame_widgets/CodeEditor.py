@@ -22,6 +22,7 @@ class LineNumberArea(QWidget):
         """
         QWidget.__init__(self, parent=editor)
         self.codeEditor = editor
+        self.sig_brk_change = None
 
     def sizeHint(self):
         return QSize(self.codeEditor.get_line_number_area_width(), 0)
@@ -128,6 +129,7 @@ class CodeEditor(QPlainTextEdit):
             self.breakpoints.remove(line)
         else:
             self.breakpoints.append(line)
+        self.sig_brk_change.emit()
 
     def line_number_area_paint(self, event):
         """

@@ -70,8 +70,6 @@ class Cpu(QObject):
                 # each instruction returns True if PC is to be incremented, False otherwise
                 # jump functions will deal with PC themselves
                 self.set_pc(self.pc + 1 + opcount)
-                if self.pc in self.brk_PC :
-                    self.do_halt("Hit Breakpoint !")
     
     def decode(self, addr, symbols = None):
         """desassemble instruction at address addr
@@ -94,6 +92,8 @@ class Cpu(QObject):
         """Changes Program Counter"""
         if 0 <= new_pc <= 255:
             self.pc = new_pc
+            if self.run and self.pc in self.brk_PC :
+                self.do_halt("Hit Breakpoint !")
         else:
             self.do_halt("Illegal PC value")
 

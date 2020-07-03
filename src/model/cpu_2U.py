@@ -65,8 +65,6 @@ class Cpu(QObject):
         if self.pc + opcount > 255:
             self.do_halt("Illegal RAM access")
         else:
-            # for i in range(opcount):
-            #     self.decoded_inst += " " + str(self.ram[self.pc + 1 + i])
             # Execute
             inc_pc = execute()
             # increment Program Counter
@@ -74,8 +72,6 @@ class Cpu(QObject):
                 # each instruction returns True if PC is to be incremented, False otherwise
                 # jump functions will deal with PC themselves
                 self.set_pc(self.pc + 1 + opcount)
-                if self.pc in self.brk_PC :
-                    self.do_halt("Hit Breakpoint !")
     
     def decode(self, addr, symbols = None):
         """desassemble instruction at address addr
@@ -98,6 +94,8 @@ class Cpu(QObject):
         """Changes Program Counter"""
         if 0 <= new_pc <= 255:
             self.pc = new_pc
+            if self.run and self.pc in self.brk_PC :
+                self.do_halt("Hit Breakpoint !")
         else:
             self.do_halt("Illegal PC value")
 
