@@ -1,5 +1,17 @@
-// operationTrainer 
-// Olivier Lecluse 
+// OperationTrainer -  Olivier Lecluse 07 / 2020
+// CC BY-NC-SA
+
+// Start the program. Choose your operation :
+// - D0 = Addition trainning
+// - D1 = Substraction trainning
+// Add (or substract) the numbers displayed on AR and DR
+// Press buttons to input the answer
+// While the button is pressed, you can see the current input on DR
+// As soon the answer is OK, you will see a flashing animation 
+// switching between input numbers ans the answer
+// Press a button to play again.
+
+// demo tour : https://youtu.be/U_D4bkQjlSA
 
 initsp	
 sbr	_sar _sr // Autorise l’écriture sur les LED d’adresses 
