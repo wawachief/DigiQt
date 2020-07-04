@@ -1,27 +1,41 @@
-// OperationTrainer -  Olivier Lecluse 07 / 2020
-// CC BY-NC-SA
+// OperationTrainer - Olivier Lecluse 07 / 2020 
+// CC BY-NC-SA 
 
-// Start the program. Choose your operation :
-// - D0 = Addition trainning
-// - D1 = Substraction trainning
-// Add (or substract) the numbers displayed on AR and DR
-// Press buttons to input the answer
-// While the button is pressed, you can see the current input on DR
+// Start the program. Choose your operation : 
+// - D0 = Addition trainning 
+// - D1 = Substraction trainning 
+// Add (or substract) the numbers displayed on AR and DR 
+// Press buttons to input the answer 
+// While the button is pressed, you can see the current input on DR 
 // As soon the answer is OK, you will see a flashing animation 
-// switching between input numbers ans the answer
-// Press a button to play again.
+// switching between input numbers ans the answer 
+// Press a button to play again. 
 
-// demo tour : https://youtu.be/U_D4bkQjlSA
+// demo tour : https://youtu.be/U_D4bkQjlSA 
 
 initsp	
 sbr	_sar _sr // Autorise l’écriture sur les LED d’adresses 
 
 // Operation Choice 
 // D0 = Addidion 
+// D3 = 2-complement
 // D7 = Substration 
 
-copylr	0b10000001 _dr 
-copylr	1 _ar 
+:begin 
+  copylr	0b10001001 _dr 
+  copylr	1 _ar 
+
+  copylr	0 input 
+  randa	
+  andla	0b01111111 
+  bcrsc	_z _sr 
+  orla	1 // n1 can't be 0
+  copyar	n1 
+  randa	
+  andla	0b01111111 
+  copyar	n2 
+
+// Choose which game we play
 :choice 
   copylr	0xff waitCounter 
 :choiceLoop 
@@ -31,15 +45,20 @@ copylr	1 _ar
   shiftrl	_ar 
   bcrsc	7 _br 
   jump	subChoice 
+  bcrsc	3 _br 
+  jump	2cmpChoice 
   bcrsc	0 _br 
   jump	addChoice 
   jump	choice 
 
+// We modify the operation instruction in the program for the game chosen
 :addChoice 
-  copylr	18 mainloop+11 // addra opcode = 18 (9 on 2A) 
+  copylr	18 ml1+5 // addra opcode = 18 (9 on 2A) 
   jump	wait4begin 
+:2cmpChoice 
+  copylr	0 n1 
 :subChoice 
-  copylr	20 mainloop+11 // subra copcode = 20 (11 on 2A) 
+  copylr	20 ml1+5 // subra copcode = 20 (11 on 2A) 
 
 :wait4begin 
 // Wait for choice release to begin 
@@ -47,21 +66,16 @@ copylr	1 _ar
   bcrss	_z _sr 
   jump	wait4begin 
 
-:begin 
-  copylr	0 input 
-  randa	
-  andla	0b01111111 
-  copyar	n1 
-  randa	
-  andla	0b01111111 
-  copyar	n2 
-
 :mainloop 
   cbr	_c _sr 
   copyrr	n1 _ar 
+  bcrss	_z _sr // if n1=0 (2 complement game) 
+  jump	ml1 
+  copyrr	input _ar // display input on AR
+:ml1 
   copyrr	n2 _dr 
   copyra	n1 
-  addra	n2 // [mainloop+11] 
+  addra	n2 // [ml1+5] 
   xorra	input 
   bcrss	_z _sr 
   jump	wait4press 
@@ -76,8 +90,9 @@ copylr	1 _ar
   call	wait 
   jump	win 
 
+// waits a long time using a 16 bits counter
 :wait 
-  copylr	0x8 waitCounter 
+  copylr	0x8 waitCounter // change this to change the delay
   copylr	0xff waitCounter+1 
 :waitLoop 
 // Press button to start again 
