@@ -19,7 +19,7 @@ class Cpu(QObject):
 
         # CPU configuration
         self.dr_model     = "2Ux"
-        self.stack_size   = 16
+        self.stack_size   = 64
         # attributes initialization
         self.ram = [0] * 256
         self.stack  = [0] * self.stack_size    # CPU Stack
