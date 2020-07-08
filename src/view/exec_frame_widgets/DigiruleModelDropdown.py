@@ -17,7 +17,7 @@ class DigiruleModelDropdown(QComboBox):
         """
         QComboBox.__init__(self)
 
-        self.addItems(("2A", "2B", "2U"))
+        self.addItems(("2A", "2B", "2U", "2Ux"))
         self.setCurrentText(init_model)  # Switch to initial selection
 
         self.setStyleSheet(style.get_stylesheet("qcombobox"))
