@@ -3,7 +3,8 @@
 
 // Start the program. Choose your operation : 
 // - D0 = Addition trainning 
-// - D1 = Substraction trainning 
+// - D3 = 2-complement trainning 
+// - D7 = Substraction trainning 
 // Add (or substract) the numbers displayed on AR and DR 
 // Press buttons to input the answer 
 // While the button is pressed, you can see the current input on DR 
