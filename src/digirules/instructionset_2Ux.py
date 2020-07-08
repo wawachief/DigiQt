@@ -76,13 +76,13 @@ inst_dic = {
             #
             # Experimental instructions
             #
-            "tbr":  {"code": 224, "operandCount": 2},
 
             # Pin instructions : no_pins = 0 (sda) or <>0 (sdc)
-            "pinin":  {"code": 225, "operandCount": 1},  # PININ no_pin ==> result 0 or 1 in ACCUM
-            "pinout":  {"code": 226, "operandCount": 2}, # PINOUT no_pin 0/1  
-            "pindir":  {"code": 227, "operandCount": 2}, # PINDIR no_pin 0/1 ==> 0 = INPUT, 1 = OUTPUT
+            "pinin":  {"code": 224, "operandCount": 1},  # PININ no_pin ==> result 0 or 1 in ACCUM
+            "pinout":  {"code": 225, "operandCount": 2}, # PINOUT no_pin 0/1  
+            "pindir":  {"code": 226, "operandCount": 2}, # PINDIR no_pin 0/1 ==> 1 = INPUT, 0 = OUTPUT
 
+            "tbr":  {"code": 233, "operandCount": 2}, # Toggle bit in Ram
             # stack instructions
             "sspush":  {"code": 234, "operandCount": 0}, # new 2B instructions
             "sspop":   {"code": 235, "operandCount": 0}, # new 2B instructions

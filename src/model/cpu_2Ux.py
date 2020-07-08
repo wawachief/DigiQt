@@ -33,7 +33,7 @@ class Cpu(QObject):
         self.exception    = ""
         self.serial_enable = True # enable Serial capability
         self.brk_PC = []       # Breakpoints
-        self.pins = [(0,0), (0,0)] # [SDA, SDC] Pin=(dir, value)
+        self.pin = [[0,0], [0,0]] # [PIN0, PIN1] Pin=(dir, value)
 
         # Special RAM addresses
         self.REG_STATUS  = 252
@@ -469,7 +469,7 @@ class Cpu(QObject):
     # Pin instructions
     def inst_pinin(self):                      # PININ no_pin ==> result 0 or 1 in ACCUM
         def p_i(pin):
-            if self.pin[0] == 0:
+            if self.pin[0] == 1:
                 self.accu = pin[1]
         arg1 = self.ram[self.pc + 1]
         if arg1 == 0:
@@ -480,7 +480,7 @@ class Cpu(QObject):
     def inst_pinout(self):                     # PINOUT no_pin 0/1
         def p_o(pin, val):
             val = 0 if val == 0 else 1
-            if self.pin[0] == 1:
+            if self.pin[0] == 0:
                 pin[1] = val
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
@@ -489,7 +489,7 @@ class Cpu(QObject):
         else:
             p_o(self.pin[1], arg2)
         return True
-    def inst_pindir(self):                     # PINDIR no_pin 0/1 ==> 0 = INPUT, 1 = OUTPUT
+    def inst_pindir(self):                     # PINDIR no_pin 0/1 ==> 0 = OUTPUT, 1 = INPUT
         def p_d(pin, val):
             val = 0 if val == 0 else 1
             pin[0] = val
