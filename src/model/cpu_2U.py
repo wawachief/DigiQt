@@ -264,6 +264,7 @@ class Cpu(QObject):
         arg1 = self.ram[self.pc + 1]
         borrow = (self.ram[self.REG_STATUS] & 2) // 2
         self.accu = self.status_C(self.accu - self.ram[arg1] - borrow)
+        self.status_Z(self.accu)
         return True
     def inst_andla(self):
         self.accu &= self.ram[self.pc + 1]
