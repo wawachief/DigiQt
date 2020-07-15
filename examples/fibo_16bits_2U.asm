@@ -103,13 +103,6 @@ bset	_sar, _sr
   call	stack_out 
   return	
 
-:invert_carry 
-// ACC is lost in this operation 
-  copyra	_sr // XX 
-  xorla	2 // XX 
-  copyar	_sr // XX 
-  return	
-
 :stack_out 
 // pops out the stack into serial 
   decr	stackPtr 

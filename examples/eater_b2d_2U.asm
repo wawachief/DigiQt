@@ -10,7 +10,7 @@
 initsp	
 speed	0 
 
-sbr	_sar, _sr 
+bset	_sar, _sr 
 // Initialize value to be the number to convert 
 copyrr	number, value 
 copyrr	number+1, value+1 
@@ -21,14 +21,14 @@ copylr	stack, stackPtr
 // Initialize the remainder to 0 
   copylr	0, mod10 
   copylr	0, mod10+1 
-  sbr	_c, _sr // XX Carry is inverted later 
+  bset	_c, _sr // XX Carry is inverted later 
 
   copylr	16, idx 
 :divloop 
 // Rotate quotient and remainder 
 // Carry is taken into account for shifting 
 // We have to invert it // XX 
-  tbr	_c, _sr 
+  bchg	_c, _sr 
 
   copyrr	value, _dr 
   copyrr	value+1, _ar 
@@ -39,14 +39,14 @@ copylr	stack, stackPtr
 
 // Acc, tmp = dividend - divisor 
 // Here, carry is borrow 
-  cbr	_c, _sr // XX 
+  bclr	_c, _sr // XX 
   copyra	mod10 
   subla	10 
   copyar	tmp 
   copyra	mod10+1 
   subla	0 
 
-  bcrsc	_c, _sr // XX 
+  btstsc	_c, _sr // XX 
   jump	ignore_result // branch if dividend < divisor 
   copyrr	tmp, mod10 
   copyar	mod10+1 
@@ -55,12 +55,12 @@ copylr	stack, stackPtr
   jump	divloop 
 // Carry is taken into account for shifting 
 // We have to invert it // XX 
-  tbr	_c _sr 
+  bchg	_c _sr 
   shiftrl	value // shift in the last bit of the quotient 
   shiftrl	value+1 
 
   copyra	mod10 
-// cbr _c, _sr // XX 
+// bclr _c, _sr // XX 
 // push the remainder into the stack 
   copyai	stackPtr 
   incr	stackPtr 
@@ -68,7 +68,7 @@ copylr	stack, stackPtr
 // if value != 0, then continue dividing 
   copyra	value 
   orra	value+1 
-  bcrss	_z, _sr 
+  btstss	_z, _sr 
   jump	divide // branch if value is not zero 
 
   call	stack_out 
@@ -84,7 +84,7 @@ copylr	stack, stackPtr
 // test if we reached the head of the stack 
   copyra	stackPtr 
   xorla	stack 
-  bcrss	_z, _sr 
+  btstss	_z, _sr 
   jump	stack_out 
   return	
 
