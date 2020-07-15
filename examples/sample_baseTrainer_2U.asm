@@ -14,7 +14,7 @@
 initsp
 :start 
   speed	0 
-  sbr	_sar, _sr 
+  bset	_sar, _sr 
 
 // initialize game 
 
@@ -28,10 +28,10 @@ initsp
 :guess_nb 
 // Wait for user input 
   comrdy	
-  bcrss	_z, _sr 
+  btstss	_z, _sr 
   jump	read_nb 
   call	tick_timer 
-  bcrsc	_c, _sr 
+  btstsc	_c, _sr 
   jump	you_loose 
   jump	guess_nb 
 :read_nb 
@@ -40,21 +40,21 @@ initsp
   comout	// echo on console 
   copyar	char 
   xorla	13 
-  bcrsc	_z, _sr 
+  btstsc	_z, _sr 
 // End of input on Enter key 
   jump	input_end 
   copyra	char 
 // to upper case 
-  cbr	_c, _sr // XX Set Carry for "normal" substraction
+  bclr	_c, _sr // XX Set Carry for "normal" substraction
   subla	'a' 
-  bcrss	_c, _sr // XX
+  btstss	_c, _sr // XX
   subla	32 // ord('a') - ord('A') = 32
   addla	96 // XX C is set 'a' is 97 
 // letter is uppercase 
 // test if digit or letter 
-  cbr	_c, _sr // XX
+  bclr	_c, _sr // XX
   subla	'A' 
-  bcrss	_c _sr // XX
+  btstss	_c _sr // XX
   subla	7 // A -> '0' + 10
   addla	64 // XX C is set 'A' is 65 
   subla	47 // XX C is set. '0' is 48.
@@ -68,7 +68,7 @@ initsp
   copylr	0, _sr 
   copyra	nb2guess 
   xorra	nbplayer 
-  bcrsc	_z, _sr 
+  btstsc	_z, _sr 
   jump	you_win 
   jump	you_loose 
 
@@ -88,7 +88,7 @@ initsp
 // Displays message string 
 :print_message 
   copyia	strPtr 
-  bcrsc	_z, _sr 
+  btstsc	_z, _sr 
   return	
   nop	
   comout	
@@ -100,7 +100,7 @@ initsp
   call	print_message 
   comin	
   xorla	' ' 
-  bcrss	_z, _sr 
+  btstss	_z, _sr 
   jump	wait_for_space 
   return	
 
@@ -110,7 +110,7 @@ initsp
   copyrr	COUNT_SPEED, cs 
   copylr	0xFF, cs+1 
   copylr	0, _ar 
-  cbr	_c, _sr 
+  bclr	_c, _sr 
   return	
 :tick_timer 
 // Non blocking timer 
@@ -123,7 +123,7 @@ initsp
   nop	
   copyrr	COUNT_SPEED, cs 
 // displays a progress bar on ADDR leds 
-  cbr	_c, _sr 
+  bclr	_c, _sr 
   shiftrl	counter 
   incr	counter 
   copyrr	counter, _ar 

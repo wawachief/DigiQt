@@ -1,12 +1,12 @@
 %define byte2 254 
 %define byte1 255 
 
-sbr	_sar,_sr 
+bset	_sar,_sr 
 copylr	0, byte2 
 copylr	0, byte1 
 
 :loop 
-  cbr	_c,_sr 
+  bclr	_c,_sr 
 
   copyra	byte0 
   subla	1 

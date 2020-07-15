@@ -22,7 +22,7 @@ copylr	init_str init_strPtr
 // Displays init_str 
 :disp_initstr 
   copyia	init_strPtr 
-  bcrsc	ZFlag status 
+  btstsc	ZFlag status 
   jump	search_loop 
   comout	
   incr	init_strPtr 
@@ -31,12 +31,12 @@ copylr	init_str init_strPtr
 // start the search with 5 
 :search_loop 
   call	prime_test 
-  bcrsc	PFlag status 
+  btstsc	PFlag status 
   jump	nb_is_prime 
 :increment_nb 
   incr	nb 
 // if null, we reached 256 
-  bcrsc	ZFlag status 
+  btstsc	ZFlag status 
   jump	the_end 
 // increment nb by 2 
   incr	nb 
@@ -63,30 +63,30 @@ copylr	init_str init_strPtr
 // input : nb 
 // ouput : PFlag on status 
 :prime_test 
-  cbr	CFlag status 
+  bclr	CFlag status 
   copyrr	nb dv 
   shiftrr	dv 
 // making sure dv is odd 
-  sbr	0 dv 
+  bset	0 dv 
 :loop_div 
   copyrr	nb r0 
   div	r0 dv 
 // r0 is the quotient, acc the remainder 
 // CFlag is set if the remainder is 0 
-  bcrsc	CFlag status 
+  btstsc	CFlag status 
   jump	not_prime 
 // we stop when dv is 3 
   decr	dv 
   decr	dv 
   copyra	dv 
   xorla	1 
-  bcrss	ZFlag status 
+  btstss	ZFlag status 
   jump	loop_div 
 // Number is prime 
-  sbr	PFlag status 
+  bset	PFlag status 
   return	
 :not_prime 
-  cbr	PFlag status 
+  bclr	PFlag status 
   return	
 
 
@@ -102,7 +102,7 @@ copylr	init_str init_strPtr
   copyai	stackPtr 
   incr	stackPtr 
   copyra	r0 
-  bcrss	ZFlag status 
+  btstss	ZFlag status 
   jump	get_digits 
 // Outputs the content of the stack over USB 
 :stack_out 
@@ -113,7 +113,7 @@ copylr	init_str init_strPtr
 // test if we reached the head of the stack 
   copyra	stackPtr 
   xorla	stack 
-  bcrss	ZFlag status 
+  btstss	ZFlag status 
   jump	stack_out 
   return	
 
