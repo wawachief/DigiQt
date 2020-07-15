@@ -14,7 +14,7 @@
 // demo tour : https://youtu.be/U_D4bkQjlSA 
 
 initsp	
-sbr	_sar _sr // Autorise l’écriture sur les LED d’adresses 
+bset	_sar _sr // Autorise l’écriture sur les LED d’adresses 
 
 // Operation Choice 
 // D0 = Addidion 
@@ -28,7 +28,7 @@ sbr	_sar _sr // Autorise l’écriture sur les LED d’adresses
   copylr	0 input 
   randa	
   andla	0b01111111 
-  bcrsc	_z _sr 
+  btstsc	_z _sr 
   orla	1 // n1 can't be 0
   copyar	n1 
   randa	
@@ -43,11 +43,11 @@ sbr	_sar _sr // Autorise l’écriture sur les LED d’adresses
   jump	choiceLoop 
 
   shiftrl	_ar 
-  bcrsc	7 _br 
+  btstsc	7 _br 
   jump	subChoice 
-  bcrsc	3 _br 
+  btstsc	3 _br 
   jump	2cmpChoice 
-  bcrsc	0 _br 
+  btstsc	0 _br 
   jump	addChoice 
   jump	choice 
 
@@ -63,13 +63,13 @@ sbr	_sar _sr // Autorise l’écriture sur les LED d’adresses
 :wait4begin 
 // Wait for choice release to begin 
   copyra	_br 
-  bcrss	_z _sr 
+  btstss	_z _sr 
   jump	wait4begin 
 
 :mainloop 
-  cbr	_c _sr 
+  bclr	_c _sr 
   copyrr	n1 _ar 
-  bcrss	_z _sr // if n1=0 (2 complement game) 
+  btstss	_z _sr // if n1=0 (2 complement game) 
   jump	ml1 
   copyrr	input _ar // display input on AR
 :ml1 
@@ -77,7 +77,7 @@ sbr	_sar _sr // Autorise l’écriture sur les LED d’adresses
   copyra	n1 
   addra	n2 // [ml1+5] 
   xorra	input 
-  bcrss	_z _sr 
+  btstss	_z _sr 
   jump	wait4press 
   jump	win 
 
@@ -97,11 +97,11 @@ sbr	_sar _sr // Autorise l’écriture sur les LED d’adresses
 :waitLoop 
 // Press button to start again 
   copyra	_br 
-  bcrss	_z _sr 
+  btstss	_z _sr 
   jump	restart 
 
 // 16 bits counter 
-  cbr	_c _sr 
+  bclr	_c _sr 
 
   copyra	waitCounter+1 
   subla	1 
@@ -111,26 +111,26 @@ sbr	_sar _sr // Autorise l’écriture sur les LED d’adresses
   subla	0 
   copyar	waitCounter 
 
-  bcrss	_z _sr 
+  btstss	_z _sr 
   jump	waitLoop 
   return	
 
 :restart 
 // wait for button release to restart 
   copyra	_br 
-  bcrss	_z _sr 
+  btstss	_z _sr 
   jump	restart 
   jump	begin 
 
 // Button Handling 
 :wait4press 
   copyra	_br 
-  bcrss	_z _sr 
+  btstss	_z _sr 
   jump	wait4release 
   jump	wait4press 
 :wait4release 
   copyrr	_br btntmp 
-  bcrsc	_z _sr 
+  btstsc	_z _sr 
   jump	release 
   copyra	input 
   xorra	btntmp 

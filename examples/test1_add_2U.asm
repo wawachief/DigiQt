@@ -1,64 +1,64 @@
-sbr	_sar,_sr 
+bset	_sar,_sr 
 
 // test subla function
 
 // test1 : C=0 FF+1 C=1
 copylr	1, _ar 
 
-cbr	_c,_sr 
+bclr	_c,_sr 
 copyla	0xff 
 addla	1 
 
 xorla	0 // 20+10 = 30
-bcrss	_z, _sr 
+btstss	_z, _sr 
 jump	error1 
 
-bcrss	_c, _sr // C = 1
+btstss	_c, _sr // C = 1
 jump	error2 
 
 
 // test2 : C=1 FF+1 C=1
 copylr	2, _ar 
 
-sbr	_c,_sr 
+bset	_c,_sr 
 copyla	0xff
 addla	1
 
 xorla	1 
-bcrss	_z, _sr 
+btstss	_z, _sr 
 jump	error1 
 
-bcrss	_c, _sr // C = 1
+btstss	_c, _sr // C = 1
 jump	error2 
 
 
 // test3 : C=0 FE+1 C=0
 copylr	4, _ar 
 
-cbr	_c,_sr 
+bclr	_c,_sr 
 copyla	0xfe
 addla	1 
 
 xorla	0xff 
-bcrss	_z, _sr 
+btstss	_z, _sr 
 jump	error1 
 
-bcrsc	_c, _sr // C = 1
+btstsc	_c, _sr // C = 1
 jump	error2 
 
 
 // test4 : C=1 FE+1 C=1
 copylr	8, _ar 
 
-sbr	_c,_sr 
+bset	_c,_sr 
 copyla	0xff
 addla	1
 
 xorla	1 
-bcrss	_z, _sr 
+btstss	_z, _sr 
 jump	error1 
 
-bcrss	_c, _sr // C = 1
+btstss	_c, _sr // C = 1
 jump	error2 
 
 

@@ -6,7 +6,7 @@ copylr 0 count
     copyra count
     comout 
     incr count
-    bcrss ZFlag statusReg
+    btstss ZFlag statusReg
     jump loop 
     halt
 %data count 0

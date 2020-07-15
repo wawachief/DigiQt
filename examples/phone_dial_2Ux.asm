@@ -19,45 +19,45 @@ pindir	PIN1 INPUT  // impulsions
 
 //mainloop
 :loop
-   bcrss _m _sr
+   btstss _m _sr
    jump process_idle
    jump process_dial
 
 :process_idle
   pinin PIN0
-  bcrss _z _sr // ZF set = dial is activated
+  btstss _z _sr // ZF set = dial is activated
   jump loop
   // enter dial mode
   copylr 0 number
   copylr 0b10000000 _ar
-  sbr _m _sr
-  cbr _r _sr // initialize the rising edge detection
+  bset _m _sr
+  bclr _r _sr // initialize the rising edge detection
   jump loop
 
 :process_dial
   // detect impulsion
   pinin PIN1
-  bcrss _z _sr // ZF set = no impulsion
+  btstss _z _sr // ZF set = no impulsion
   jump process_impuls
   
-  cbr _r _sr
-  cbr 0 _ar
+  bclr _r _sr
+  bclr 0 _ar
   pinin PIN0
-  bcrsc _z _sr // ZF clear = back to idle mode
+  btstsc _z _sr // ZF clear = back to idle mode
   jump loop
   // exit dial mode
   copylr 0b00000000 _ar
-  cbr _m _sr
+  bclr _m _sr
   copyrr number _dr // we display the number
   jump loop
 
 :process_impuls
-  bcrsc _r _sr // _r clear => we have a rising edge
+  btstsc _r _sr // _r clear => we have a rising edge
   jump loop // _r set ==> nothing new
   
   // we have a rising edge
-  sbr _r _sr 
-  sbr 0 _ar // turn on A0
+  bset _r _sr 
+  bset 0 _ar // turn on A0
   incr number // increment impulsion counter
   jump loop
   

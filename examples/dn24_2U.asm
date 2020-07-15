@@ -1,24 +1,23 @@
-%define _sr 252 
-%define _sar 2 
-%define _c 1 
 %define byte2 254 
 %define byte1 255 
 
-sbr	_sar,_sr 
-copylr	0, byte1 
+bset	_sar,_sr 
 copylr	0, byte2 
+copylr	0, byte1 
+
 :loop 
+  bclr	_c,_sr 
 
   copyra	byte0 
-  addla	1 
+  subla	1 
   copyar	byte0 
 
   copyra	byte1 
-  addla	0 
+  subla	0 
   copyar	byte1 
 
   copyra	byte2 
-  addla	0 
+  subla	0 
   copyar	byte2 
 
   jump	loop 
@@ -26,3 +25,5 @@ copylr	0, byte2
 
 %org 0xF0 
 %data byte0 0 
+
+

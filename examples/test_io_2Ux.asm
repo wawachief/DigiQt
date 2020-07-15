@@ -14,7 +14,7 @@ pindir	PIN1 INPUT
 
 :start 
   pinin	PIN1 
-  bcrsc	_z _sr 
+  btstsc	_z _sr 
   jump	btn_pressed 
 
   pinout	PIN0 LOW 

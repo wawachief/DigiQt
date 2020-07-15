@@ -344,6 +344,11 @@ class Cpu(QObject):
         arg2 = self.ram[self.pc + 2]
         self.ram[arg2] |= 2**arg1                         # sets the specified bit to 0
         return True
+    def inst_tbr(self):                                  # toggle bit in ram
+        arg1 = self.ram[self.pc + 1]
+        arg2 = self.ram[self.pc + 2]
+        self.ram[arg2] ^= 2**arg1
+        return True
     def inst_bcrsc(self):                                 # Bit Check Ram Skip if Cleared
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]

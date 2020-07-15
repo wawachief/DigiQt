@@ -8,7 +8,7 @@
 import sys
 sys.path.append("..") 
 from src.model.assemble import Assemble
-from src.digirules.instructionset_2Ux import inst_dic
+from src.digirules.instructionset_2U import inst_dic
 from src.hex_utils import ram2hex
 
 with open(sys.argv[1], "r") as f:

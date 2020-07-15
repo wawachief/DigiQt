@@ -28,7 +28,7 @@ copylr	stack, stackPtr
 // Rotate quotient and remainder 
 // Carry is taken into account for shifting 
 // We have to invert it // XX 
-  call	invert_carry 
+  tbr	_c, _sr 
 
   copyrr	value, _dr 
   copyrr	value+1, _ar 
@@ -55,7 +55,7 @@ copylr	stack, stackPtr
   jump	divloop 
 // Carry is taken into account for shifting 
 // We have to invert it // XX 
-  call	invert_carry 
+  tbr	_c _sr 
   shiftrl	value // shift in the last bit of the quotient 
   shiftrl	value+1 
 
@@ -74,13 +74,6 @@ copylr	stack, stackPtr
   call	stack_out 
   halt	
   jump	0 
-
-:invert_carry 
-// ACC is lost in this operation 
-  copyra	_sr // XX 
-  xorla	2 // XX 
-  copyar	_sr // XX 
-  return	
 
 :stack_out 
 // pops out the stack into serial 

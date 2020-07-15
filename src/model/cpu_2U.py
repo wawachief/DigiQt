@@ -48,9 +48,10 @@ class Cpu(QObject):
         # format : lookupTable [opcode] --> function
         self.lookup_table = [[self.inst_illegal, "illegal", 0] for _ in range(256)]
         for inst in self.inst_dic :
-            opcode  = self.inst_dic[inst]["code"]
-            opcount = self.inst_dic[inst]["operandCount"]
-            self.lookup_table[opcode] = [eval("self.inst_"+inst), inst, opcount]
+            if "alias" not in self.inst_dic[inst].keys():
+                opcode  = self.inst_dic[inst]["code"]
+                opcount = self.inst_dic[inst]["operandCount"]
+                self.lookup_table[opcode] = [eval("self.inst_"+inst), inst, opcount]
 
     #
     # Execution methods
@@ -333,17 +334,22 @@ class Cpu(QObject):
         self.ram[arg1] >>= 1                              # shifts whitout taking care of the previous Carry bit
         self.ram[arg1] += 128 * carry                     # sets the MSB equals to the previous Carry bit
         return True
-    def inst_cbr(self):
+    def inst_bclr(self):
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
         self.ram[arg2] &= (255-2**arg1)                   # sets the specified bit to 0
         return True
-    def inst_sbr(self):
+    def inst_bset(self):
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
         self.ram[arg2] |= 2**arg1                         # sets the specified bit to 0
         return True
-    def inst_bcrsc(self):                                 # Bit Check Ram Skip if Cleared
+    def inst_bchg(self):                                  # toggle bit in ram
+        arg1 = self.ram[self.pc + 1]
+        arg2 = self.ram[self.pc + 2]
+        self.ram[arg2] ^= 2**arg1
+        return True
+    def inst_btstsc(self):                                 # Bit Check Ram Skip if Cleared
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
         if (self.ram[arg2] & 2**arg1) == 0:
@@ -351,7 +357,7 @@ class Cpu(QObject):
         else:
             self.set_pc(self.pc + 3)
         return False
-    def inst_bcrss(self):                                 # Bit Check Ram Skip if Set
+    def inst_btstss(self):                                 # Bit Check Ram Skip if Set
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
         if (self.ram[arg2] & 2**arg1) != 0:

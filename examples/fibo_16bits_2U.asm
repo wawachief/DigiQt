@@ -10,7 +10,7 @@
 initsp	
 speed	0 
 
-sbr	_sar, _sr 
+bset	_sar, _sr 
 // Initialize value to be the number to convert 
 :start 
   copyla	0 
@@ -24,7 +24,7 @@ sbr	_sar, _sr
   call	print_number 
   copyla	' ' 
   comout	
-  cbr	_c, _sr 
+  bclr	_c, _sr 
   copyra	number_1 
   addra	number 
   copyar	number_t 
@@ -35,7 +35,7 @@ sbr	_sar, _sr
   copyrr	number_t, number 
   copyrr	number+1, number_1+1 
   copyrr	number_t+1, number+1 
-  bcrss	_c, _sr 
+  btstss	_c, _sr 
   jump	fibo 
   halt	
   jump	start 
@@ -50,14 +50,14 @@ sbr	_sar, _sr
 // Initialize the remainder to 0 
   copylr	0, mod10 
   copylr	0, mod10+1 
-  sbr	_c, _sr // XX Carry is inverted later 
+  bset	_c, _sr // XX Carry is inverted later 
 
   copylr	16, idx 
 :divloop 
 // Rotate quotient and remainder 
 // Carry is taken into account for shifting 
 // We have to invert it // XX 
-  call	invert_carry 
+  bchg 	_c, _sr
 
   copyrr	value, _dr 
   copyrr	value+1, _ar 
@@ -68,14 +68,14 @@ sbr	_sar, _sr
 
 // Acc, tmp = dividend - divisor 
 // Here, carry is borrow 
-  cbr	_c, _sr // XX 
+  bclr	_c, _sr // XX 
   copyra	mod10 
   subla	10 
   copyar	tmp 
   copyra	mod10+1 
   subla	0 
 
-  bcrsc	_c, _sr // XX 
+  btstsc	_c, _sr // XX 
   jump	ignore_result // branch if dividend < divisor 
   copyrr	tmp, mod10 
   copyar	mod10+1 
@@ -84,12 +84,12 @@ sbr	_sar, _sr
   jump	divloop 
 // Carry is taken into account for shifting 
 // We have to invert it // XX 
-  call	invert_carry 
+  bchg	_c, _sr 
   shiftrl	value // shift in the last bit of the quotient 
   shiftrl	value+1 
 
   copyra	mod10 
-// cbr _c, _sr // XX 
+// bclr _c, _sr // XX 
 // push the remainder into the stack 
   copyai	stackPtr 
   incr	stackPtr 
@@ -97,7 +97,7 @@ sbr	_sar, _sr
 // if value != 0, then continue dividing 
   copyra	value 
   orra	value+1 
-  bcrss	_z, _sr 
+  btstss	_z, _sr 
   jump	divide // branch if value is not zero 
 
   call	stack_out 
@@ -119,7 +119,7 @@ sbr	_sar, _sr
 // test if we reached the head of the stack 
   copyra	stackPtr 
   xorla	stack 
-  bcrss	_z, _sr 
+  btstss	_z, _sr 
   jump	stack_out 
   return	
 

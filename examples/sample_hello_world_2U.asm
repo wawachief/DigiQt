@@ -12,7 +12,7 @@ initsp
         copyra  0    // loop+1 is the argument of copyra
         incr loop+1  // this program modifies itself
         addla 0      // in order to do the read the string
-        bcrsc zeroFlag statusReg
+        btstsc zeroFlag statusReg
         jump start
         comout
         jump loop
