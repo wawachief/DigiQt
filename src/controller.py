@@ -153,8 +153,8 @@ class Controller(QObject):
             if self.cpu.run == True:
                 # we are in run mode, we handle the LEDs
                 if self.show_run_adr:
-                    if self.cpu.ram[self.cpu.REG_STATUS] & 4 ==0 :
-                        self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.pc], False)
+                    if self.cpu.ram[self.cpu.REG_STATUS] & 4 == 0 :
+                        self.gui.dr_canvas.set_row_state(True, self.cpu.pc, False)
                     else:
                         self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.REG_ADDRLED], False)
                 self.gui.dr_canvas.set_row_state(False, self.cpu.ram[self.cpu.REG_DATALED], True)

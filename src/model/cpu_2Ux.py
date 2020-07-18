@@ -338,22 +338,22 @@ class Cpu(QObject):
     def inst_bclr(self):
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
-        self.ram[arg2] &= (255-2**arg1)                   # sets the specified bit to 0
+        self.ram[arg2] &= (255-2**(arg1&7))               # sets the specified bit to 0
         return True
     def inst_bset(self):
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
-        self.ram[arg2] |= 2**arg1                         # sets the specified bit to 0
+        self.ram[arg2] |= 2**(arg1&7)                     # sets the specified bit to 0
         return True
     def inst_bchg(self):                                  # toggle bit in ram
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
-        self.ram[arg2] ^= 2**arg1        
+        self.ram[arg2] ^= 2**(arg1&7)         
         return True
     def inst_btstsc(self):                                 # Bit Check Ram Skip if Cleared
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
-        if (self.ram[arg2] & 2**arg1) == 0:
+        if (self.ram[arg2] & 2**(arg1&7)) == 0:
             self.set_pc(self.pc + 5)
         else:
             self.set_pc(self.pc + 3)
@@ -361,7 +361,7 @@ class Cpu(QObject):
     def inst_btstss(self):                                 # Bit Check Ram Skip if Set
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
-        if (self.ram[arg2] & 2**arg1) != 0:
+        if (self.ram[arg2] & 2**(arg1&7)) != 0:
             self.set_pc(self.pc + 5)
         else:
             self.set_pc(self.pc + 3)
@@ -471,33 +471,23 @@ class Cpu(QObject):
             if self.pin[0] == 1:
                 self.accu = pin[1]
         arg1 = self.ram[self.pc + 1]
-        if arg1 == 0:
-            p_i(self.pin[0])
-        else:
-            p_i(self.pin[1])
+        p_i(self.pin[arg1&1])
         return True
     def inst_pinout(self):                     # PINOUT no_pin 0/1
         def p_o(pin, val):
-            val = 0 if val == 0 else 1
             if self.pin[0] == 0:
-                pin[1] = val
+                pin[1] = val&1
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
-        if arg1 == 0:
-            p_o(self.pin[0], arg2)
-        else:
-            p_o(self.pin[1], arg2)
+        p_o(self.pin[arg1&1], arg2)
         return True
     def inst_pindir(self):                     # PINDIR no_pin 0/1 ==> 0 = OUTPUT, 1 = INPUT
         def p_d(pin, val):
-            val = 0 if val == 0 else 1
+            val &= 1
             pin[0] = val
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
-        if arg1 == 0:
-            p_d(self.pin[0], arg2)
-        else:
-            p_d(self.pin[1], arg2)
+        p_d(self.pin[arg1&1], arg2)
         return True
 
     # Software stack
