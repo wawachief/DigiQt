@@ -22,13 +22,14 @@ CONFIG_FILE_PATH = 'src/config.ini'
 
 class CpuThread(QThread):
     """Calls ticks the CPU all the time when CPU is in run mode"""
-    def __init__(self, cpu, parent = None):
+    def __init__(self, cpu, inst_delay, parent = None):
         QThread.__init__(self, parent)
         self.cpu        = cpu
         self.running    = True
         self.inst_timer = 0
         self.next_tick_time = perf_counter()
         self.next_inst_time = perf_counter()
+        self.inst_delay = inst_delay # Changed by the controller from config.ini
 
     @Slot()
     def run(self):
@@ -37,12 +38,12 @@ class CpuThread(QThread):
                 if perf_counter() > self.next_tick_time and self.inst_timer >= speed_to_rate[self.cpu.speed] :
                     self.cpu.tick()
                     self.inst_timer = 0
-                    self.next_tick_time = perf_counter() + 0.000033
+                    self.next_tick_time = perf_counter() + self.inst_delay
                 # 30000 cycles per second in speed 0 configuration
                 # adjust speed with cpu.speed value
                 if perf_counter() > self.next_inst_time:
                     self.inst_timer += 1
-                    self.next_inst_time = perf_counter() + 0.001
+                    self.next_inst_time = perf_counter() + 0.001 # 1ms unit
                 self.yieldCurrentThread()
             else:
                 sleep(0.001)
@@ -85,6 +86,8 @@ class Controller(QObject):
             self.config.read(self.config_path)
 
         self.dr_model = self.config.get('digirule', 'DR_MODEL')
+        ui_timer_ms = self.config.getint('digirule', 'ui_timer_ms')
+        self.inst_speed = self.config.getint('digirule', 'inst_speed')
 
         # Controller attributes
         self.idle_data = 0
@@ -119,7 +122,7 @@ class Controller(QObject):
         # run UI update timer
         self.ui_timer = QTimer(parent = self)
         self.connect(self.ui_timer, SIGNAL('timeout()'), self.update_ui)
-        self.ui_timer.start(10) # ui refresh every 10 ms
+        self.ui_timer.start(ui_timer_ms) # ui refresh every 10 ms
 
     def init_state(self):
         """Instantiate the main compnents
@@ -132,7 +135,7 @@ class Controller(QObject):
         #
         # Run cpu thread and UI update
         #
-        self.cpu_thread = CpuThread(self.cpu, parent = None)
+        self.cpu_thread = CpuThread(self.cpu, 1/self.inst_speed, parent = None)
         self.cpu_thread.start()
 
         # Instanciate the debugger
