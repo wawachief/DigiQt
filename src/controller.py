@@ -7,7 +7,8 @@
 
 from configparser import ConfigParser
 from PySide2.QtCore import Signal, Slot, QObject, QThread, QTimer, SIGNAL
-from time import sleep
+from time import sleep, perf_counter
+from src.model.timing import speed_to_rate
 from importlib import import_module
 from os import path
 import shutil
@@ -21,23 +22,28 @@ CONFIG_FILE_PATH = 'src/config.ini'
 
 class CpuThread(QThread):
     """Calls ticks the CPU all the time when CPU is in run mode"""
-    def __init__(self, cpu, speed_fact=20, parent = None):
+    def __init__(self, cpu, parent = None):
         QThread.__init__(self, parent)
         self.cpu        = cpu
         self.running    = True
         self.inst_timer = 0
-        self.speed_factor = speed_fact
+        self.next_tick_time = perf_counter()
+        self.next_inst_time = perf_counter()
 
+    @Slot()
     def run(self):
         while self.running:
             if self.cpu.run:
-                if self.inst_timer >= self.cpu.speed * self.speed_factor :
+                if perf_counter() > self.next_tick_time and self.inst_timer >= speed_to_rate[self.cpu.speed] :
                     self.cpu.tick()
                     self.inst_timer = 0
-                # 10000 cycles per second in speed 0 configuration
+                    self.next_tick_time = perf_counter() + 0.000033
+                # 30000 cycles per second in speed 0 configuration
                 # adjust speed with cpu.speed value
-                sleep(0.00001)
-                self.inst_timer += 1
+                if perf_counter() > self.next_inst_time:
+                    self.inst_timer += 1
+                    self.next_inst_time = perf_counter() + 0.001
+                self.yieldCurrentThread()
             else:
                 sleep(0.001)
 
@@ -113,7 +119,7 @@ class Controller(QObject):
         # run UI update timer
         self.ui_timer = QTimer(parent = self)
         self.connect(self.ui_timer, SIGNAL('timeout()'), self.update_ui)
-        self.ui_timer.start(50) # ui refresh every 50 ms
+        self.ui_timer.start(10) # ui refresh every 10 ms
 
     def init_state(self):
         """Instantiate the main compnents
@@ -153,7 +159,7 @@ class Controller(QObject):
             if self.cpu.run == True:
                 # we are in run mode, we handle the LEDs
                 if self.show_run_adr:
-                    if self.cpu.ram[self.cpu.REG_STATUS] & 4 == 0 :
+                    if self.cpu.ram[self.cpu.REG_STATUS] & 4 ==0 :
                         self.gui.dr_canvas.set_row_state(True, self.cpu.pc, False)
                     else:
                         self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.REG_ADDRLED], False)
@@ -163,7 +169,7 @@ class Controller(QObject):
                 # we are in idle mode, we handle the animations
                 if self.anim_boot != 0:
                     # Animation clear memory
-                    if self.anim_boot % 2 ==0:
+                    if self.anim_boot % 8 ==0:
                         self.do_blink()
                     self.anim_boot -= 1
                     if self.anim_boot == 1:
@@ -171,7 +177,7 @@ class Controller(QObject):
                         self._update_idle_leds()
                 if self.anim_adrLED != 0:
                     # Animation de la barre de LED
-                    if self.anim_adrLED % 2 ==0:
+                    if self.anim_adrLED % 8 ==0:
                         self.do_progress()
                     self.anim_adrLED -= 1
                     if self.anim_adrLED == 1:
@@ -329,12 +335,12 @@ class Controller(QObject):
         """button in normal mode"""
         self.save_mode = False
         self.load_mode = True
-        self.anim_adrLED = 16
+        self.anim_adrLED = 64
     def cb_idle_save(self):
         """button in normal mode"""
         self.save_mode = True
         self.load_mode = False
-        self.anim_adrLED = 16
+        self.anim_adrLED = 64
     def cb_idle_store(self):
         """button in normal mode"""
         self.cpu.ram[self.idle_addr] = self.idle_data
@@ -391,7 +397,7 @@ class Controller(QObject):
         """Button clear pressed in clear mode"""
         self.gui.statusbar.sig_temp_message.emit("Memory clear")
         self.cpu.clear_ram()
-        self.anim_boot = 40
+        self.anim_boot = 160
         self.ram_reloaded()
         if self.serialctl and self.serialctl.fd_thread:
             # Kill the From Digirule thread if there is one
@@ -463,14 +469,14 @@ class Controller(QObject):
         170 represents 10101010
         """
         # self.set_running_leds(i % 2 != 0, False)  # Don't repaint yet
-        self.gui.dr_canvas.set_row_state(True, 170 if (self.anim_boot//2) % 2 == 0 else 85, False)  # Don't repaint yet
-        self.gui.dr_canvas.set_row_state(False, 85 if (self.anim_boot//2) % 2 == 0 else 170)
+        self.gui.dr_canvas.set_row_state(True, 170 if (self.anim_boot//2) % 8 == 0 else 85, False)  # Don't repaint yet
+        self.gui.dr_canvas.set_row_state(False, 85 if (self.anim_boot//2) % 8 == 0 else 170)
 
     def do_progress(self):
         """
         make a progress bar with the data_leds
         """
-        n = 10 - self.anim_adrLED//2
+        n = 10 - self.anim_adrLED//8
         n = max(1, 2**n - 1)
         self.gui.dr_canvas.set_row_state(False, n)
 
