@@ -78,6 +78,7 @@ class RAMFrame(QWidget):
         """
         Called when the Hexadecimal mode checkbox is selected or unselected
         """
+        self.is_size_set = False    # Hexa update -> we resize
         self.sig_hexa_mode.emit(self.hexa_checkbox.isChecked())
 
     def _connect_all(self):
@@ -99,7 +100,7 @@ class RAMFrame(QWidget):
             text_size = font_metrics.size(0, text)
 
             w = text_size.width() + 30
-            h = text_size.height() + 30
+            h = text_size.height() + 50
 
             self.setFixedSize(QSize(w, h + 160))
             self.ram_content.setFixedSize(QSize(w, h))
