@@ -98,8 +98,8 @@ class RAMFrame(QWidget):
             font_metrics = QFontMetrics(font)  # a QFontMetrics based on our font
             text_size = font_metrics.size(0, text)
 
-            w = text_size.width() + 10
-            h = text_size.height() + 20
+            w = text_size.width() + 30
+            h = text_size.height() + 30
 
             self.setFixedSize(QSize(w, h + 160))
             self.ram_content.setFixedSize(QSize(w, h))
