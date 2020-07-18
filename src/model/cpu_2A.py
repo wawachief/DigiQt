@@ -302,17 +302,17 @@ class Cpu(QObject):
     def inst_cbr(self):
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
-        self.ram[arg2] &= (255-2**arg1)                   # sets the specified bit to 0
+        self.ram[arg2] &= (255-2**(arg1&7))               # sets the specified bit to 0
         return True
     def inst_sbr(self):
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
-        self.ram[arg2] |= 2**arg1                         # sets the specified bit to 0
+        self.ram[arg2] |= 2**(arg1&7)                     # sets the specified bit to 0
         return True
     def inst_bcrsc(self):                                 # Bit Check Ram Skip if Cleared
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
-        if (self.ram[arg2] & 2**arg1) == 0:
+        if (self.ram[arg2] & 2**(arg1&7)) == 0:
             self.set_pc(self.pc + 5)
         else:
             self.set_pc(self.pc + 3)
@@ -320,7 +320,7 @@ class Cpu(QObject):
     def inst_bcrss(self):                                 # Bit Check Ram Skip if Set
         arg1 = self.ram[self.pc + 1]
         arg2 = self.ram[self.pc + 2]
-        if (self.ram[arg2] & 2**arg1) != 0:
+        if (self.ram[arg2] & 2**(arg1&7)) != 0:
             self.set_pc(self.pc + 5)
         else:
             self.set_pc(self.pc + 3)
