@@ -7,6 +7,7 @@
 
 from PySide2.QtWidgets import QFormLayout, QGridLayout, QWidget, QCheckBox, QLabel
 from PySide2.QtCore import QSize, Qt
+from PySide2.QtGui import QFontMetrics
 
 from src.view.style import style
 
@@ -25,13 +26,10 @@ class RAMFrame(QWidget):
 
         self.setWindowTitle("DigiQt - RAM")
 
-        w = 370
-        h = 750
-
-        self.setFixedSize(QSize(w, h))
-
         self.ram_content = RamDebugText(config)
-        self.ram_content.setFixedSize(QSize(w, h - 160))
+
+        # Sizes will be set once the text will have been filled
+        self.is_size_set = False
 
         self.lab_ac = QLabel("AC:")
         self.lab_pc = QLabel("PC:")
@@ -94,6 +92,19 @@ class RAMFrame(QWidget):
         :param text: text to set
         """
         self.ram_content.setPlainText(text)
+
+        if not self.is_size_set:
+            font = self.ram_content.document().defaultFont()  # or another font if you change it
+            font_metrics = QFontMetrics(font)  # a QFontMetrics based on our font
+            text_size = font_metrics.size(0, text)
+
+            w = text_size.width() + 10
+            h = text_size.height() + 20
+
+            self.setFixedSize(QSize(w, h + 160))
+            self.ram_content.setFixedSize(QSize(w, h))
+
+            self.is_size_set = True
 
     # --- Close handler ---
 
