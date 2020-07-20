@@ -68,6 +68,8 @@ inst_dic = {
             # misc
             "randa":   {"code": 46, "operandCount": 0},
 
+            "shiftal": {"code": 231, "operandCount": 0}, # new 2B instructions
+            "shiftar": {"code": 232, "operandCount": 0}, # new 2B instructions
             "tbr":     {"code": 233, "operandCount": 2},
             # stack instructions
             "sspush":  {"code": 234, "operandCount": 0}, # new 2B instructions

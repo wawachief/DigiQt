@@ -17,8 +17,8 @@ class Cpu(QObject):
 
         # CPU configuration
         self.dr_model     = "2B"
-        self.stack_size   = 16
-        self.sstack_size  = 64
+        self.stack_size   = 64
+        self.sstack_size  = 256
         # attributes initialization
         self.ram = [0] * 256
         self.stack  = [0] * self.stack_size    # CPU Stack
@@ -333,6 +333,21 @@ class Cpu(QObject):
             self.status_C(0)                              # sets Carry bit to 0
         self.ram[arg1] >>= 1                              # shifts whitout taking care of the previous Carry bit
         self.ram[arg1] += 128 * carry                     # sets the MSB equals to the previous Carry bit
+        return True
+    def inst_shiftal(self):
+        self.accu <<= 1                                   # shifts whitout taking care of the previous Carry bit
+        carry = (self.ram[self.REG_STATUS] & 2) // 2      # 0 or 2 # gets the previous Carry bit on the status register
+        self.accu += carry                                # sets the LSB equals to the previous Carry bit
+        self.accu = self.status_C(self.accu)
+        return True
+    def inst_shiftar(self):
+        carry = (self.ram[self.REG_STATUS] & 2) // 2      # gets the previous Carry bit on the status register
+        if self.accu % 2 == 1:                            # if odd value => raises a new Carry
+            self.status_C(256)                            # sets Carry bit to 1
+        else:
+            self.status_C(0)                              # sets Carry bit to 0
+        self.accu >>= 1                                   # shifts whitout taking care of the previous Carry bit
+        self.accu += 128 * carry                          # sets the MSB equals to the previous Carry bit
         return True
     def inst_cbr(self):
         arg1 = self.ram[self.pc + 1]
