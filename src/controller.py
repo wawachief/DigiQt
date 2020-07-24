@@ -132,6 +132,7 @@ class Controller(QObject):
 
         CpuModule = import_module("src.model.cpu_" + self.dr_model)
         self.cpu = CpuModule.Cpu(self.sig_cpu_stopped, self.sig_cpu_speed)
+        self.gui.slider.setValue(0)
         #
         # Run cpu thread and UI update
         #
