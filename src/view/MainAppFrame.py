@@ -5,7 +5,7 @@
 # Execution frame
 #
 
-from PySide2.QtWidgets import QToolBar, QVBoxLayout, QHBoxLayout, QWidget, QSizePolicy
+from PySide2.QtWidgets import QToolBar, QVBoxLayout, QHBoxLayout, QWidget, QSizePolicy, QDialog
 from PySide2.QtCore import Qt
 
 from src.view.EditorFrame import EditorFrame
@@ -19,6 +19,7 @@ from src.view.exec_frame_widgets.ExecFrameButtons import OpenEditorButton, OpenR
 from src.view.exec_frame_widgets.StatusBar import StatusBar
 from src.view.exec_frame_widgets.SpeedSlider import SpeedSlider
 from src.view.style import style
+from src.view.popup.QuitConfirmDialog import DialogQuitConfirmation
 
 
 class ExecutionFrame(QWidget):
@@ -34,6 +35,7 @@ class ExecutionFrame(QWidget):
         QWidget.__init__(self)
 
         self.config = config
+        self.is_quitting = False
 
         app_version = self.config.get('main', 'APP_VERSION')
         self.setWindowTitle("DigiQt - Emulator for Digirule - " + str(app_version))
@@ -152,15 +154,27 @@ class ExecutionFrame(QWidget):
         """
         Event called upon a red-cross click
         """
-        self.do_quit()
+        if self.ask_quit_confirmation():
+            self.is_quitting = True
+            self.do_quit()
 
-        # Reset status bar
-        self.statusbar.sig_persistent_message.emit("")
+            # Reset status bar
+            self.statusbar.sig_persistent_message.emit("")
 
-        # Call the secondary frames close methods as well
-        self.editor_frame.on_close()
-        self.ram_frame.on_close()
-        self.monitor_frame.on_close()
-        self.symbol_frame.on_close()
-        self.about_frame.on_close()
-        event.accept()
+            # Call the secondary frames close methods as well
+            self.editor_frame.on_close()
+            self.ram_frame.on_close()
+            self.monitor_frame.on_close()
+            self.symbol_frame.on_close()
+            self.about_frame.on_close()
+
+            event.accept()
+        else:
+            event.ignore()
+
+    def ask_quit_confirmation(self):
+        """
+        Asks a quit confirmation message
+        :return: True if the user wants to quit the app
+        """
+        return DialogQuitConfirmation().exec_()

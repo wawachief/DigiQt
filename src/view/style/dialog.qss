@@ -1,0 +1,25 @@
+QDialog {
+    background-color: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1,
+    stop: 0 #101010, stop: 0.2 #222222, stop: 0.5 #303030, stop: 0.8 #222222, stop: 1 #101010);
+    border: 5px double #DC2020;
+}
+
+QLabel {
+    color: #66BBFF;
+    font-weight: bold;
+    background: transparent;
+}
+
+QPushButton {
+    height: 2em;
+    color: #FAFAFA;
+    font-weight: bold;
+    background: #555555;
+    border: 2px solid #FAFAFA;
+    border-radius: 6px;
+}
+
+QPushButton:hover {
+    border-color: #75BA6D;
+    background: #787878;
+}

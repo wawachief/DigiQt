@@ -20,6 +20,7 @@ from src.view.MainAppFrame import ExecutionFrame
 
 CONFIG_FILE_PATH = 'src/config.ini'
 
+
 class CpuThread(QThread):
     """Calls ticks the CPU all the time when CPU is in run mode"""
     def __init__(self, cpu, inst_delay, parent = None):
@@ -490,11 +491,12 @@ class Controller(QObject):
         self.gui.dr_canvas.set_row_state(False, n)
 
     def do_quit(self):
-        # Kill the cpu thread and quit the app
-        self.cpu_thread.running = False
-        sleep(0.1)
-        self.gui.close()
-        print("Bye")
+        if self.gui.is_quitting:
+            self.cpu_thread.running = False
+            sleep(0.1)
+            print("Bye")
+        else:
+            self.gui.close()
 
     def do_view_ram(self):
         self.dbg.view_ram()

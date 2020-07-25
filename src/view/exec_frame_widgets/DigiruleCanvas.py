@@ -190,7 +190,6 @@ class DRCanvas(QLabel):
                     self.on_d(int(btn_name[-1]), True)
                     return  # No need to continue once found
 
-
     def set_led_state(self, top_row, led, active, do_repaint=True):
         """
         Sets the given LED state
