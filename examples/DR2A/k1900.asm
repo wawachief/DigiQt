@@ -1,3 +1,4 @@
+speed 25
 
 :start 
   sbr    7 255 
