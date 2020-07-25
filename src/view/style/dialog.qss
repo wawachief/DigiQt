@@ -1,7 +1,19 @@
 QDialog {
     background-color: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1,
     stop: 0 #101010, stop: 0.2 #222222, stop: 0.5 #303030, stop: 0.8 #222222, stop: 1 #101010);
-    border: 5px double #DC2020;
+
+    border-bottom: 2px solid QLinearGradient(x1: 0, y1: 0, x2: 1, y2: 0,
+    stop: 0 #FFFF00, stop: 0.2 #FF0000, stop: 0.4 #FF00FF, stop: 0.6 #0000FF, stop: 0.8 #00FFFF, stop: 1 #00FF00);
+
+    border-left: 2px solid QLinearGradient(x1: 0, y1: 1, x2: 0, y2: 0,
+    stop: 0 #FFFF00, stop: 0.2 #FF0000, stop: 0.4 #FF00FF, stop: 0.6 #0000FF, stop: 0.8 #00FFFF, stop: 1 #00FF00);
+
+    border-top: 2px solid QLinearGradient(x1: 1, y1: 0, x2: 0, y2: 0,
+    stop: 0 #FFFF00, stop: 0.2 #FF0000, stop: 0.4 #FF00FF, stop: 0.6 #0000FF, stop: 0.8 #00FFFF, stop: 1 #00FF00);
+
+    border-right: 2px solid QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1,
+    stop: 0 #FFFF00, stop: 0.2 #FF0000, stop: 0.4 #FF00FF, stop: 0.6 #0000FF, stop: 0.8 #00FFFF, stop: 1 #00FF00);
+
 }
 
 QLabel {

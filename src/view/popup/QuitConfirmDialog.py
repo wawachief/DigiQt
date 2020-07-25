@@ -1,7 +1,8 @@
 from PySide2.QtWidgets import QDialog, QGridLayout, QLabel, QPushButton
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, QSize
 
 from src.view.style import style
+
 
 class DialogQuitConfirmation(QDialog):
     def __init__(self):
@@ -13,6 +14,8 @@ class DialogQuitConfirmation(QDialog):
         self.setWindowTitle("Quit DigiQt?")
         self.setWindowFlags(Qt.FramelessWindowHint)
 
+        self.setFixedSize(QSize(300, 130))
+
         self.ok_btn = QPushButton("Quit")
         self.ok_btn.clicked.connect(self.accept)
 
@@ -20,6 +23,7 @@ class DialogQuitConfirmation(QDialog):
         self.cancel_btn.clicked.connect(self.reject)
 
         self.label = QLabel("Do you really want to quit DigiQt?")
+        self.label.setAlignment(Qt.AlignCenter)
 
         layout = QGridLayout()
         layout.addWidget(self.label, 0, 0, 1, 2)
