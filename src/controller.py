@@ -89,7 +89,7 @@ class Controller(QObject):
         self.dr_model = self.config.get('digirule', 'dr_model')
         self.dr_models = self.config.get('digirule', 'dr_models').split()
         ui_timer_ms = self.config.getint('digirule', 'ui_timer_ms')
-        self.inst_speed = self.config.getint('digirule', 'inst_speed')
+        self.inst_speed = 0
 
         # Controller attributes
         self.idle_data = 0
@@ -142,6 +142,8 @@ class Controller(QObject):
         #
         # Run cpu thread and UI update
         #
+
+        self.inst_speed = self.config.getint(self.dr_model, 'inst_speed')
         self.cpu_thread = CpuThread(self.cpu, 1/self.inst_speed, parent = None)
         self.cpu_thread.start()
 

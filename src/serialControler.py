@@ -22,8 +22,9 @@ class InitSerialThread(QThread):
         self.parent = parent
 
         # Serial port configuration
+        dr_model = parent.config.get('digirule', 'dr_model')
         self.port      = parent.config.get("serial","port")
-        self.baudrate  = int(parent.config.get("serial","baudrate"))
+        self.baudrate  = int(parent.config.get(dr_model,"baudrate"))
         self.timeout   = float(parent.config.get("serial","TIMEOUT"))
         self.update_combo = None # pushed by controler
         self.do_refresh = False  # we hit refresh button
