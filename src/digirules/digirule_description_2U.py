@@ -5,7 +5,7 @@
 # This file's purpose is to describe the Digirule 2U model elements position
 #
 
-IMG_NAME = "DR_2.png"  # Image file name
+IMG_NAME = "DR_2U.png"  # Image file name
 BUTTONS_WIDTH = 30  # Push buttons width
 
 # The drawing painter in which is drawn buttons and LEDs needs to be rescaled.
@@ -19,44 +19,44 @@ buttons_positions = {
     (71, 140): "d_btn6",
     (117, 140): "d_btn5",
     (165, 140): "d_btn4",
-    (213, 140): "d_btn3",
-    (262, 140): "d_btn2",
-    (310, 140): "d_btn1",
-    (360, 140): "d_btn0",
-    (432, 70): "btn_goto",
-    (490, 70): "btn_store",
-    (490, 136): "btn_next",
-    (432, 136): "btn_prev",
-    (793, 136): "btn_run",
-    (904, 136): "btn_save",
-    (904, 70): "btn_load",
+    (212, 139): "d_btn3",
+    (260, 139): "d_btn2",
+    (306, 139): "d_btn1",
+    (353, 139): "d_btn0",
+    (818, 68): "btn_goto",
+    (876, 68): "btn_store",
+    (876, 135): "btn_next",
+    (818, 135): "btn_prev",
+    (740, 115): "btn_run",
+    (946, 133): "btn_save",
+    (947, 67): "btn_load",
 }
 
 # Rectangle-shape buttons and larger buttons
 special_buttons_rectangles = {
-    (559, 108, 605, 155): "btn_ram",
-    (670, 118, 703, 128): "btn_clear",
-    (970, 50, 1050, 130): "btn_power"
+    (597, 103, 643, 150): "btn_ram",
+    (510, 118, 550, 135): "btn_clear",
+    (395, 40, 470, 120): "btn_power"
 }
 
 # Rows of LEDs
 led_positions = {
-    (28, 64): "topLed7",
-    (74, 64): "topLed6",
-    (120, 64): "topLed5",
-    (168, 64): "topLed4",
-    (216, 64): "topLed3",
-    (264, 64): "topLed2",
-    (312, 64): "topLed1",
-    (360, 64): "topLed0",
-    (28, 100): "bottomLed7",
-    (74, 100): "bottomLed6",
-    (120, 100): "bottomLed5",
-    (168, 100): "bottomLed4",
-    (216, 100): "bottomLed3",
-    (264, 100): "bottomLed2",
-    (312, 100): "bottomLed1",
-    (360, 100): "bottomLed0",
-    (831, 105): "stopLed",
-    (755, 105): "runLed"
+    (27, 62): "topLed7",
+    (73, 62): "topLed6",
+    (120, 62): "topLed5",
+    (167, 62): "topLed4",
+    (213, 62): "topLed3",
+    (261, 62): "topLed2",
+    (308, 62): "topLed1",
+    (355, 62): "topLed0",
+    (27, 99): "bottomLed7",
+    (73, 99): "bottomLed6",
+    (120, 99): "bottomLed5",
+    (167, 99): "bottomLed4",
+    (213, 99): "bottomLed3",
+    (261, 99): "bottomLed2",
+    (308, 99): "bottomLed1",
+    (355, 99): "bottomLed0",
+    (771, 148): "stopLed",
+    (707, 148): "runLed"
 }

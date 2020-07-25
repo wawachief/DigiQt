@@ -92,7 +92,7 @@ class ExecutionFrame(QWidget):
 
         # Digirule model selection
         self.toolbar.addSeparator()
-        self.digimodel_dropdown = DigiruleModelDropdown(self.on_digimodel_dropdown_changed, self.current_digirule_model)
+        self.digimodel_dropdown = DigiruleModelDropdown(self.on_digimodel_dropdown_changed)
         self.toolbar.addWidget(self.digimodel_dropdown)
 
         # Empty space to align the about button to the right

@@ -85,7 +85,8 @@ class Controller(QObject):
             shutil.copyfile(CONFIG_FILE_PATH, self.config_path)
             self.config.read(self.config_path)
 
-        self.dr_model = self.config.get('digirule', 'DR_MODEL')
+        self.dr_model = self.config.get('digirule', 'dr_model')
+        self.dr_models = self.config.get('digirule', 'dr_models').split()
         ui_timer_ms = self.config.getint('digirule', 'ui_timer_ms')
         self.inst_speed = self.config.getint('digirule', 'inst_speed')
 
@@ -107,6 +108,10 @@ class Controller(QObject):
         self.gui.do_quit = self.do_quit
         self.gui.ram_frame.ram_content.sig_rampc_goto = self.sig_rampc_goto
         self.gui.symbol_frame.sig_symbol_goto = self.sig_symbol_goto
+
+        # push the digirule models into the combobox
+        self.gui.digimodel_dropdown.addItems(self.dr_models)
+        self.gui.digimodel_dropdown.setCurrentText(self.dr_model)  # Switch to initial selection
 
         self.cpu = None
         self.init_state()

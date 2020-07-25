@@ -87,7 +87,7 @@ class DRCanvas(QLabel):
         # Drawing
         pen = QPen()
         pen.setWidth(self.digirule.get_buttons_width())
-        pen.setColor(QColor(0, 0, 0, 0))  # Buttons color
+        pen.setColor(QColor(0, 0, 0, 0))  # Buttons color 
         painter.setPen(pen)
 
         # Buttons

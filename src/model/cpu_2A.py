@@ -6,7 +6,6 @@
 #
 
 from PySide2.QtCore import Signal, Slot, QObject
-from random import randint
 from src.model.cpu import Core
 
 
