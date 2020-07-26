@@ -58,6 +58,8 @@ class Controller(QObject):
     sig_rampc_goto = Signal(str)
     sig_symbol_goto = Signal(str)
     sig_brk_change = Signal()
+    sig_PIN_out = Signal(tuple)
+    sig_PIN_in = Signal(int)
 
     def __init__(self):
         QObject.__init__(self)
@@ -69,7 +71,8 @@ class Controller(QObject):
         self.sig_ram_update.connect(self.ram_reloaded)
         self.sig_rampc_goto.connect(self.on_rampc_goto)
         self.sig_symbol_goto.connect(self.on_symbol_goto)
-        self.sig_brk_change.connect(self.make_brk_pc)
+        self.sig_PIN_out.connect(self.on_pinout)
+        self.sig_PIN_in.connect(self.on_pinin)
 
         # Read configuration
         # Copy config file into home directory
@@ -153,6 +156,11 @@ class Controller(QObject):
         # change attribute in editor for coloration
         self.gui.editor_frame.editor.highlight.init_rules(self.cpu.inst_dic)
         self.do_view_ram()
+
+        # connect the pin signals
+        self.cpu.sig_PIN_out = self.sig_PIN_out
+        self.cpu.sig_PIN_in = self.sig_PIN_in
+        self.gui.dr_canvas.sig_PIN_in = self.sig_PIN_in 
 
         # Instantiate the serial controler
         if self.cpu.serial_enable:
@@ -272,6 +280,14 @@ class Controller(QObject):
                 # variable color
                 self.dbg.ram_frame.ram_content.select(lpc, cpc, "ram_variable")
 
+    @Slot(tuple)
+    def on_pinout(self, pin_val):
+        self.gui.dr_canvas.set_pin_leds(pin_val[0], pin_val[1])
+
+    @Slot(int)
+    def on_pinin(self, pin):
+        self.cpu.pin[pin][1] = 1- self.cpu.pin[pin][1]
+        self.gui.dr_canvas.set_pin_leds(pin, 2+self.cpu.pin[pin][1])
     #
     # other events methods
     #
@@ -303,8 +319,6 @@ class Controller(QObject):
 
         # update the control leds
         self.gui.dr_canvas.set_running_leds(False)
-
-
 
     def set_run_mode(self):
         """The digirule enters run mode. We reconfigure all the calbacks methods"""

@@ -20,6 +20,8 @@ class Core(QObject):
         self.sig_cpu_speed = None
         self.sig_CPU_comout = None # These signals are pushed 
         self.sig_CPU_comin  = None # by the serial controler
+        self.sig_PIN_out = None # These signals are used by the 2Ux CPU
+        self.sig_PIN_in = None # These signals are used by the 2Ux CPU
         self.dr_model     = None
         self.stack_size   = 0
         self.stack  = []  # CPU Stack

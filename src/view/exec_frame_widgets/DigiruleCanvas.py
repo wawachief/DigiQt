@@ -31,7 +31,9 @@ class DRCanvas(QLabel):
         "bottomLed1": False,
         "bottomLed0": False,
         "stopLed": True,
-        "runLed": False
+        "runLed": False,
+        "pin1Led": 0,
+        "pin0Led": 0
     }
 
     def __init__(self, sig_status, window_width, digirule_model, config):
@@ -51,6 +53,7 @@ class DRCanvas(QLabel):
 
         self.config = config
         self.sig_status = sig_status
+        self.sig_PIN_in = None
 
         self.setFixedSize(window_width, 204)  # 1/4 of the original size
         self.setScaledContents(True)
@@ -131,10 +134,14 @@ class DRCanvas(QLabel):
         painter = QPainter(self)
         pen = QPen()
         pen.setWidth(10)
+        pinColor=["black", "red", "grey", "yellow"]
 
         led_dico = self.digirule.get_led_positions_dic()
         for led in led_dico:
-            if self.led_states[led_dico[led]]:  # LED active color
+            if led_dico[led] == "pin0Led" or led_dico[led] == "pin1Led":
+                # pin Leds can be of 4 different colors
+                pen.setColor(QColor(pinColor[self.led_states[led_dico[led]]]))
+            elif self.led_states[led_dico[led]]:  # LED active color
                 pen.setColor(QColor(top_color if "top" in led_dico[led] else bottom_color))
             else:  # LED inactive color
                 pen.setColor(QColor("black"))
@@ -225,6 +232,29 @@ class DRCanvas(QLabel):
 
         if do_repaint:
             self.repaint()  # Forces the label to repaint
+    
+    def set_pin_leds(self, pin, mode, do_repaint=True):
+        """
+        Sets pins LEDs given the specified running state
+
+        :param pin: 0 or 1 for pin0 or pin1
+        :type pin: int
+        :param mode: int 
+             0 : LOW
+             1 : HIGH
+             2 : INPUT LOW
+             3 : INPUT HIGH
+        :type mode: int
+        :param do_repaint: repaint after setting
+        :type do_repaint: bool
+        """
+        if pin == 0:
+            self.led_states["pin0Led"] = mode
+        else:
+            self.led_states["pin1Led"] = mode
+
+        if do_repaint:
+            self.repaint()  # Forces the label to repaint
 
     def set_row_state(self, top_row, octet, do_repaint=True):
         """
@@ -289,3 +319,13 @@ class DRCanvas(QLabel):
 
     def on_btn_power(self):
         pass
+
+    def on_btn_pin0(self):
+        if self.led_states["pin0Led"]>=2:
+            # pindir is input
+            self.sig_PIN_in.emit(0)
+
+    def on_btn_pin1(self):
+        if self.led_states["pin1Led"]>=2:
+            # pindir is input
+            self.sig_PIN_in.emit(1)
