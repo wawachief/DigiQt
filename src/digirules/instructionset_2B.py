@@ -51,10 +51,15 @@ inst_dic = {
             "shiftrr": {"code": 34, "operandCount": 1},
 
             # bit manipulation
-            "cbr":     {"code": 35, "operandCount": 2},
-            "sbr":     {"code": 36, "operandCount": 2},
-            "bcrsc":   {"code": 37, "operandCount": 2},
-            "bcrss":   {"code": 38, "operandCount": 2},
+            "bclr":     {"code": 35, "operandCount": 2},
+            "bset":     {"code": 36, "operandCount": 2},
+            "btstsc":   {"code": 37, "operandCount": 2},
+            "btstss":   {"code": 38, "operandCount": 2},
+            # bit manipulation - oldnames
+            "cbr":     {"code": 35, "operandCount": 2, "alias": True},
+            "sbr":     {"code": 36, "operandCount": 2, "alias": True},
+            "bcrsc":   {"code": 37, "operandCount": 2, "alias": True},
+            "bcrss":   {"code": 38, "operandCount": 2, "alias": True},
 
             # Program comtrol
             "jump":    {"code": 39, "operandCount": 1},
@@ -68,9 +73,14 @@ inst_dic = {
             # misc
             "randa":   {"code": 46, "operandCount": 0},
 
+            # Custom jump with test Zero
+            "jumpz":    {"code": 229, "operandCount": 1},  # 2B Jump if Zero flag
+            "jumpnz":    {"code": 230, "operandCount": 1}, # 2B Jump if not Zero flag
+
             "shiftal": {"code": 231, "operandCount": 0}, # new 2B instructions
             "shiftar": {"code": 232, "operandCount": 0}, # new 2B instructions
-            "tbr":     {"code": 233, "operandCount": 2},
+            "bchg":    {"code": 233, "operandCount": 2},
+            "tbr":     {"code": 233, "operandCount": 2, "alias": True},
             # stack instructions
             "sspush":  {"code": 234, "operandCount": 0}, # new 2B instructions
             "sspop":   {"code": 235, "operandCount": 0}, # new 2B instructions
@@ -80,4 +90,12 @@ inst_dic = {
             "sspopi":  {"code": 239, "operandCount": 1}, # new 2B instructions
             "sshead":  {"code": 240, "operandCount": 0}, # new 2B instructions
             "ssdepth": {"code": 241, "operandCount": 0}, # new 2B instructions
+
+            # Logical operations with RAM
+            "andlr":   {"code": 242, "operandCount": 2},
+            "andrr":   {"code": 243, "operandCount": 2},
+            "orlr":    {"code": 244, "operandCount": 2},
+            "orrr":    {"code": 245, "operandCount": 2},
+            "xorlr":   {"code": 246, "operandCount": 2},
+            "xorrr":   {"code": 247, "operandCount": 2},
         }

@@ -39,18 +39,61 @@ class Cpu(Core):
         self.accu >>= 1                                   # shifts whitout taking care of the previous Carry bit
         self.accu += 128 * carry                          # sets the MSB equals to the previous Carry bit
         return True
-    
-    # restore old bit instruction names
-    inst_cbr = Core.inst_bclr
-    inst_sbr = Core.inst_bset
-    inst_tbr = Core.inst_bchg
-    inst_bcrsc = Core.inst_btstsc
-    inst_bcrss = Core.inst_btstss
 
     def inst_initsp(self):
         self.sp = 0
         self.ssp = 0 # Reinitialize software stack pointer
         return True
+
+    # Logical operations with RAM
+    def inst_andlr(self):
+        arg1 = self.ram[self.pc + 1]
+        arg2 = self.ram[self.pc + 2]
+        self.ram[arg2] &= arg1
+        self.status_Z(self.ram[arg2])
+        return True
+    def inst_andrr(self):
+        arg1 = self.ram[self.pc + 1]
+        arg2 = self.ram[self.pc + 2]
+        self.ram[arg2] &= self.ram[arg1]
+        self.status_Z(self.ram[arg2])
+        return True
+    def inst_orlr(self):
+        arg1 = self.ram[self.pc + 1]
+        arg2 = self.ram[self.pc + 2]
+        self.ram[arg2] |= arg1
+        self.status_Z(self.ram[arg2])
+        return True
+    def inst_orrr(self):
+        arg1 = self.ram[self.pc + 1]
+        arg2 = self.ram[self.pc + 2]
+        self.ram[arg2] |= self.ram[arg1]
+        self.status_Z(self.ram[arg2])
+        return True
+    def inst_xorlr(self):
+        arg1 = self.ram[self.pc + 1]
+        arg2 = self.ram[self.pc + 2]
+        self.ram[arg2] ^= arg1
+        self.status_Z(self.ram[arg2])
+        return True
+    def inst_xorrr(self):
+        arg1 = self.ram[self.pc + 1]
+        arg2 = self.ram[self.pc + 2]
+        self.ram[arg2] ^= self.ram[arg1]
+        self.status_Z(self.ram[arg2])
+        return True
+    
+    # Jump and test 0 instructions
+    def inst_jumpznz(self, z):
+        if self.ram[self.REG_STATUS] & 1 == z:
+            arg1 = self.ram[self.pc + 1]
+            self.set_pc(arg1)
+            return False
+        return True
+    def inst_jumpnz(self):
+        return self.inst_jumpznz(0)
+    def inst_jumpz(self):
+        return self.inst_jumpznz(1)
 
     # Software stack
     def inst_sspush(self):
