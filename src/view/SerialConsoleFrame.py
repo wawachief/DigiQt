@@ -12,6 +12,7 @@ from PySide2.QtGui import QKeySequence, QFont, QTextCursor
 from src.view.style import style
 from src.view.console_frame_widgets.ConsoleFrameButtons import ClearButton, ToDigiruleButton, FromDigiruleButton, RefreshPortButton
 from src.view.console_frame_widgets.USBPortDropdown import UsbPortCombo
+from src.assets_manager import get_font
 
 
 class SerialConsoleFrame(QWidget):
@@ -26,7 +27,7 @@ class SerialConsoleFrame(QWidget):
         """
         QWidget.__init__(self)
 
-        self.setFixedSize(QSize(600, 170))
+        self.setFixedSize(QSize(600, 470))
 
         self.config = config
         self.setWindowTitle("DigiQt - Serial console")
@@ -37,7 +38,13 @@ class SerialConsoleFrame(QWidget):
         # Serial out
         self.serial_out = QPlainTextEdit()
         self.serial_out.setReadOnly(True)
-        self.serial_out.setFixedSize(QSize(600, 100))
+        self.serial_out.setFixedSize(QSize(800, 400))
+
+
+        doc = self.serial_out.document()
+        f = doc.defaultFont()
+        f.setFamily(get_font(config))
+        doc.setDefaultFont(f)
 
         # Serial in
         self.serial_in = QLabel()
@@ -136,11 +143,11 @@ class SerialConsoleFrame(QWidget):
         Appends the given text inside the serial out area
         """
         # First, we place the cursor at the end (this will also clear the selection before inserting new text)
-        
-        cursor = self.serial_out.textCursor()
-        cursor.movePosition(QTextCursor.End)
-        self.serial_out.setTextCursor(cursor)
-        self.serial_out.insertPlainText(text)
+        if text != chr(10):
+            cursor = self.serial_out.textCursor()
+            cursor.movePosition(QTextCursor.End)
+            self.serial_out.setTextCursor(cursor)
+            self.serial_out.insertPlainText(text)
     # --- Close handler ---
 
     def closeEvent(self, event):
