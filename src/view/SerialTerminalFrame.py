@@ -15,6 +15,7 @@ from src.assets_manager import get_font
 
 import queue as Queue
 import sys, time, serial
+from time import sleep
 
 WIN_WIDTH, WIN_HEIGHT = 684, 400    # Window size
 SER_TIMEOUT = 0.1                   # Timeout for serial Rx
@@ -45,14 +46,8 @@ class SerialTerminalFrame(QWidget):
 
         self.setFixedSize(QSize(WIN_WIDTH, WIN_HEIGHT))
 
-        self.config = config
         self.setWindowTitle("DigiQt - Serial terminal")
 
-        self.dr_model = self.config.get("digirule", "dr_model")
-
-        self.baudrate    = self.config.getint(self.dr_model, "baudrate")                 # Default baud rate
-        self.portname    = self.config.get("serial", "port")                # Default port name
-        
         self.textbox = MyTextBox()              # Create custom text box
         font = QFont()
         font.setFamily("Courier New")           # Monospaced font
@@ -63,8 +58,9 @@ class SerialTerminalFrame(QWidget):
         self.setLayout(layout)
         self.text_update.connect(self.append_text)      # Connect text update to handler
         sys.stdout = self                               # Redirect sys.stdout to self
-        self.serth = SerialThread(self.portname, self.baudrate)   # Start serial thread
-        self.serth.start()
+
+        self.serth = None
+        
          
     def write(self, text):                      # Handle sys.stdout.write: update display
         self.text_update.emit(text)             # Send signal to synchronise call with main thread
@@ -96,35 +92,41 @@ class SerialTerminalFrame(QWidget):
     # --- Close handler ---
     def closeEvent(self, event):                # Window closing
         self.serth.running = False              # Wait until serial thread terminates
-        self.serth.wait()
+        sleep(0.1)
+        print("Bye")
         self.on_close()
 
 
 # Thread to handle incoming &amp; outgoing serial data
 class SerialThread(QThread):
-    def __init__(self, portname, baudrate): # Initialise with serial port details
+    def __init__(self, config): # Initialise with serial port details
         QThread.__init__(self)
-        self.portname, self.baudrate = portname, baudrate
+
+        self.config = config
+        self.dr_model = self.config.get("digirule", "dr_model")
+        self.baudrate    = self.config.getint(self.dr_model, "baudrate")                 # Default baud rate
+        self.portname    = self.config.get("serial", "port")                # Default port name
+        
         self.txq = Queue.Queue()
         self.running = True
  
     def ser_out(self, s):                   # Write outgoing data to serial port if open
-        self.txq.put(s)                     # ..using a queue to sync with reader thread
+        if s != '\x0a':
+            self.txq.put(s)                     # ..using a queue to sync with reader thread
          
     def ser_in(self, s):                    # Write incoming serial data to screen
-        display(s)
-         
-    def run(self):                          # Run serial reader thread
+        self.display(s)
 
-        def bytes_str(d):
+    def bytes_str(self, d):
             return d if type(d) is str else "".join([chr(b) for b in d])
 
-        def display(s):
-            def textdump(data):
-            # Return a string with high-bit chars replaced by hex values
-                return "".join(["[%02X]" % ord(b) if b>'\x7e' else b for b in data])
-            sys.stdout.write(textdump(str(s)))
-            
+    def display(self, s):
+        def textdump(data):
+        # Return a string with high-bit chars replaced by hex values
+            return "".join(["[%02X]" % ord(b) if b>'\x7e' else b for b in data])
+        sys.stdout.write(textdump(str(s)))
+
+    def run(self):                          # Run serial reader thread
         print(f"Opening {self.portname} at {self.baudrate} baud")
         try:
             self.ser = serial.Serial(self.portname, self.baudrate, timeout=SER_TIMEOUT)
@@ -138,7 +140,7 @@ class SerialThread(QThread):
         while self.running:
             s = self.ser.read(self.ser.in_waiting or 1)
             if s:                                       # Get data from serial port
-                self.ser_in(bytes_str(s))               # ..and convert to string
+                self.ser_in(self.bytes_str(s))               # ..and convert to string
             if not self.txq.empty():
                 txd = str(self.txq.get())               # If Tx data in queue, write to serial port
                 self.ser.write(txd.encode('latin-1'))
