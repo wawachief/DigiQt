@@ -120,6 +120,41 @@ class OpenConsoleButton(QPushButton):
 
             self.console_frame.hide()
 
+class OpenTerminalButton(QPushButton):
+    def __init__(self, terminal_frame, config):
+        """
+        Button handling the open/close operation of the serial terminal frame
+
+        :param terminal_frame: The terminal frame that this button shows/hides
+        """
+        QPushButton.__init__(self)
+
+        self.setIcon(assets_mgr.get_icon("show_terminal"))
+        self.setIconSize(assets_mgr.ICON_SIZE)
+        self.setToolTip("Show Serial terminal")
+        self.setStyleSheet('border: none; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
+
+        self.terminal_frame = terminal_frame
+
+        self.clicked.connect(lambda: self.show_terminal_frame(not self.terminal_frame.isVisible()))
+
+    def show_terminal_frame(self, do_display):
+        """
+        Hides or shows the serial terminal frame
+
+        :param do_display: True will display the terminal frame, False will hide it
+        :type do_display: bool
+        """
+        if do_display:
+            self.setIcon(assets_mgr.get_icon("hide_terminal"))
+            self.setToolTip("Hide Serial terminal")
+
+            self.terminal_frame.show()
+        else:
+            self.setIcon(assets_mgr.get_icon("show_terminal"))
+            self.setToolTip("Show Serial terminal")
+
+            self.terminal_frame.hide()
 
 class OpenSymbolButton(QPushButton):
     def __init__(self, symbol_frame, config):
