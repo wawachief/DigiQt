@@ -8,8 +8,10 @@
 import sys
 sys.path.append("..") 
 from src.model.assemble import Assemble
-from src.model.cpu import Cpu
 from configparser import ConfigParser
+from importlib import import_module
+from os import path
+import shutil
 
 CONFIG_FILE_PATH = '../src/config.ini'
 
@@ -38,14 +40,11 @@ with open(sys.argv[1], "r") as f:
     text = ""
     for l in f.readlines():
         text += l
-    asm = Assemble(text,inst_dic)
+    asm = Assemble(text,inst_dic.inst_dic)
     res = asm.parse()
 
-if res[0]:
-    config = ConfigParser()
-    config.read(CONFIG_FILE_PATH)
-    print (config.get('digirule', 'DR_MODEL'))
-    dr_cpu = Cpu(config)
+    CpuModule = import_module("src.model.cpu_" + dr_model)
+    dr_cpu = CpuModule.Cpu()
     dr_cpu.set_ram(res[1])
     dr_cpu.run = True
     n = 0

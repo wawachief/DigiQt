@@ -189,7 +189,8 @@ class Core(QObject):
     def inst_speed(self):
         self.speed = self.ram[self.pc + 1]
         # send signal to the controler
-        self.sig_cpu_speed.emit(str(self.speed))
+        if self.sig_cpu_speed:
+            self.sig_cpu_speed.emit(str(self.speed))
         return True
     def inst_copylr(self):
         arg1 = self.ram[self.pc + 1] 
@@ -454,7 +455,8 @@ class Core(QObject):
     #
     def inst_comout(self):
         self.tx = self.accu
-        self.sig_CPU_comout.emit(chr(self.accu))
+        if self.sig_CPU_comout:
+            self.sig_CPU_comout.emit(chr(self.accu))
         return True
     def inst_comin(self):
         if self.rx is None:
