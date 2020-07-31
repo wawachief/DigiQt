@@ -5,7 +5,7 @@
 # USB controlframe
 #
 
-from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QLabel, QPlainTextEdit
+from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QLabel, QPlainTextEdit, QFileDialog
 from PySide2.QtCore import QSize
 from PySide2.QtGui import QTextCursor
 
@@ -47,6 +47,7 @@ class USBFrame(QWidget):
         self.setWindowTitle("DigiQt - USB Control")
 
         self.sig_button_pressed = None  # signal configured by serialControler
+        self.sig_firmware_update = None # 
 
         # Firmware update output
         self.out = ConsoleOutput()
@@ -59,8 +60,7 @@ class USBFrame(QWidget):
 
         # Firmware
         self.firmware_btn = FirmwareUpdate(config)
-        self.firmware_btn.firmware_update = lambda: self.sig_button_pressed.emit(4)
-        #self.firmware_btn.firmware_update = self.firmware_update
+        self.firmware_btn.firmware_update = self.firmware_update
         # Port selection
         self.lab_port = QLabel("Port:")
         self.usb_combo = UsbPortCombo()
@@ -108,7 +108,14 @@ class USBFrame(QWidget):
         self.out.setStyleSheet("background-color: #505050; color: white;")
 
     def firmware_update(self):
-        pass
+        dlg = QFileDialog()
+        dlg.setWindowTitle("Choose a digirule Firmware")
+        dlg.setFileMode(QFileDialog.AnyFile)
+        dlg.setNameFilter("HEX files (*.hex)")
+        if dlg.exec_():
+            file_path = dlg.selectedFiles()[0]
+            # Call the controller method for update
+            self.sig_firmware_update.emit(file_path)
 
     # --- Close handler ---
 

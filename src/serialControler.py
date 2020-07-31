@@ -145,6 +145,7 @@ class SerialControl(QObject):
     sig_port_change    = Signal(str)
     sig_button_pressed = Signal(int)
     sig_terminal_open  = Signal(bool)
+    sig_firmware_update  = Signal(str)
 
     def __init__(self, cpu, monitor_frame, terminal_frame, usb_frame, statusbar, config, sig_update, config_file_path):
         QObject.__init__(self)
@@ -169,6 +170,7 @@ class SerialControl(QObject):
         self.sig_port_change.connect(self.on_port_change)
         self.sig_button_pressed.connect(self.on_button_dispatch)
         self.sig_terminal_open.connect(self.on_terminal_open)
+        self.sig_firmware_update.connect(self.on_firmware_update)
 
         self.monitor_frame.sig_keyseq_pressed = self.sig_keyseq_pressed
         self.monitor_frame.sig_button_pressed = self.sig_button_pressed
@@ -176,6 +178,7 @@ class SerialControl(QObject):
         self.cpu.sig_CPU_comin = self.sig_CPU_comin
         self.usb_frame.usb_combo.sig_port_change = self.sig_port_change
         self.usb_frame.sig_button_pressed = self.sig_button_pressed
+        self.usb_frame.sig_firmware_update = self.sig_firmware_update
 
         self.terminal.sig_terminal_open = self.sig_terminal_open
         
@@ -232,8 +235,6 @@ class SerialControl(QObject):
             self.init_serial()
         elif btn_nbr == 3:
             self.on_clear_button()
-        elif btn_nbr == 4:
-            self.on_firmware_update()
 
     @Slot(bool)
     def on_terminal_open(self, is_open):
@@ -281,8 +282,9 @@ class SerialControl(QObject):
         else:
             self.init_serial()
     
-    def on_firmware_update(self):
-        filepath = "/home/wawa/Seafile/Arduino/retro_8bits/digirule2/Firmware/dr2u.v26.hex"
+    @Slot(str)
+    def on_firmware_update(self, filepath):
+        # filepath = "/home/wawa/Seafile/Arduino/retro_8bits/digirule2/Firmware/dr2u.v26.hex"
         command = f'/usr/local/bin/udr2 --program {self.ser_port.port} < {filepath}'
         self.statusbar.sig_temp_message.emit(command)
         self.proc = QProcess(self)
