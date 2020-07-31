@@ -10,6 +10,8 @@ import serial.tools.list_ports as list_ports
 from PySide2.QtCore import QObject, QThread, Signal, Slot
 from time import sleep
 from src.hex_utils import ram2hex, hex2ram
+import queue as Queue
+import sys
 
 NO_SERIAL = "No serial available"
 SELECT_SERIAL = "Select..."
@@ -25,7 +27,7 @@ class InitSerialThread(QThread):
         dr_model = parent.config.get('digirule', 'dr_model')
         self.port      = parent.config.get("serial","port")
         self.baudrate  = int(parent.config.get(dr_model,"baudrate"))
-        self.timeout   = float(parent.config.get("serial","TIMEOUT"))
+        self.timeout   = parent.config.getfloat("serial","timeout")
         self.update_combo = None # pushed by controler
         self.do_refresh = False  # we hit refresh button
 
@@ -87,18 +89,69 @@ class FromDigiruleThread(QThread):
                 self.parent.statusbar.sig_temp_message.emit("Abort receive")
             self.parent.ser_port.close()
 
+
+# Thread to handle terminal serial 
+class SerialThread(QThread):
+    def __init__(self, parent): # Initialise with serial port details
+        QThread.__init__(self)
+
+        self.parent = parent
+        self.ser = self.parent.ser_port
+        self.txq = Queue.Queue()
+        self.running = True
+ 
+    def ser_out(self, s):   
+        self.txq.put(s)                     # ..using a queue to sync with reader thread
+         
+    def ser_in(self, s):                    # Write incoming serial data to screen
+        self.display(s)
+
+    def bytes_str(self, d):
+            return d if type(d) is str else "".join([chr(b) for b in d])
+
+    def display(self, s):
+        def textdump(data):
+        # Return a string with high-bit chars replaced by hex values
+            return "".join(["[%02X]" % ord(b) if b>'\x7e' else b for b in data])
+        sys.stdout.write(textdump(str(s)))
+
+    def run(self):                          # Run serial reader thread
+        print(f"Opening {self.ser.port} at {self.ser.baudrate} baud")
+        print('\x0d')
+        try:
+            self.ser.open()
+            self.ser.flushInput()
+        except:
+            self.ser = None
+        if not self.ser:
+            print("Can't open port")
+            self.running = False
+        while self.running:
+            s = self.ser.read(self.ser.in_waiting or 1)
+            if s:                                       # Get data from serial port
+                self.ser_in(self.bytes_str(s))               # ..and convert to string
+            if not self.txq.empty():
+                txd = str(self.txq.get())               # If Tx data in queue, write to serial port
+                self.ser.write(txd.encode('latin-1'))
+        if self.ser:                                    # Close serial port when thread finished
+            self.ser.close()
+            self.ser = None
+
+
 class SerialControl(QObject):
     sig_keyseq_pressed = Signal(str)
     sig_CPU_comout     = Signal(str)
     sig_CPU_comin      = Signal(str)
     sig_port_change    = Signal(str)
     sig_button_pressed = Signal(int)
+    sig_terminal_open  = Signal(bool)
 
-    def __init__(self, cpu, monitor_frame, statusbar, config, sig_update, config_file_path):
+    def __init__(self, cpu, monitor_frame, terminal_frame, statusbar, config, sig_update, config_file_path):
         QObject.__init__(self)
 
         self.cpu       = cpu
         self.monitor   = monitor_frame
+        self.terminal   = terminal_frame
         self.statusbar = statusbar
         self.config    = config
         self.ser_port  = None
@@ -113,12 +166,15 @@ class SerialControl(QObject):
         self.sig_CPU_comin.connect(self.on_comin)
         self.sig_port_change.connect(self.on_port_change)
         self.sig_button_pressed.connect(self.on_button_dispatch)
+        self.sig_terminal_open.connect(self.on_terminal_open)
 
         self.monitor_frame.sig_keyseq_pressed = self.sig_keyseq_pressed
         self.monitor_frame.sig_button_pressed = self.sig_button_pressed
         self.cpu.sig_CPU_comout = self.sig_CPU_comout
         self.cpu.sig_CPU_comin = self.sig_CPU_comin
         self.monitor_frame.usb_combo.sig_port_change = self.sig_port_change
+
+        self.terminal.sig_terminal_open = self.sig_terminal_open
         
         self.init_serial()
 
@@ -173,6 +229,20 @@ class SerialControl(QObject):
             self.init_serial()
         elif btn_nbr == 3:
             self.on_clear_button()
+
+    @Slot(bool)
+    def on_terminal_open(self, is_open):
+        if is_open:
+            # Terminal window is open : create the terminal serial thread
+            self.statusbar.sig_temp_message.emit("open terminal thread")
+            self.terminal.serth = SerialThread(self)   # Start serial thread
+            self.terminal.serth.start()
+        else:
+            # Terminal window is closed : quit the terminal serial thread
+            if self.terminal.serth:
+                self.terminal.serth.running = False
+                sleep(0.5)
+                self.terminal.serth = None
 
     def on_clear_button(self):
         self.monitor_frame.serial_out.setPlainText("")  # Clear the serial out content

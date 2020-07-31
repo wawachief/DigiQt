@@ -164,7 +164,7 @@ class Controller(QObject):
 
         # Instantiate the serial controler
         if self.cpu.serial_enable:
-            self.serialctl = SerialControl(self.cpu, self.gui.monitor_frame, 
+            self.serialctl = SerialControl(self.cpu, self.gui.monitor_frame, self.gui.terminal_frame,
                 self.gui.statusbar, self.config, self.sig_ram_update, self.config_path)
             self.gui.open_monitor_btn.setEnabled(True)
         else:

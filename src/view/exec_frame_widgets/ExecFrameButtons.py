@@ -6,9 +6,8 @@
 #
 
 from PySide2.QtWidgets import QPushButton
-from time import sleep
 import src.assets_manager as assets_mgr
-from src.view.SerialTerminalFrame import SerialThread
+
 
 class OpenEditorButton(QPushButton):
     def __init__(self, editor_frame, config):
@@ -149,15 +148,12 @@ class OpenTerminalButton(QPushButton):
         if do_display:
             self.setIcon(assets_mgr.get_icon("hide_terminal"))
             self.setToolTip("Hide Serial terminal")
-            serth = SerialThread(self.config)   # Start serial thread
-            self.terminal_frame.serth = serth
-            serth.start()
+            self.terminal_frame.sig_terminal_open.emit(True)  # Ask Serial controler to Start serial thread
             self.terminal_frame.show()
         else:
             self.setIcon(assets_mgr.get_icon("show_terminal"))
             self.setToolTip("Show Serial terminal")
-            self.terminal_frame.serth.running = False              # Wait until serial thread terminates
-            sleep(0.1)
+            self.terminal_frame.sig_terminal_open.emit(False) # Ask Serial controler to Stop serial thread
             self.terminal_frame.hide()
 
 class OpenSymbolButton(QPushButton):
