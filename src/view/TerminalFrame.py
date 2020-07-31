@@ -5,17 +5,17 @@
 # Serial console frame
 #
 
-from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QLabel, QPlainTextEdit, QShortcut
+from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QLabel, QPlainTextEdit, QShortcut, QTabWidget
 from PySide2.QtCore import QSize, Qt
 from PySide2.QtGui import QKeySequence, QFont, QTextCursor
 
 from src.view.style import style
-from src.view.console_frame_widgets.ConsoleFrameButtons import ClearButton, ToDigiruleButton, FromDigiruleButton, RefreshPortButton
-from src.view.console_frame_widgets.USBPortDropdown import UsbPortCombo
+from src.view.SerialTerminalFrame import SerialTerminalFrame, WIN_HEIGHT, WIN_WIDTH
+from src.view.console_frame_widgets.ConsoleFrameButtons import ClearButton
 from src.assets_manager import get_font
 
 
-class SerialConsoleFrame(QWidget):
+class TerminalFrame(QWidget):
 
     # --- Init methods ---
 
@@ -27,24 +27,29 @@ class SerialConsoleFrame(QWidget):
         """
         QWidget.__init__(self)
 
-        self.setFixedSize(QSize(600, 470))
-
         self.config = config
-        self.setWindowTitle("DigiQt - Serial console")
+        self.setWindowTitle("DigiQt - Terminal")
 
         self.sig_keyseq_pressed = None  # signal configured by serialControler
         self.sig_button_pressed = None  # signal configured by serialControler
 
-        # Serial out
+        # Virtual Serial out
         self.serial_out = QPlainTextEdit()
         self.serial_out.setReadOnly(True)
-        self.serial_out.setFixedSize(QSize(800, 400))
-
+        self.serial_out.setFixedSize(QSize(WIN_WIDTH, WIN_HEIGHT))
 
         doc = self.serial_out.document()
         f = doc.defaultFont()
         f.setFamily(get_font(config))
         doc.setDefaultFont(f)
+
+        # Serial terminal (real)
+        self.terminal = SerialTerminalFrame(self.config)
+
+        # Tab
+        self.tab_widget = QTabWidget()
+        self.tab_widget.addTab(self.serial_out, "Virtual terminal")
+        self.tab_widget.addTab(self.terminal, "Serial terminal")
 
         # Serial in
         self.serial_in = QLabel()
@@ -59,20 +64,10 @@ class SerialConsoleFrame(QWidget):
         self.clear_btn = ClearButton(config)
         self.clear_btn.on_clear = lambda: self.sig_button_pressed.emit(3)
 
-        self.to_dr_btn = ToDigiruleButton(config,)
-        self.to_dr_btn.to_digirule = lambda: self.sig_button_pressed.emit(0)
-
-        self.from_dr_btn = FromDigiruleButton(config)
-        self.from_dr_btn.from_digirule = lambda: self.sig_button_pressed.emit(1)
-
-        # Port selection
-        self.lab_port = QLabel("Port:")
-        self.usb_combo = UsbPortCombo()
-        self.refresh_btn = RefreshPortButton(config)
-        self.refresh_btn.on_refresh = lambda: self.sig_button_pressed.emit(2)
-
         shortcut_space = QShortcut(QKeySequence(Qt.Key_Space), self)
         shortcut_space.activated.connect(lambda: self.__send_key(" "))
+
+        self.tab_widget.currentChanged.connect(self.__on_tab_changed)
 
         self._init_tool_bar()
         self._set_layout()
@@ -86,18 +81,16 @@ class SerialConsoleFrame(QWidget):
         self.toolbar.setFixedHeight(70)
 
         self.toolbar.addWidget(self.clear_btn)
-
-        self.toolbar.addSeparator()
-        self.toolbar.addWidget(self.to_dr_btn)
-        self.toolbar.addWidget(self.from_dr_btn)
-
-        self.toolbar.addSeparator()
-        self.toolbar.addWidget(self.lab_port)
-        self.toolbar.addWidget(self.usb_combo)
-        self.toolbar.addWidget(self.refresh_btn)
-
-        self.toolbar.addSeparator()
         self.toolbar.addWidget(self.serial_in)
+
+    def __on_tab_changed(self):
+        """
+        Hides the serial in display when current widget is the real terminal
+        """
+        if self.tab_widget.currentWidget() == self.serial_out:
+            self.serial_in.setStyleSheet(style.get_stylesheet("serial_in"))
+        else:
+            self.serial_in.setStyleSheet("background: #333333; color: #333333;")
 
     def _set_layout(self):
         """
@@ -108,16 +101,27 @@ class SerialConsoleFrame(QWidget):
 
         box.addWidget(self.toolbar, 0, 0)
 
-        box.addWidget(self.serial_out, 1, 0)
+        box.addWidget(self.tab_widget, 1, 0)
 
         self.setLayout(box)
+
+    def clear(self):
+        """
+        Clears the content of the current tab
+        """
+        if self.tab_widget.currentWidget() == self.serial_out:
+            self.serial_out.setPlainText("")
+            self.set_serial_in(" ")
+        else:
+            self.terminal.textbox.setPlainText("")
 
     def _set_stylesheet(self):
         self.toolbar.setStyleSheet(style.get_stylesheet("qtoolbar"))
         self.setStyleSheet(style.get_stylesheet("common"))
-        self.lab_port.setStyleSheet("background-color: transparent; color: #75BA6D; font-weight: bold;")
         self.serial_in.setStyleSheet(style.get_stylesheet("serial_in"))
         self.serial_out.setStyleSheet("background-color: #505050; color: white; padding-left: 10px;")
+        self.terminal.textbox.setStyleSheet("background-color: #111111; color: #44DD44;")
+        self.tab_widget.setStyleSheet(style.get_stylesheet("tab"))
 
     def keyPressEvent(self, event):
         """
@@ -130,7 +134,8 @@ class SerialConsoleFrame(QWidget):
         Sends signal to serialControler
         :param key_type: key typed
         """
-        self.sig_keyseq_pressed.emit(key_typed)
+        if self.tab_widget.currentWidget() == self.serial_out:
+            self.sig_keyseq_pressed.emit(key_typed)
 
     def set_serial_in(self, val):
         """
@@ -154,6 +159,7 @@ class SerialConsoleFrame(QWidget):
         """
         Event called upon a red-cross click.
         """
+        self.terminal.sig_terminal_open.emit(False)  # ask Serial Controller to terminate the thread
         self.on_close()
 
     def on_close(self):

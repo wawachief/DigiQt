@@ -83,41 +83,46 @@ class OpenRamButton(QPushButton):
             self.ram_frame.hide()
 
 
-class OpenConsoleButton(QPushButton):
-    def __init__(self, console_frame, config):
+class OpenUSBButton(QPushButton):
+    def __init__(self, usb_frame, config):
         """
-        Button handling the open/close operation of the serial console frame
+        Button handling the open/close operation of the usb control frame
 
-        :param console_frame: The console frame that this button shows/hides
+        :param usb_frame: The usb frame that this button shows/hides
         """
         QPushButton.__init__(self)
 
         self.setIcon(assets_mgr.get_icon("show_monitor"))
         self.setIconSize(assets_mgr.ICON_SIZE)
-        self.setToolTip("Show Serial Console")
+        self.setToolTip("Show USB controls")
         self.setStyleSheet('border: none; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
 
-        self.console_frame = console_frame
+        self.usb_frame = usb_frame
 
-        self.clicked.connect(lambda: self.show_console_frame(not self.console_frame.isVisible()))
+        self.clicked.connect(lambda: self.show_usb_frame(not self.usb_frame.isVisible()))
 
-    def show_console_frame(self, do_display):
+    def show_usb_frame(self, do_display):
         """
-        Hides or shows the serial console frame
+        Hides or shows the usb control frame
 
-        :param do_display: True will display the console frame, False will hide it
+        :param do_display: True will display the usb frame, False will hide it
         :type do_display: bool
         """
         if do_display:
             self.setIcon(assets_mgr.get_icon("hide_monitor"))
-            self.setToolTip("Hide Serial Console")
+            self.setToolTip("Hide USB controls")
 
-            self.console_frame.show()
+            self.usb_frame.show()
         else:
             self.setIcon(assets_mgr.get_icon("show_monitor"))
-            self.setToolTip("Show Serial Console")
+            self.setToolTip("Show USB controls")
 
-            self.console_frame.hide()
+            self.usb_frame.hide()
+
+        self.is_opened(do_display)
+
+    def is_opened(self, b_visible):
+        pass
 
 class OpenTerminalButton(QPushButton):
     def __init__(self, terminal_frame, config):
@@ -148,13 +153,19 @@ class OpenTerminalButton(QPushButton):
         if do_display:
             self.setIcon(assets_mgr.get_icon("hide_terminal"))
             self.setToolTip("Hide Serial terminal")
-            self.terminal_frame.sig_terminal_open.emit(True)  # Ask Serial controler to Start serial thread
+            self.terminal_frame.terminal.sig_terminal_open.emit(True)  # Ask Serial controler to Start serial thread
             self.terminal_frame.show()
         else:
             self.setIcon(assets_mgr.get_icon("show_terminal"))
             self.setToolTip("Show Serial terminal")
-            self.terminal_frame.sig_terminal_open.emit(False) # Ask Serial controler to Stop serial thread
+            self.terminal_frame.terminal.sig_terminal_open.emit(False) # Ask Serial controler to Stop serial thread
             self.terminal_frame.hide()
+
+        self.is_opened(do_display)
+
+    def is_opened(self, b_visible):
+        pass
+
 
 class OpenSymbolButton(QPushButton):
     def __init__(self, symbol_frame, config):

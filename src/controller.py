@@ -49,6 +49,7 @@ class CpuThread(QThread):
             else:
                 sleep(0.001)
 
+
 class Controller(QObject):
     # Signals declarations
     sig_config_changed = Signal(str)
@@ -147,7 +148,7 @@ class Controller(QObject):
         #
 
         self.inst_speed = self.config.getint(self.dr_model, 'inst_speed')
-        self.cpu_thread = CpuThread(self.cpu, 1/self.inst_speed, parent = None)
+        self.cpu_thread = CpuThread(self.cpu, 1/self.inst_speed, parent=None)
         self.cpu_thread.start()
 
         # Instanciate the debugger
@@ -164,22 +165,25 @@ class Controller(QObject):
 
         # Instantiate the serial controler
         if self.cpu.serial_enable:
-            self.serialctl = SerialControl(self.cpu, self.gui.monitor_frame, self.gui.terminal_frame,
-                self.gui.statusbar, self.config, self.sig_ram_update, self.config_path)
+            self.serialctl = SerialControl(self.cpu, self.gui.monitor_frame, self.gui.monitor_frame.terminal,
+                                           self.gui.usb_frame, self.gui.statusbar, self.config, self.sig_ram_update,
+                                           self.config_path)
             self.gui.open_monitor_btn.setEnabled(True)
+            self.gui.open_usb_btn.setEnabled(True)
         else:
             self.serialctl = None
             self.gui.open_monitor_btn.setEnabled(False)
+            self.gui.open_usb_btn.setEnabled(False)
 
     def update_ui(self):
         """This method is responsible for updating the UI in run mode and
         for the animations in idle mode.
         Is is called every 50 ms by a timer"""
         if self.cpu is not None:
-            if self.cpu.run == True:
+            if self.cpu.run:
                 # we are in run mode, we handle the LEDs
                 if self.show_run_adr:
-                    if self.cpu.ram[self.cpu.REG_STATUS] & 4 ==0 :
+                    if self.cpu.ram[self.cpu.REG_STATUS] & 4 == 0:
                         self.gui.dr_canvas.set_row_state(True, self.cpu.pc, False)
                     else:
                         self.gui.dr_canvas.set_row_state(True, self.cpu.ram[self.cpu.REG_ADDRLED], False)
@@ -189,7 +193,7 @@ class Controller(QObject):
                 # we are in idle mode, we handle the animations
                 if self.anim_boot != 0:
                     # Animation clear memory
-                    if self.anim_boot % 8 ==0:
+                    if self.anim_boot % 8 == 0:
                         self.do_blink()
                     self.anim_boot -= 1
                     if self.anim_boot == 1:

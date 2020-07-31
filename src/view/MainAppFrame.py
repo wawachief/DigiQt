@@ -10,13 +10,13 @@ from PySide2.QtCore import Qt
 
 from src.view.EditorFrame import EditorFrame
 from src.view.RamFrame import RAMFrame
-from src.view.SerialConsoleFrame import SerialConsoleFrame
-from src.view.SerialTerminalFrame import SerialTerminalFrame
+from src.view.TerminalFrame import TerminalFrame
+from src.view.USBControlFrame import USBFrame
 from src.view.SymbolViewFrame import SymbolViewFrame
 from src.view.AboutFrame import AboutFrame
 from src.view.exec_frame_widgets.DigiruleCanvas import DRCanvas
 from src.view.exec_frame_widgets.DigiruleModelDropdown import DigiruleModelDropdown
-from src.view.exec_frame_widgets.ExecFrameButtons import OpenEditorButton, OpenRamButton, OpenConsoleButton, OpenTerminalButton, AboutButton, OpenSymbolButton
+from src.view.exec_frame_widgets.ExecFrameButtons import OpenEditorButton, OpenRamButton, OpenUSBButton, OpenTerminalButton, AboutButton, OpenSymbolButton
 from src.view.exec_frame_widgets.StatusBar import StatusBar
 from src.view.exec_frame_widgets.SpeedSlider import SpeedSlider
 from src.view.style import style
@@ -61,13 +61,16 @@ class ExecutionFrame(QWidget):
         self.open_ram_btn = OpenRamButton(self.ram_frame, config)
         self.ram_frame.on_close = lambda: self.open_ram_btn.show_ram_frame(False)
 
-        self.monitor_frame = SerialConsoleFrame(config)
-        self.open_monitor_btn = OpenConsoleButton(self.monitor_frame, config)
-        self.monitor_frame.on_close = lambda: self.open_monitor_btn.show_console_frame(False)
+        self.monitor_frame = TerminalFrame(config)
+        self.open_monitor_btn = OpenTerminalButton(self.monitor_frame, config)
+        self.monitor_frame.on_close = lambda: self.open_monitor_btn.show_terminal_frame(False)
 
-        self.terminal_frame = SerialTerminalFrame(config)
-        self.open_terminal_btn = OpenTerminalButton(self.terminal_frame, config)
-        self.terminal_frame.on_close = lambda: self.open_terminal_btn.show_terminal_frame(False)
+        self.usb_frame = USBFrame(config)
+        self.open_usb_btn = OpenUSBButton(self.usb_frame, config)
+        self.usb_frame.on_close = lambda: self.open_usb_btn.show_usb_frame(False)
+
+        self.open_monitor_btn.is_opened = lambda b: self.open_usb_btn.setEnabled(not b)
+        self.open_usb_btn.is_opened = lambda b: self.open_monitor_btn.setEnabled(not b)
 
         self.symbol_frame = SymbolViewFrame(config)
         self.open_symbol_btn = OpenSymbolButton(self.symbol_frame, config)
@@ -95,7 +98,7 @@ class ExecutionFrame(QWidget):
         self.toolbar.addWidget(self.open_editor_btn)
         self.toolbar.addWidget(self.open_ram_btn)
         self.toolbar.addWidget(self.open_monitor_btn)
-        self.toolbar.addWidget(self.open_terminal_btn)
+        self.toolbar.addWidget(self.open_usb_btn)
         self.toolbar.addWidget(self.open_symbol_btn)
 
         # Digirule model selection
@@ -171,7 +174,7 @@ class ExecutionFrame(QWidget):
             self.editor_frame.on_close()
             self.ram_frame.on_close()
             self.monitor_frame.on_close()
-            self.terminal_frame.on_close()
+            self.usb_frame.on_close()
             self.symbol_frame.on_close()
             self.about_frame.on_close()
 

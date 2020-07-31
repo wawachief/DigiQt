@@ -5,11 +5,10 @@
 # Serial Terminal frame
 #
 
-from PySide2.QtWidgets import QVBoxLayout, QWidget, QTextEdit
-from PySide2.QtCore import Qt, Signal, Slot, SIGNAL, QThread, QObject, QSize
+from PySide2.QtWidgets import QVBoxLayout, QWidget, QTextEdit, QApplication
+from PySide2.QtCore import Qt, Signal, Slot, QSize
 from PySide2.QtGui import QFont, QTextCursor
 
-from src.view.style import style
 from src.assets_manager import get_font
 
 import sys
@@ -18,6 +17,7 @@ WIN_WIDTH, WIN_HEIGHT = 684, 400    # Window size
 RETURN_CHAR = "\x0D"                  # Char to be sent when Enter key pressed
 PASTE_CHAR  = "\x16"                # Ctrl code for clipboard paste
 
+
 # Custom text box, catching keystrokes
 class MyTextBox(QTextEdit):
     def __init__(self, *args): 
@@ -25,7 +25,8 @@ class MyTextBox(QTextEdit):
          
     def keyPressEvent(self, event):     # Send keypress to parent's handler
         self.parent().keypress_handler(event)
-             
+
+
 # Main widget            
 class SerialTerminalFrame(QWidget):
     text_update = Signal(str)
@@ -50,6 +51,7 @@ class SerialTerminalFrame(QWidget):
         font.setPointSize(10)
         self.textbox.setFont(font)
         layout = QVBoxLayout()
+        layout.setMargin(0)
         layout.addWidget(self.textbox)
         self.setLayout(layout)
         self.text_update.connect(self.append_text)      # Connect text update to handler
@@ -57,10 +59,10 @@ class SerialTerminalFrame(QWidget):
 
         self.serth = None                       # Terminal thread created by serial controler
         self.sig_terminal_open = None           # Signal pushed by serial controler
-        
-         
+
     def write(self, text):                      # Handle sys.stdout.write: update display
         self.text_update.emit(text)             # Send signal to synchronise call with main thread
+
     def flush(self):                            # Handle sys.stdout.flush: do nothing
         pass
 
@@ -70,7 +72,7 @@ class SerialTerminalFrame(QWidget):
         cur.movePosition(QTextCursor.End) # Move cursor to end of text
         s = str(text)
         while s:
-            head,sep,s = s.partition("\n")      # Split line at LF
+            head, sep, s = s.partition("\n")      # Split line at LF
             cur.insertText(head)                # Insert text at cursor
             #if sep:                             # New line if LF
             #    cur.insertBlock()
@@ -78,14 +80,9 @@ class SerialTerminalFrame(QWidget):
  
     def keypress_handler(self, event):          # Handle keypress from text box
         k = event.key()
-        s = RETURN_CHAR if k==Qt.Key_Return else event.text()
-        if len(s)>0 and s[0]==PASTE_CHAR:       # Detect ctrl-V paste
+        s = RETURN_CHAR if k == Qt.Key_Return else event.text()
+        if len(s) > 0 and s[0] == PASTE_CHAR:       # Detect ctrl-V paste
             cb = QApplication.clipboard() 
             self.serth.ser_out(cb.text())       # Send paste string to serial driver
         else:
             self.serth.ser_out(s)               # ..or send keystroke
-     
-    # --- Close handler ---
-    def closeEvent(self, event):                # Window closing
-        self.sig_terminal_open.emit(False)           # ask Serial COntroler to terminate the thread
-        self.on_close()

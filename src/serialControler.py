@@ -32,7 +32,7 @@ class InitSerialThread(QThread):
         self.do_refresh = False  # we hit refresh button
 
     def run(self):
-        list_available_ports =  [p.device for p in list_ports.comports()]
+        list_available_ports = [p.device for p in list_ports.comports()]
         if not list_available_ports:
             list_available_ports = [NO_SERIAL]
         else:
@@ -48,6 +48,7 @@ class InitSerialThread(QThread):
             self.parent.init_OK()
         else:
             self.parent.ser_port = None
+
 
 class FromDigiruleThread(QThread):
     """Receive memory dump from Digirule"""
@@ -82,7 +83,7 @@ class FromDigiruleThread(QThread):
                     # Ram is received and no checksum error
                     # writing newram in RAM
                     self.parent.statusbar.sig_temp_message.emit("Memory received")
-                    for i,r in enumerate(newram):
+                    for i, r in enumerate(newram):
                         self.parent.cpu.ram[i] = r
                     self.parent.sig_update.emit("from digirule complete")
             else:
@@ -92,7 +93,7 @@ class FromDigiruleThread(QThread):
 
 # Thread to handle terminal serial 
 class SerialThread(QThread):
-    def __init__(self, parent): # Initialise with serial port details
+    def __init__(self, parent):  # Initialise with serial port details
         QThread.__init__(self)
 
         self.parent = parent
@@ -146,7 +147,7 @@ class SerialControl(QObject):
     sig_button_pressed = Signal(int)
     sig_terminal_open  = Signal(bool)
 
-    def __init__(self, cpu, monitor_frame, terminal_frame, statusbar, config, sig_update, config_file_path):
+    def __init__(self, cpu, monitor_frame, terminal_frame, usb_frame, statusbar, config, sig_update, config_file_path):
         QObject.__init__(self)
 
         self.cpu       = cpu
@@ -158,6 +159,7 @@ class SerialControl(QObject):
         self.sig_update = sig_update
         self.fd_thread = None
         self.monitor_frame = monitor_frame
+        self.usb_frame = usb_frame
         self.config_file_path = config_file_path
 
         # Connect signal
@@ -172,15 +174,16 @@ class SerialControl(QObject):
         self.monitor_frame.sig_button_pressed = self.sig_button_pressed
         self.cpu.sig_CPU_comout = self.sig_CPU_comout
         self.cpu.sig_CPU_comin = self.sig_CPU_comin
-        self.monitor_frame.usb_combo.sig_port_change = self.sig_port_change
+        self.usb_frame.usb_combo.sig_port_change = self.sig_port_change
+        self.usb_frame.sig_button_pressed = self.sig_button_pressed
 
         self.terminal.sig_terminal_open = self.sig_terminal_open
         
         self.init_serial()
 
-    def init_serial(self, do_refresh = True):
+    def init_serial(self, do_refresh=True):
         is_thread = InitSerialThread(self)
-        is_thread.update_combo = self.monitor_frame.usb_combo.set_ports
+        is_thread.update_combo = self.usb_frame.usb_combo.set_ports
         is_thread.do_refresh = do_refresh
         is_thread.start()
 
@@ -245,8 +248,7 @@ class SerialControl(QObject):
                 self.terminal.serth = None
 
     def on_clear_button(self):
-        self.monitor_frame.serial_out.setPlainText("")  # Clear the serial out content
-        self.monitor_frame.serial_in.setText(" ")       # Clear the serial input content
+        self.monitor_frame.clear()  # Clear the serial in/out content
         self.cpu.rx = None
         self.cpu.tx = None
 
