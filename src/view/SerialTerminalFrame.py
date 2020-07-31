@@ -110,9 +110,8 @@ class SerialThread(QThread):
         self.txq = Queue.Queue()
         self.running = True
  
-    def ser_out(self, s):                   # Write outgoing data to serial port if open
-        if s != '\x0a':
-            self.txq.put(s)                     # ..using a queue to sync with reader thread
+    def ser_out(self, s):   
+        self.txq.put(s)                     # ..using a queue to sync with reader thread
          
     def ser_in(self, s):                    # Write incoming serial data to screen
         self.display(s)
