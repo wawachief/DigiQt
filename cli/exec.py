@@ -9,10 +9,30 @@ import sys
 sys.path.append("..") 
 from src.model.assemble import Assemble
 from src.model.cpu import Cpu
-from src.digirules.instructionset_2U import inst_dic
 from configparser import ConfigParser
 
 CONFIG_FILE_PATH = '../src/config.ini'
+
+# Read configuration
+# Copy config file into home directory
+config_path = path.expanduser("~/.DigiQtrc")
+if not path.exists(config_path):
+    shutil.copyfile(CONFIG_FILE_PATH, config_path)
+# Compare local version with app version
+config_ori = ConfigParser()
+config_ori.read(CONFIG_FILE_PATH)
+config = ConfigParser()
+config.read(config_path)
+if config_ori.get('main', 'app_version') != config.get('main', 'app_version'):
+    # .DigiQtrc is obsolete, We overwrite the config file
+    shutil.copyfile(CONFIG_FILE_PATH, config_path)
+    config.read(config_path)
+
+dr_model = config.get('digirule', 'dr_model')
+inst_dic = import_module("src.digirules.instructionset_" + dr_model)
+print (f"Assemble for model {dr_model}")
+
+## TODO
 
 with open(sys.argv[1], "r") as f:
     text = ""

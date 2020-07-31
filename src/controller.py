@@ -131,7 +131,7 @@ class Controller(QObject):
 
         # run UI update timer
         self.ui_timer = QTimer(parent = self)
-        self.connect(self.ui_timer, SIGNAL('timeout()'), self.update_ui)
+        self.ui_timer.timeout.connect(self.update_ui)
         self.ui_timer.start(ui_timer_ms) # ui refresh every 10 ms
 
     def init_state(self):

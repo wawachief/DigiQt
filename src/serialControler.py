@@ -7,11 +7,11 @@
 
 import serial
 import serial.tools.list_ports as list_ports
-from PySide2.QtCore import QObject, QThread, Signal, Slot
+from PySide2.QtCore import QObject, QThread, Signal, Slot, SIGNAL, QProcess
 from time import sleep
 from src.hex_utils import ram2hex, hex2ram
 import queue as Queue
-import sys
+import sys, functools
 
 NO_SERIAL = "No serial available"
 SELECT_SERIAL = "Select..."
@@ -138,7 +138,6 @@ class SerialThread(QThread):
             self.ser.close()
             self.ser = None
 
-
 class SerialControl(QObject):
     sig_keyseq_pressed = Signal(str)
     sig_CPU_comout     = Signal(str)
@@ -158,6 +157,7 @@ class SerialControl(QObject):
         self.ser_port  = None
         self.sig_update = sig_update
         self.fd_thread = None
+        self.fwth = None
         self.monitor_frame = monitor_frame
         self.usb_frame = usb_frame
         self.config_file_path = config_file_path
@@ -232,6 +232,8 @@ class SerialControl(QObject):
             self.init_serial()
         elif btn_nbr == 3:
             self.on_clear_button()
+        elif btn_nbr == 4:
+            self.on_firmware_update()
 
     @Slot(bool)
     def on_terminal_open(self, is_open):
@@ -278,3 +280,22 @@ class SerialControl(QObject):
             self.fd_thread.start()
         else:
             self.init_serial()
+    
+    def on_firmware_update(self):
+        filepath = "/home/wawa/Seafile/Arduino/retro_8bits/digirule2/Firmware/dr2u.v26.hex"
+        command = f'/usr/local/bin/udr2 --program {self.ser_port.port} < {filepath}'
+        self.statusbar.sig_temp_message.emit(command)
+        self.proc = QProcess(self)
+
+        self.proc.readyReadStandardOutput.connect(self.stdoutReady)
+        self.proc.readyReadStandardError.connect(self.stderrReady)
+
+        self.proc.start('bash', ['-c' , command])
+    
+    def stdoutReady(self):
+        text = str(self.proc.readAllStandardOutput())
+        self.usb_frame.out.write(eval(text).decode())
+
+    def stderrReady(self):
+        text = str(self.proc.readAllStandardError())
+        self.usb_frame.out.write(eval(text).decode())

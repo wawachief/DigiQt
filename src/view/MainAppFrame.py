@@ -97,8 +97,8 @@ class ExecutionFrame(QWidget):
         # Open/hide buttons
         self.toolbar.addWidget(self.open_editor_btn)
         self.toolbar.addWidget(self.open_ram_btn)
-        self.toolbar.addWidget(self.open_monitor_btn)
         self.toolbar.addWidget(self.open_usb_btn)
+        self.toolbar.addWidget(self.open_monitor_btn)
         self.toolbar.addWidget(self.open_symbol_btn)
 
         # Digirule model selection

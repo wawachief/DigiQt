@@ -7,11 +7,27 @@
 
 from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QLabel, QPlainTextEdit
 from PySide2.QtCore import QSize
+from PySide2.QtGui import QTextCursor
 
 from src.view.style import style
 from src.view.console_frame_widgets.ConsoleFrameButtons import ToDigiruleButton, FromDigiruleButton, RefreshPortButton, FirmwareUpdate
 from src.view.console_frame_widgets.USBPortDropdown import UsbPortCombo
 
+class ConsoleOutput(QPlainTextEdit):
+    def __init__(self, *args): 
+        QPlainTextEdit.__init__(self, *args)
+        self.setReadOnly(True)
+
+    def write(self, text):
+        cur = self.textCursor()
+        cur.movePosition(QTextCursor.End) # Move cursor to end of text
+        s = str(text)
+        while s:
+            head, sep, s = s.partition("\n")      # Split line at LF
+            cur.insertText(head)                # Insert text at cursor                # Insert text at cursor
+            if sep:                             # New line if LF
+                cur.insertBlock()
+        self.setTextCursor(cur)         # Update visible cursor
 
 class USBFrame(QWidget):
 
@@ -33,9 +49,7 @@ class USBFrame(QWidget):
         self.sig_button_pressed = None  # signal configured by serialControler
 
         # Firmware update output
-        self.out = QPlainTextEdit()
-        self.out.setReadOnly(True)
-
+        self.out = ConsoleOutput()
         # Buttons
         self.to_dr_btn = ToDigiruleButton(config)
         self.to_dr_btn.to_digirule = lambda: self.sig_button_pressed.emit(0)
@@ -46,7 +60,7 @@ class USBFrame(QWidget):
         # Firmware
         self.firmware_btn = FirmwareUpdate(config)
         self.firmware_btn.firmware_update = lambda: self.sig_button_pressed.emit(4)
-
+        #self.firmware_btn.firmware_update = self.firmware_update
         # Port selection
         self.lab_port = QLabel("Port:")
         self.usb_combo = UsbPortCombo()
@@ -92,6 +106,9 @@ class USBFrame(QWidget):
         self.setStyleSheet(style.get_stylesheet("common"))
         self.lab_port.setStyleSheet("background-color: transparent; color: #75BA6D; font-weight: bold;")
         self.out.setStyleSheet("background-color: #505050; color: white;")
+
+    def firmware_update(self):
+        pass
 
     # --- Close handler ---
 
