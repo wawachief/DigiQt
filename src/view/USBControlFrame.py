@@ -5,11 +5,11 @@
 # USB controlframe
 #
 
-from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QLabel
+from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QLabel, QPlainTextEdit
 from PySide2.QtCore import QSize
 
 from src.view.style import style
-from src.view.console_frame_widgets.ConsoleFrameButtons import ToDigiruleButton, FromDigiruleButton, RefreshPortButton
+from src.view.console_frame_widgets.ConsoleFrameButtons import ToDigiruleButton, FromDigiruleButton, RefreshPortButton, FirmwareUpdate
 from src.view.console_frame_widgets.USBPortDropdown import UsbPortCombo
 
 
@@ -32,7 +32,9 @@ class USBFrame(QWidget):
 
         self.sig_button_pressed = None  # signal configured by serialControler
 
-        self.widget = QWidget()
+        # Firmware update output
+        self.out = QPlainTextEdit()
+        self.out.setReadOnly(True)
 
         # Buttons
         self.to_dr_btn = ToDigiruleButton(config)
@@ -40,6 +42,10 @@ class USBFrame(QWidget):
 
         self.from_dr_btn = FromDigiruleButton(config)
         self.from_dr_btn.from_digirule = lambda: self.sig_button_pressed.emit(1)
+
+        # Firmware
+        self.firmware_btn = FirmwareUpdate(config)
+        self.firmware_btn.firmware_update = lambda: self.sig_button_pressed.emit(4)
 
         # Port selection
         self.lab_port = QLabel("Port:")
@@ -62,6 +68,9 @@ class USBFrame(QWidget):
         self.toolbar.addWidget(self.from_dr_btn)
 
         self.toolbar.addSeparator()
+        self.toolbar.addWidget(self.firmware_btn)
+
+        self.toolbar.addSeparator()
         self.toolbar.addWidget(self.lab_port)
         self.toolbar.addWidget(self.usb_combo)
         self.toolbar.addWidget(self.refresh_btn)
@@ -74,7 +83,7 @@ class USBFrame(QWidget):
         box.setContentsMargins(0, 0, 0, 0)
 
         box.addWidget(self.toolbar, 0, 0)
-        box.addWidget(self.widget, 1, 0)
+        box.addWidget(self.out, 1, 0)
 
         self.setLayout(box)
 
@@ -82,6 +91,7 @@ class USBFrame(QWidget):
         self.toolbar.setStyleSheet(style.get_stylesheet("qtoolbar"))
         self.setStyleSheet(style.get_stylesheet("common"))
         self.lab_port.setStyleSheet("background-color: transparent; color: #75BA6D; font-weight: bold;")
+        self.out.setStyleSheet("background-color: #505050; color: white;")
 
     # --- Close handler ---
 

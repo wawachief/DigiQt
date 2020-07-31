@@ -114,6 +114,7 @@ class TerminalFrame(QWidget):
             self.set_serial_in(" ")
         else:
             self.terminal.textbox.setPlainText("")
+            self.terminal.textbox.setFocus()
 
     def _set_stylesheet(self):
         self.toolbar.setStyleSheet(style.get_stylesheet("qtoolbar"))

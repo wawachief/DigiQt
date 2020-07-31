@@ -5,7 +5,7 @@
 # Execution frame
 #
 
-from PySide2.QtWidgets import QToolBar, QVBoxLayout, QHBoxLayout, QWidget, QSizePolicy, QDialog
+from PySide2.QtWidgets import QToolBar, QVBoxLayout, QHBoxLayout, QWidget, QSizePolicy
 from PySide2.QtCore import Qt
 
 from src.view.EditorFrame import EditorFrame

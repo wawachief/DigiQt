@@ -137,3 +137,21 @@ class RefreshPortButton(QPushButton):
         self.set_style(False)
 
         super().mouseReleaseEvent(e)
+
+
+class FirmwareUpdate(QPushButton):
+    def __init__(self, config):
+        """
+        Button for the firmware update
+        """
+        QPushButton.__init__(self)
+
+        self.setIcon(assets_mgr.get_icon("firmware"))
+        self.setIconSize(assets_mgr.ICON_SIZE)
+        self.setToolTip("Firmware update")
+        self.setStyleSheet('border: none; background-color: ' + config.get('colors', 'toolbar_icon_btn_bg') + ';')
+
+        self.clicked.connect(self.firmware_update)
+
+    def firmware_update(self):
+        pass
