@@ -290,7 +290,7 @@ class SerialControl(QObject):
                 udr2 = f"cli\\udr2-win32.exe"
             else:
                 udr2 = f"cli/udr2-{sys.platform}"
-            command = f'{udr2} --program {self.ser_port.port} < {filepath}'
+            command = f'{udr2} --program {self.ser_port.port} < "{filepath}"'
             self.statusbar.sig_temp_message.emit(command)
             self.proc = QProcess(self)
             self.proc.readyReadStandardOutput.connect(self.stdoutReady)
