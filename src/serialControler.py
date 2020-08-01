@@ -285,21 +285,22 @@ class SerialControl(QObject):
     
     @Slot(str)
     def on_firmware_update(self, filepath):
-        if sys.platform == "win32":
-            udr2 = f"cli\\udr2-win32.exe"
-        else:
-            udr2 = f"cli/udr2-{sys.platform}"
-        command = f'{udr2} --program {self.ser_port.port} < {filepath}'
-        self.statusbar.sig_temp_message.emit(command)
-        self.proc = QProcess(self)
+        if self.ser_port:
+            if sys.platform == "win32":
+                udr2 = f"cli\\udr2-win32.exe"
+            else:
+                udr2 = f"cli/udr2-{sys.platform}"
+            command = f'{udr2} --program {self.ser_port.port} < {filepath}'
+            self.statusbar.sig_temp_message.emit(command)
+            self.proc = QProcess(self)
 
-        self.proc.readyReadStandardOutput.connect(self.stdoutReady)
-        self.proc.readyReadStandardError.connect(self.stderrReady)
+            self.proc.readyReadStandardOutput.connect(self.stdoutReady)
+            self.proc.readyReadStandardError.connect(self.stderrReady)
 
-        if sys.platform == "win32":
-            self.proc.start('cmd.exe', ['/c' , command])
-        else:
-            self.proc.start('bash', ['-c' , command])
+            if sys.platform == "win32":
+                self.proc.start('cmd.exe', ['/c' , command])
+            else:
+                self.proc.start('bash', ['-c' , command])
     
     def stdoutReady(self):
         text = str(self.proc.readAllStandardOutput())
