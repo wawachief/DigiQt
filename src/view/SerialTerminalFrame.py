@@ -55,7 +55,7 @@ class SerialTerminalFrame(QWidget):
         layout.addWidget(self.textbox)
         self.setLayout(layout)
         self.text_update.connect(self.append_text)      # Connect text update to handler
-
+        
         self.serth = None                       # Terminal thread created by serial controler
         self.sig_terminal_open = None           # Signal pushed by serial controler
 

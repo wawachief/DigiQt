@@ -7,7 +7,7 @@
 
 import serial
 import serial.tools.list_ports as list_ports
-from PySide2.QtCore import QObject, QThread, Signal, Slot, SIGNAL, QProcess
+from PySide2.QtCore import QObject, QThread, Signal, Slot, QTimer, QProcess
 from time import sleep
 from src.hex_utils import ram2hex, hex2ram
 import queue as Queue
@@ -293,16 +293,28 @@ class SerialControl(QObject):
             command = f'{udr2} --program {self.ser_port.port} < {filepath}'
             self.statusbar.sig_temp_message.emit(command)
             self.proc = QProcess(self)
-
             self.proc.readyReadStandardOutput.connect(self.stdoutReady)
             self.proc.readyReadStandardError.connect(self.stderrReady)
 
             if sys.platform == "win32":
+                self.usb_frame.out.write("Firmware update started, please wait ")
+                self.bullshitTimer = QTimer()
+                self.bullshitTimer.timeout.connect(self.stdoutBullshit)
+                self.bullshitTimer.start(1000)
+                self.proc.setProcessChannelMode(QProcess.MergedChannels)
                 self.proc.start('cmd.exe', ['/c' , command])
             else:
+                self.bullshitTimer = None
                 self.proc.start('bash', ['-c' , command])
     
+    def stdoutBullshit(self):
+        self.usb_frame.out.write(".")
+
     def stdoutReady(self):
+        if self.bullshitTimer:
+            self.usb_frame.out.write("\n")
+            self.bullshitTimer.stop()
+
         text = str(self.proc.readAllStandardOutput())
         self.usb_frame.out.write(eval(text).decode())
 
