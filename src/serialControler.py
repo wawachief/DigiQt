@@ -293,7 +293,6 @@ class SerialControl(QObject):
             if sys.platform == "win32":
                 udr2 = f"cli\\udr2-win32.exe"
                 command = f'{udr2} --program {self.ser_port.port} < {filepath}'
-                print(command)
                 self.usb_frame.out.write("Firmware update started, please wait ")
                 # displays running dots on windows to pretend it is not stalled
                 self.bullshitTimer = QTimer()
@@ -304,9 +303,9 @@ class SerialControl(QObject):
             else:
                 udr2 = f"cli/udr2-{sys.platform}"
                 command = f'{udr2} --program {self.ser_port.port} < "{filepath}"'
-                print(command)
                 self.bullshitTimer = None
                 self.proc.start('bash', ['-c' , command])
+            # print(command)
             
     
     def stdoutBullshit(self):
