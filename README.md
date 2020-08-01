@@ -22,16 +22,15 @@ Just download the .AppImage file, make it executable and clic on it.
 
 ## Osx
 
-I don't have a valid developper certificate, so my build won't launch for security reasons. You have to proceed manually and launch the program from source.
-
-## Launching from sources 
-
-- You must have python 3.7 or later installed
-- Install the following packages via your favorite Python package manager (*pip* or *conda*)
+I don't have a valid developper certificate, so my build won't launch for security reasons. You have to proceed manually and launch the program from source. Here is the procedure :
+1. download and install python (3.6 minimum - 3.8.5 is the latest version when I write this guide and works fine) : https://www.python.org/downloads/mac-osx/
+1. open a terminal window and install the following packages via your favorite Python package manager (*pip* or *conda*)
 	- pyside2 
 	- serial
 	- serial-tool
-- Launch the program : `python3 main.py`
+	
+`sudo pip3 install pyside2 serial serial-tool`shoud do it.
+3. Go into the DigiQt source directory and launch the program : `python3 main.py`
 
 # Instruction set
 

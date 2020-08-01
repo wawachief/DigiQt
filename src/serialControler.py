@@ -11,7 +11,7 @@ from PySide2.QtCore import QObject, QThread, Signal, Slot, SIGNAL, QProcess
 from time import sleep
 from src.hex_utils import ram2hex, hex2ram
 import queue as Queue
-import sys, functools
+import sys
 
 NO_SERIAL = "No serial available"
 SELECT_SERIAL = "Select..."
@@ -117,16 +117,20 @@ class SerialThread(QThread):
         self.parent.terminal.write(textdump(str(s)))
 
     def run(self):                          # Run serial reader thread
-        self.parent.terminal.write(f"Opening {self.ser.port} at {self.ser.baudrate} baud")
-        self.parent.terminal.write('\x0d')
-        try:
-            self.ser.open()
-            self.ser.flushInput()
-        except:
-            self.ser = None
-        if not self.ser:
-            self.parent.terminal_frame.write("Can't open port")
+        if self.ser is None:
+            # No serial port configured
             self.running = False
+        else:
+            print(f"Opening {self.ser.port} at {self.ser.baudrate} baud")
+            print('\x0d')
+            try:
+                self.ser.open()
+                self.ser.flushInput()
+            except:
+                self.ser = None
+            if not self.ser:
+                print("Can't open port")
+                self.running = False
         while self.running:
             s = self.ser.read(self.ser.in_waiting or 1)
             if s:                                       # Get data from serial port
@@ -284,15 +288,18 @@ class SerialControl(QObject):
     
     @Slot(str)
     def on_firmware_update(self, filepath):
-        # filepath = "/home/wawa/Seafile/Arduino/retro_8bits/digirule2/Firmware/dr2u.v26.hex"
-        command = f'/usr/local/bin/udr2 --program {self.ser_port.port} < {filepath}'
+        udr2 = f"cli/udr2-{sys.platform}"
+        command = f'{udr2} --program {self.ser_port.port} < {filepath}'
         self.statusbar.sig_temp_message.emit(command)
         self.proc = QProcess(self)
 
         self.proc.readyReadStandardOutput.connect(self.stdoutReady)
         self.proc.readyReadStandardError.connect(self.stderrReady)
 
-        self.proc.start('bash', ['-c' , command])
+        if sys.platform == "win32":
+            self.proc.start('cmd.exe', ['-e' , command])
+        else:
+            self.proc.start('bash', ['-c' , command])
     
     def stdoutReady(self):
         text = str(self.proc.readAllStandardOutput())
