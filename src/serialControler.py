@@ -286,26 +286,28 @@ class SerialControl(QObject):
     @Slot(str)
     def on_firmware_update(self, filepath):
         if self.ser_port:
-            if sys.platform == "win32":
-                udr2 = f"cli\\udr2-win32.exe"
-            else:
-                udr2 = f"cli/udr2-{sys.platform}"
-            command = f'{udr2} --program {self.ser_port.port} < "{filepath}"'
-            self.statusbar.sig_temp_message.emit(command)
             self.proc = QProcess(self)
             self.proc.readyReadStandardOutput.connect(self.stdoutReady)
             self.proc.readyReadStandardError.connect(self.stderrReady)
 
             if sys.platform == "win32":
+                udr2 = f"cli\\udr2-win32.exe"
+                command = f'{udr2} --program {self.ser_port.port} < {filepath}'
+                print(command)
                 self.usb_frame.out.write("Firmware update started, please wait ")
+                # displays running dots on windows to pretend it is not stalled
                 self.bullshitTimer = QTimer()
                 self.bullshitTimer.timeout.connect(self.stdoutBullshit)
                 self.bullshitTimer.start(1000)
                 self.proc.setProcessChannelMode(QProcess.MergedChannels)
                 self.proc.start('cmd.exe', ['/c' , command])
             else:
+                udr2 = f"cli/udr2-{sys.platform}"
+                command = f'{udr2} --program {self.ser_port.port} < "{filepath}"'
+                print(command)
                 self.bullshitTimer = None
                 self.proc.start('bash', ['-c' , command])
+            
     
     def stdoutBullshit(self):
         self.usb_frame.out.write(".")
@@ -316,8 +318,8 @@ class SerialControl(QObject):
             self.bullshitTimer.stop()
 
         text = str(self.proc.readAllStandardOutput())
-        self.usb_frame.out.write(eval(text).decode())
+        self.usb_frame.out.write(eval(text).decode('iso8859-1'))
 
     def stderrReady(self):
         text = str(self.proc.readAllStandardError())
-        self.usb_frame.out.write(eval(text).decode())
+        self.usb_frame.out.write(eval(text).decode('iso8859-1'))
