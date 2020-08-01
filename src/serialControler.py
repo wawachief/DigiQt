@@ -116,21 +116,18 @@ class SerialThread(QThread):
             return "".join(["[%02X]" % ord(b) if b>'\x7e' else b for b in data])
         self.parent.terminal.write(textdump(str(s)))
 
-    def run(self):                          # Run serial reader thread
-        if self.ser is None:
-            # No serial port configured
-            self.running = False
-        else:
-            print(f"Opening {self.ser.port} at {self.ser.baudrate} baud")
-            print('\x0d')
+    def run(self):
+        if self.ser is not None:
+            self.parent.terminal.write(f"Opening {self.ser.port} at {self.ser.baudrate} baud")
+            self.parent.terminal.write('\x0d')
             try:
                 self.ser.open()
                 self.ser.flushInput()
             except:
                 self.ser = None
-            if not self.ser:
-                print("Can't open port")
-                self.running = False
+        if not self.ser:
+            self.parent.terminal_frame.write("Can't open port")
+            self.running = False
         while self.running:
             s = self.ser.read(self.ser.in_waiting or 1)
             if s:                                       # Get data from serial port
@@ -288,7 +285,10 @@ class SerialControl(QObject):
     
     @Slot(str)
     def on_firmware_update(self, filepath):
-        udr2 = f"cli/udr2-{sys.platform}"
+        if sys.platform == "win32":
+            udr2 = f"cli\\udr2-win32.exe"
+        else:
+            udr2 = f"cli/udr2-{sys.platform}"
         command = f'{udr2} --program {self.ser_port.port} < {filepath}'
         self.statusbar.sig_temp_message.emit(command)
         self.proc = QProcess(self)
@@ -297,7 +297,7 @@ class SerialControl(QObject):
         self.proc.readyReadStandardError.connect(self.stderrReady)
 
         if sys.platform == "win32":
-            self.proc.start('cmd.exe', ['-e' , command])
+            self.proc.start('cmd.exe', ['/c' , command])
         else:
             self.proc.start('bash', ['-c' , command])
     
