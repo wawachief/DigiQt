@@ -114,18 +114,18 @@ class SerialThread(QThread):
         def textdump(data):
         # Return a string with high-bit chars replaced by hex values
             return "".join(["[%02X]" % ord(b) if b>'\x7e' else b for b in data])
-        sys.stdout.write(textdump(str(s)))
+        self.parent.terminal.write(textdump(str(s)))
 
     def run(self):                          # Run serial reader thread
-        print(f"Opening {self.ser.port} at {self.ser.baudrate} baud")
-        print('\x0d')
+        self.parent.terminal.write(f"Opening {self.ser.port} at {self.ser.baudrate} baud")
+        self.parent.terminal.write('\x0d')
         try:
             self.ser.open()
             self.ser.flushInput()
         except:
             self.ser = None
         if not self.ser:
-            print("Can't open port")
+            self.parent.terminal_frame.write("Can't open port")
             self.running = False
         while self.running:
             s = self.ser.read(self.ser.in_waiting or 1)
