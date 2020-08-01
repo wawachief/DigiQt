@@ -28,6 +28,7 @@ I don't have a valid developper certificate, so my build won't launch for securi
 	- pyside2 
 	- serial
 	- serial-tool
+	
 `sudo pip3 install pyside2 serial serial-tool`shoud do it.
 1. Go into the DigiQt source directory and launch the program : `python3 main.py`
 
