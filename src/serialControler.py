@@ -126,7 +126,7 @@ class SerialThread(QThread):
             except:
                 self.ser = None
         if not self.ser:
-            self.parent.terminal_frame.write("Can't open port")
+            self.parent.terminal.write("Can't open port")
             self.running = False
         while self.running:
             s = self.ser.read(self.ser.in_waiting or 1)
