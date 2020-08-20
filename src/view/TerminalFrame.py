@@ -36,7 +36,7 @@ class TerminalFrame(QWidget):
         # Virtual Serial out
         self.serial_out = QPlainTextEdit()
         self.serial_out.setReadOnly(True)
-        self.serial_out.setFixedSize(QSize(WIN_WIDTH, WIN_HEIGHT))
+        self.serial_out.setMinimumSize(QSize(WIN_WIDTH, WIN_HEIGHT))
 
         doc = self.serial_out.document()
         f = doc.defaultFont()
@@ -45,6 +45,7 @@ class TerminalFrame(QWidget):
 
         # Serial terminal (real)
         self.terminal = SerialTerminalFrame(self.config)
+
 
         # Tab
         self.tab_widget = QTabWidget()

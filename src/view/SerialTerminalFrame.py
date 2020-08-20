@@ -41,7 +41,7 @@ class SerialTerminalFrame(QWidget):
         """
         QWidget.__init__(self)
 
-        self.setFixedSize(QSize(WIN_WIDTH, WIN_HEIGHT))
+        self.setMinimumSize(QSize(WIN_WIDTH, WIN_HEIGHT))
 
         self.setWindowTitle("DigiQt - Serial terminal")
 
