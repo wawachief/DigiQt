@@ -1,10 +1,6 @@
 # Author: Olivier Lécluse
 # License GPL-3
 
-#
-# Digirule CPU Core
-#
-
 import sys
 from cx_Freeze import setup, Executable
 from configparser import ConfigParser
@@ -16,11 +12,14 @@ build_exe_options = {
     "excludes": []
 }
 
+bdist_msi_options = {
+    "upgrade_code": "{731A0BB3-7F97-4A2F-B7B2-939DE5A08C64}",
+    "all_users": True,
+    "initial_target_dir": "c:\DigiQt"
+}
 base = None
 if sys.platform == "win32":
     base = "Win32GUI"
-    if 'bdist_msi' in sys.argv:
-        sys.argv += ['--initial-target-dir', 'c:\DigiQt']
 
 config = ConfigParser()
 config.read("src/config.ini")
@@ -29,5 +28,5 @@ setup(  name = "DigiQt",
         version = config.get('main', 'app_version'),
         description = "Digirule2 assembler and simulator",
         author="Olivier Lecluse - Thomas Lecluse",
-        options = {"build_exe": build_exe_options},
+        options = {"build_exe": build_exe_options, "bdist_msi": bdist_msi_options},
         executables = [Executable("main.py", base=base)])
