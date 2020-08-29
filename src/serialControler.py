@@ -11,7 +11,7 @@ from PySide2.QtCore import QObject, QThread, Signal, Slot, QTimer, QProcess
 from time import sleep
 from src.hex_utils import ram2hex, hex2ram
 import queue as Queue
-import sys
+import sys, os
 
 NO_SERIAL = "No serial available"
 SELECT_SERIAL = "Select..."
@@ -182,7 +182,11 @@ class SerialControl(QObject):
         self.usb_frame.sig_firmware_update = self.sig_firmware_update
 
         self.terminal.sig_terminal_open = self.sig_terminal_open
-        
+
+        # Disable fw flash button if udr2 binary is nor present
+        self.udr2 = f"cli/udr2-{sys.platform}" if sys.platform != "win32" else "cli\\udr2-win32.exe"
+        if not os.path.isfile(self.udr2):
+            self.usb_frame.firmware_btn.setEnabled(False)
         self.init_serial()
 
     def init_serial(self, do_refresh=True):
@@ -291,8 +295,7 @@ class SerialControl(QObject):
             self.proc.readyReadStandardError.connect(self.stderrReady)
 
             if sys.platform == "win32":
-                udr2 = f"cli\\udr2-win32.exe"
-                command = f'{udr2} --program {self.ser_port.port} < {filepath}'
+                command = f'{self.udr2} --program {self.ser_port.port} < {filepath}'
                 self.usb_frame.out.write("Firmware update started, please wait ")
                 # displays running dots on windows to pretend it is not stalled
                 self.bullshitTimer = QTimer()
@@ -301,8 +304,7 @@ class SerialControl(QObject):
                 self.proc.setProcessChannelMode(QProcess.MergedChannels)
                 self.proc.start('cmd.exe', ['/c' , command])
             else:
-                udr2 = f"cli/udr2-{sys.platform}"
-                command = f'{udr2} --program {self.ser_port.port} < "{filepath}"'
+                command = f'{self.udr2} --program {self.ser_port.port} < "{filepath}"'
                 self.bullshitTimer = None
                 self.proc.start('bash', ['-c' , command])
             # print(command)
