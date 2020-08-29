@@ -145,17 +145,19 @@ class TerminalFrame(QWidget):
         """
         self.serial_in.setText(val)
 
-    def append_serial_out(self, text):
+    def append_serial_out(self, byte):
         """
         Appends the given text inside the serial out area
         """
         # First, we place the cursor at the end (this will also clear the selection before inserting new text)
-        if text != chr(10):
+        if byte != 10:
             cursor = self.serial_out.textCursor()
             cursor.movePosition(QTextCursor.End)
             self.serial_out.setTextCursor(cursor)
-            self.serial_out.insertPlainText(text)
-    # --- Close handler ---
+            try:
+                self.serial_out.insertPlainText(chr(byte))
+            except ValueError:
+                self.serial_out.insertPlainText(" ")
 
     def closeEvent(self, event):
         """

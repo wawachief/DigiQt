@@ -141,7 +141,7 @@ class SerialThread(QThread):
 
 class SerialControl(QObject):
     sig_keyseq_pressed = Signal(str)
-    sig_CPU_comout     = Signal(str)
+    sig_CPU_comout     = Signal(int)
     sig_CPU_comin      = Signal(str)
     sig_port_change    = Signal(str)
     sig_button_pressed = Signal(int)
@@ -212,13 +212,10 @@ class SerialControl(QObject):
         """Char is handled by CPU, we free the slot"""
         self.monitor_frame.serial_in.setText(" ")
 
-    @Slot(str)
-    def on_comout(self, char):
+    @Slot(int)
+    def on_comout(self, byte):
         """Append the char to the console"""
-        try:
-            self.monitor_frame.append_serial_out(char)
-        except ValueError:            
-            self.monitor_frame.append_serial_out("?")
+        self.monitor_frame.append_serial_out(byte)
 
 
     @Slot(str)
