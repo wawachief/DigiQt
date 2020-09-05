@@ -11,7 +11,7 @@ from PySide2.QtCore import QObject, QThread, Signal, Slot, QTimer, QProcess
 from time import sleep
 from src.hex_utils import ram2hex, hex2ram
 import queue as Queue
-import sys
+import sys, os
 
 NO_SERIAL = "No serial available"
 SELECT_SERIAL = "Select..."
@@ -126,7 +126,7 @@ class SerialThread(QThread):
             except:
                 self.ser = None
         if not self.ser:
-            self.parent.terminal_frame.write("Can't open port")
+            self.parent.terminal.write("Can't open port")
             self.running = False
         while self.running:
             s = self.ser.read(self.ser.in_waiting or 1)
@@ -141,7 +141,7 @@ class SerialThread(QThread):
 
 class SerialControl(QObject):
     sig_keyseq_pressed = Signal(str)
-    sig_CPU_comout     = Signal(str)
+    sig_CPU_comout     = Signal(int)
     sig_CPU_comin      = Signal(str)
     sig_port_change    = Signal(str)
     sig_button_pressed = Signal(int)
@@ -182,7 +182,11 @@ class SerialControl(QObject):
         self.usb_frame.sig_firmware_update = self.sig_firmware_update
 
         self.terminal.sig_terminal_open = self.sig_terminal_open
-        
+
+        # Disable fw flash button if udr2 binary is nor present
+        self.udr2 = f"cli/udr2-{sys.platform}" if sys.platform != "win32" else "cli\\udr2-win32.exe"
+        if not os.path.isfile(self.udr2):
+            self.usb_frame.firmware_btn.setEnabled(False)
         self.init_serial()
 
     def init_serial(self, do_refresh=True):
@@ -208,13 +212,10 @@ class SerialControl(QObject):
         """Char is handled by CPU, we free the slot"""
         self.monitor_frame.serial_in.setText(" ")
 
-    @Slot(str)
-    def on_comout(self, char):
+    @Slot(int)
+    def on_comout(self, byte):
         """Append the char to the console"""
-        try:
-            self.monitor_frame.append_serial_out(char)
-        except ValueError:            
-            self.monitor_frame.append_serial_out("?")
+        self.monitor_frame.append_serial_out(byte)
 
 
     @Slot(str)
@@ -286,26 +287,25 @@ class SerialControl(QObject):
     @Slot(str)
     def on_firmware_update(self, filepath):
         if self.ser_port:
-            if sys.platform == "win32":
-                udr2 = f"cli\\udr2-win32.exe"
-            else:
-                udr2 = f"cli/udr2-{sys.platform}"
-            command = f'{udr2} --program {self.ser_port.port} < "{filepath}"'
-            self.statusbar.sig_temp_message.emit(command)
             self.proc = QProcess(self)
             self.proc.readyReadStandardOutput.connect(self.stdoutReady)
             self.proc.readyReadStandardError.connect(self.stderrReady)
 
             if sys.platform == "win32":
+                command = f'{self.udr2} --program {self.ser_port.port} < {filepath}'
                 self.usb_frame.out.write("Firmware update started, please wait ")
+                # displays running dots on windows to pretend it is not stalled
                 self.bullshitTimer = QTimer()
                 self.bullshitTimer.timeout.connect(self.stdoutBullshit)
                 self.bullshitTimer.start(1000)
                 self.proc.setProcessChannelMode(QProcess.MergedChannels)
                 self.proc.start('cmd.exe', ['/c' , command])
             else:
+                command = f'{self.udr2} --program {self.ser_port.port} < "{filepath}"'
                 self.bullshitTimer = None
                 self.proc.start('bash', ['-c' , command])
+            # print(command)
+            
     
     def stdoutBullshit(self):
         self.usb_frame.out.write(".")
@@ -316,8 +316,8 @@ class SerialControl(QObject):
             self.bullshitTimer.stop()
 
         text = str(self.proc.readAllStandardOutput())
-        self.usb_frame.out.write(eval(text).decode())
+        self.usb_frame.out.write(eval(text).decode('iso8859-1'))
 
     def stderrReady(self):
         text = str(self.proc.readAllStandardError())
-        self.usb_frame.out.write(eval(text).decode())
+        self.usb_frame.out.write(eval(text).decode('iso8859-1'))

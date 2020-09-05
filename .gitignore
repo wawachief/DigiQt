@@ -9,5 +9,6 @@ instructionset_2Ux.py
 flash_2Ux.txt
 DR2Ux
 DR_2Ux.png
-test_vt.py
-.vscode
+udr2-darwin
+udr2-linux
+udr2-win32.exe

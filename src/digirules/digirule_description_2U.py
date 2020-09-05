@@ -13,50 +13,55 @@ BUTTONS_WIDTH = 30  # Push buttons width
 # prompt on click, to get the offset.
 OFFSET_SCALE = (1000/399, 500/200)
 
+# Test position with changing transparency line 93 in DigiruleCanvas.py
 # All the positions for buttons
 buttons_positions = {
-    (25, 140): "d_btn7",
-    (71, 140): "d_btn6",
-    (117, 140): "d_btn5",
-    (165, 140): "d_btn4",
-    (212, 139): "d_btn3",
+    (28, 139): "d_btn7",
+    (75, 139): "d_btn6",
+    (122, 139): "d_btn5",
+    (167, 139): "d_btn4",
+    (214, 139): "d_btn3",
     (260, 139): "d_btn2",
-    (306, 139): "d_btn1",
+    (305, 139): "d_btn1",
     (353, 139): "d_btn0",
-    (818, 68): "btn_goto",
-    (876, 68): "btn_store",
-    (876, 135): "btn_next",
-    (818, 135): "btn_prev",
-    (740, 115): "btn_run",
-    (946, 133): "btn_save",
-    (947, 67): "btn_load",
+    (816, 67): "btn_goto",
+    (871, 67): "btn_store",
+    (871, 131): "btn_next",
+    (816, 131): "btn_prev",
+    (738, 115): "btn_run",
+    (940, 131): "btn_save",
+    (940, 67): "btn_load",
 }
 
 # Rectangle-shape buttons and larger buttons
 special_buttons_rectangles = {
     (597, 103, 643, 150): "btn_ram",
     (510, 118, 550, 135): "btn_clear",
-    (395, 40, 470, 120): "btn_power"
+    (395, 40, 473, 123): "btn_power",
+    (1036, 142, 1046, 152): "btn_pin1",
+    (1036, 155, 1046, 165): "btn_pin0"
 }
 
 # Rows of LEDs
 led_positions = {
     (27, 62): "topLed7",
-    (73, 62): "topLed6",
-    (120, 62): "topLed5",
+    (75, 62): "topLed6",
+    (122, 62): "topLed5",
     (167, 62): "topLed4",
     (213, 62): "topLed3",
     (261, 62): "topLed2",
-    (308, 62): "topLed1",
-    (355, 62): "topLed0",
-    (27, 99): "bottomLed7",
-    (73, 99): "bottomLed6",
-    (120, 99): "bottomLed5",
-    (167, 99): "bottomLed4",
-    (213, 99): "bottomLed3",
-    (261, 99): "bottomLed2",
-    (308, 99): "bottomLed1",
-    (355, 99): "bottomLed0",
-    (771, 148): "stopLed",
-    (707, 148): "runLed"
+    (306, 62): "topLed1",
+    (353, 62): "topLed0",
+    (27, 98): "bottomLed7",
+    (75, 98): "bottomLed6",
+    (122, 98): "bottomLed5",
+    (167, 98): "bottomLed4",
+    (213, 98): "bottomLed3",
+    (261, 98): "bottomLed2",
+    (306, 98): "bottomLed1",
+    (353, 98): "bottomLed0",
+    (772, 147): "stopLed",
+    (708, 147): "runLed",
+    (1041, 147): "pin1Led",
+    (1041, 160): "pin0Led"
 }
