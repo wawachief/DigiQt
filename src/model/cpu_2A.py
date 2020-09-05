@@ -98,3 +98,7 @@ class Cpu(Core):
     inst_comin  = Core.inst_illegal
     inst_comout = Core.inst_illegal
     inst_comrdy = Core.inst_illegal
+    
+    inst_pinin = Core.inst_illegal
+    inst_pinout = Core.inst_illegal
+    inst_pindir = Core.inst_illegal

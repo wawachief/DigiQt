@@ -36,6 +36,7 @@ class Core(QObject):
         self.speed  = 0        # speed attribute changed by the speed instruction
         self.exception    = ""
         self.serial_enable = False # enable Serial capability
+        self.pins = [[0,0], [0,0]] # [PINB, PINA] Pin=(dir, value)
         self.rx   = None       # Byte received or None
         self.tx   = None       # Byte to send of None
         self.brk_PC = []       # Breakpoints
@@ -127,11 +128,14 @@ class Core(QObject):
             self.do_halt("Clear RAM while running")
         self.ram = [0] * 256
         self.brk_PC = []
+        self.pins = [[0,0], [0,0]] # [PINB, PINA] Pin=(dir, value)
 
     def set_ram(self, new_ram):
         self.clear_ram()
         for i, r in enumerate(new_ram):
             self.ram [i] = r
+        self.pins = [[0,0], [0,0]] # [PINB, PINA] Pin=(dir, value)
+
     #
     # Status register methods
     #
@@ -472,4 +476,55 @@ class Core(QObject):
             self.status_Z(0)             # if no character awaits, sets the zeroflag
         else:
             self.status_Z(1)             # if a character is available, clears the zeroflag
+        return True
+    
+    #
+    # Pin instructions
+    #
+
+    def inst_pinin(self):                      # PININ no_pin ==> result 0 or 1 in ACCUM
+        arg1 = self.ram[self.pc + 1]
+        if 1 <= arg1 <= 3:
+            if arg1 == 3:
+                # we read both pins
+                self.accu = self.pins[1][1]+2*self.pins[0][1]
+            else:
+                self.accu = self.pins[arg1&1][1]
+            self.status_Z(self.accu)
+        return True
+    def inst_pinout(self):                     # PINOUT no_pin - takes Value in ACCUM
+        arg1 = self.ram[self.pc + 1]
+        if 1 <= arg1 <= 3:
+            if arg1 == 3:
+                # we write both pins
+                self.pins[0][1] = (self.accu // 2)&1
+                self.pins[1][1] = self.accu & 1
+                # emit signal for updating the GUI
+                self.sig_PIN_out.emit((1, self.accu & 1))
+                self.sig_PIN_out.emit((0, (self.accu // 2)&1))
+            else:
+                self.pins[arg1&1][1] = self.accu & 1
+                # emit signal for updating the GUI
+                self.sig_PIN_out.emit((arg1&1, self.accu & 1))
+        return True
+    def inst_pindir(self):                     # PINdir no_pin - takes Value in ACCUM
+        def set_pin_dir(pin, dirc):
+            self.pins[pin][0] = dirc
+            # Update the GUI for pin type
+            if dirc == 0:
+                # pin is output
+                self.sig_PIN_out.emit((pin, 0))
+            else:
+                # pin is input
+                self.pins[pin][1] = 1
+                self.sig_PIN_in.emit(pin) # toggles pin value
+
+        arg1 = self.ram[self.pc + 1]
+        if 1 <= arg1 <= 3:
+            if arg1 == 3:
+                # we set both pins
+                set_pin_dir(0, (self.accu // 2)&1)  # pinB
+                set_pin_dir(1, self.accu & 1)       # pinA
+            else:
+                set_pin_dir(arg1&1, self.accu & 1)
         return True

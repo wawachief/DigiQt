@@ -290,8 +290,8 @@ class Controller(QObject):
 
     @Slot(int)
     def on_pinin(self, pin):
-        self.cpu.pin[pin][1] = 1- self.cpu.pin[pin][1]
-        self.gui.dr_canvas.set_pin_leds(pin, 2+self.cpu.pin[pin][1])
+        self.cpu.pins[pin][1] = 1- self.cpu.pins[pin][1]
+        self.gui.dr_canvas.set_pin_leds(pin, 2+self.cpu.pins[pin][1])
     #
     # other events methods
     #

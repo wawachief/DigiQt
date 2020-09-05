@@ -80,4 +80,10 @@ inst_dic = {
             "comout":  {"code": 192, "operandCount": 0}, # new 2U instructions
             "comin":   {"code": 193, "operandCount": 0}, # new 2U instructions
             "comrdy":  {"code": 194, "operandCount": 0}, # new 2U instructions
+
+            # IO instructions
+            "pinout":  {"code": 196, "operandCount": 1}, # new 2U instructions
+            "pinin":   {"code": 197, "operandCount": 1}, # new 2U instructions
+            "pindir":  {"code": 198, "operandCount": 1}, # new 2U instructions
+
         }

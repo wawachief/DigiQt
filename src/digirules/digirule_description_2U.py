@@ -37,7 +37,9 @@ buttons_positions = {
 special_buttons_rectangles = {
     (597, 103, 643, 150): "btn_ram",
     (510, 118, 550, 135): "btn_clear",
-    (395, 40, 473, 123): "btn_power"
+    (395, 40, 473, 123): "btn_power",
+    (1036, 142, 1046, 152): "btn_pin1",
+    (1036, 155, 1046, 165): "btn_pin0"
 }
 
 # Rows of LEDs
@@ -59,5 +61,7 @@ led_positions = {
     (306, 98): "bottomLed1",
     (353, 98): "bottomLed0",
     (772, 147): "stopLed",
-    (708, 147): "runLed"
+    (708, 147): "runLed",
+    (1041, 147): "pin1Led",
+    (1041, 160): "pin0Led"
 }
