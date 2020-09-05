@@ -13,7 +13,7 @@ from src.assets_manager import get_font
 
 import sys
 
-WIN_WIDTH, WIN_HEIGHT = 684, 470    # Window size
+WIN_WIDTH, WIN_HEIGHT = 684, 510    # Window size
 RETURN_CHAR = "\x0D"                  # Char to be sent when Enter key pressed
 PASTE_CHAR  = "\x16"                # Ctrl code for clipboard paste
 
@@ -49,7 +49,7 @@ class SerialTerminalFrame(QWidget):
         self.textbox = MyTextBox()              # Create custom text box
         font = QFont()
         font.setFamily(get_font(config))           # Monospaced font
-        font.setPointSize(12)
+        font.setPointSize(11)
         self.textbox.setFont(font)
         layout = QVBoxLayout()
         layout.setMargin(60)
