@@ -5,9 +5,9 @@
 # Serial console frame
 #
 
-from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QLabel, QPlainTextEdit, QShortcut, QTabWidget
+from PySide2.QtWidgets import QToolBar, QGridLayout, QWidget, QLabel, QPlainTextEdit, QShortcut, QTabWidget, QVBoxLayout
 from PySide2.QtCore import QSize, Qt
-from PySide2.QtGui import QKeySequence, QFont, QTextCursor
+from PySide2.QtGui import QKeySequence, QFont, QTextCursor, QPainter, QPixmap
 
 from src.view.style import style
 from src.view.SerialTerminalFrame import SerialTerminalFrame, WIN_HEIGHT, WIN_WIDTH
@@ -34,18 +34,10 @@ class TerminalFrame(QWidget):
         self.sig_button_pressed = None  # signal configured by serialControler
 
         # Virtual Serial out
-        self.serial_out = QPlainTextEdit()
-        self.serial_out.setReadOnly(True)
-        self.serial_out.setMinimumSize(QSize(WIN_WIDTH, WIN_HEIGHT))
-
-        doc = self.serial_out.document()
-        f = doc.defaultFont()
-        f.setFamily(get_font(config))
-        doc.setDefaultFont(f)
+        self.serial_out = SerialOut(self.config)
 
         # Serial terminal (real)
         self.terminal = SerialTerminalFrame(self.config)
-
 
         # Tab
         self.tab_widget = QTabWidget()
@@ -71,6 +63,12 @@ class TerminalFrame(QWidget):
         self.tab_widget.currentChanged.connect(self.__on_tab_changed)
 
         self._init_tool_bar()
+
+        # Compute max size
+        max_w = self.terminal.maximumWidth()
+        max_h = self.terminal.maximumHeight() + self.tab_widget.tabBar().minimumHeight() + self.toolbar.maximumHeight()
+        self.setMaximumSize(QSize(max_w, max_h))
+
         self._set_layout()
         self._set_stylesheet()
 
@@ -111,7 +109,7 @@ class TerminalFrame(QWidget):
         Clears the content of the current tab
         """
         if self.tab_widget.currentWidget() == self.serial_out:
-            self.serial_out.setPlainText("")
+            self.serial_out.console.setPlainText("")
             self.set_serial_in(" ")
         else:
             self.terminal.textbox.setPlainText("")
@@ -121,8 +119,8 @@ class TerminalFrame(QWidget):
         self.toolbar.setStyleSheet(style.get_stylesheet("qtoolbar"))
         self.setStyleSheet(style.get_stylesheet("common"))
         self.serial_in.setStyleSheet(style.get_stylesheet("serial_in"))
-        self.serial_out.setStyleSheet("background-color: #505050; color: white; padding-left: 10px;")
-        self.terminal.textbox.setStyleSheet("background-color: #111111; color: #44DD44;")
+        self.serial_out.console.setStyleSheet("background-color: #000000; color: white; padding-left: 10px;")
+        self.terminal.textbox.setStyleSheet("background-color: #000000; color: #44DD44;")
         self.tab_widget.setStyleSheet(style.get_stylesheet("tab"))
 
     def keyPressEvent(self, event):
@@ -151,13 +149,13 @@ class TerminalFrame(QWidget):
         """
         # First, we place the cursor at the end (this will also clear the selection before inserting new text)
         if byte != 10:
-            cursor = self.serial_out.textCursor()
+            cursor = self.serial_out.console.textCursor()
             cursor.movePosition(QTextCursor.End)
-            self.serial_out.setTextCursor(cursor)
+            self.serial_out.console.setTextCursor(cursor)
             try:
-                self.serial_out.insertPlainText(chr(byte))
+                self.serial_out.console.insertPlainText(chr(byte))
             except ValueError:
-                self.serial_out.insertPlainText(" ")
+                self.serial_out.console.insertPlainText(" ")
 
     def closeEvent(self, event):
         """
@@ -171,3 +169,34 @@ class TerminalFrame(QWidget):
         Reroute this method in the Main Frame in order to Updates the execution frame's open editor icon and tooltip
         """
         pass
+
+
+class SerialOut(QWidget):
+
+    def __init__(self, config):
+        """
+        Custom widget for serial out frame
+        """
+        QWidget.__init__(self)
+
+        self.console = QPlainTextEdit()
+        self.console.setReadOnly(True)
+
+        doc = self.console.document()
+        f = doc.defaultFont()
+        f.setFamily(get_font(config))
+        doc.setDefaultFont(f)
+
+        layout = QVBoxLayout()
+        layout.setMargin(60)
+        layout.addWidget(self.console)
+        self.setLayout(layout)
+
+    def paintEvent(self, event):
+        """
+        Override to draw the console frame background image
+        """
+        painter = QPainter(self)
+        painter.drawPixmap(0, 0, QPixmap("assets/retroterm.png").scaled(self.size()))
+
+        super().paintEvent(event)

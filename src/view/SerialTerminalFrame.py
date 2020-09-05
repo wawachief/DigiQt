@@ -7,13 +7,13 @@
 
 from PySide2.QtWidgets import QVBoxLayout, QWidget, QTextEdit, QApplication
 from PySide2.QtCore import Qt, Signal, Slot, QSize
-from PySide2.QtGui import QFont, QTextCursor
+from PySide2.QtGui import QFont, QTextCursor, QPainter, QPixmap
 
 from src.assets_manager import get_font
 
 import sys
 
-WIN_WIDTH, WIN_HEIGHT = 684, 400    # Window size
+WIN_WIDTH, WIN_HEIGHT = 684, 470    # Window size
 RETURN_CHAR = "\x0D"                  # Char to be sent when Enter key pressed
 PASTE_CHAR  = "\x16"                # Ctrl code for clipboard paste
 
@@ -42,16 +42,17 @@ class SerialTerminalFrame(QWidget):
         QWidget.__init__(self)
 
         self.setMinimumSize(QSize(WIN_WIDTH, WIN_HEIGHT))
+        self.setMaximumSize(QSize(int(WIN_WIDTH*1.3), int(WIN_HEIGHT*1.5)))
 
         self.setWindowTitle("DigiQt - Serial terminal")
 
         self.textbox = MyTextBox()              # Create custom text box
         font = QFont()
         font.setFamily(get_font(config))           # Monospaced font
-        font.setPointSize(10)
+        font.setPointSize(12)
         self.textbox.setFont(font)
         layout = QVBoxLayout()
-        layout.setMargin(0)
+        layout.setMargin(60)
         layout.addWidget(self.textbox)
         self.setLayout(layout)
         self.text_update.connect(self.append_text)      # Connect text update to handler
@@ -83,3 +84,12 @@ class SerialTerminalFrame(QWidget):
             self.serth.ser_out(cb.text())       # Send paste string to serial driver
         else:
             self.serth.ser_out(s)               # ..or send keystroke
+
+    def paintEvent(self, event):
+        """
+        Override to draw the terminal console frame background image
+        """
+        painter = QPainter(self)
+        painter.drawPixmap(0, 0, QPixmap("assets/retroterm.png").scaled(self.size()))
+
+        super().paintEvent(event)
