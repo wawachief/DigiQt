@@ -90,6 +90,7 @@ class TerminalFrame(QWidget):
             self.serial_in.setStyleSheet(style.get_stylesheet("serial_in"))
         else:
             self.serial_in.setStyleSheet("background: #333333; color: #333333;")
+            self.terminal.textbox.setFocus()
 
     def _set_layout(self):
         """
