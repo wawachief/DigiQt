@@ -1,4 +1,4 @@
-// test I/O 
+// Phone dial
 
 %define PINA 1 
 %define PINB 2 
