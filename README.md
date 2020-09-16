@@ -30,7 +30,7 @@ I don't have a valid developper certificate, so my build won't launch for securi
 
 # Instruction set
 
-DigiQt offers the *Digirule 2A, 2B & 2U* instruction set. Choose in the button the model corresponding to the hardware you want to simulate.
+DigiQt offers the *Digirule 2A and 2U instruction set. Choose in the button the model corresponding to the hardware you want to simulate.
 
 # Assembler Quick guide
 
